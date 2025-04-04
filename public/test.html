@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+        }
+        #konva-container {
+            width: 100%;
+            height: 100%;
+            background-color: #cccdcd;
+        }
+    </style>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script language="JavaScript" src="js/app.js" type="module"></script>
+</head>
+<body>
+<div>
+    <p>INPUT</p>
+    <textarea style="width: 100%; height: 300px" id="input">
+        {
+            "machine": {
+                "id": "m1",
+                "type": "t1",
+                "grip-margin": 10,
+                "input-dimensions": {
+                    "min": {
+                        "width": 500,
+                        "height": 350
+                    },
+                    "max": {
+                        "width": 1020,
+                        "height": 720
+                    }
+                }
+            },
+            "press-sheet": {
+                "width": 1020,
+                "height": 700,
+                "grip-margin": 20
+            },
+            "zone": {
+                "width": 120,
+                "height": 80
+            },
+            "cutSpacing": {
+                "horizontal": 10,
+                "vertical": 10
+            }
+        }
+    </textarea>
+    <button onclick="calc(JSON.parse(document.getElementById('input').value));">CALC</button>
+    <div id="variations"></div>
+</div>
+<div id="konva-container"></div>
+</body>
+</html>
