@@ -28,6 +28,38 @@ const show = (sheetLayout) => {
     showTrimLines(sheetLayout);
     showlayoutArea(sheetLayout);
 
+    let distance = 0;
+    showPressSheetDimensionLines(sheetLayout, {
+        distance: distance++,
+        color: "black"
+    });
+    showTrimDimensionLines(sheetLayout, {
+        distance: distance++,
+        color: "black"
+    });
+    // showMaxSheetDimensionLines(sheetLayout, {
+    //     distance: distance++,
+    //     color: "black",
+    // });
+    // showMinSheetDimensionLines(sheetLayout, {
+    //     distance: distance++,
+    //     color: "black",
+    // });
+    showLayoutAreaDimensionLines(sheetLayout, {
+        distance: distance++,
+        color: "black"
+    });
+    showFirstTileWithCutBufferDimensionLines(sheetLayout, {
+        distance: distance++,
+        color: "black"
+    });
+    showFirstTileDimensionLines(sheetLayout, {
+        distance: distance++,
+        color: "black"
+    });
+
+
+
     stage.add(baseLayer);
 }
 
@@ -35,7 +67,7 @@ const showPressSheet = (sheetLayout) => {
 
     const sheetOffset = {
         x: 150,
-        y: 130
+        y: 150
     }
 
     const pressSheetGroup = new Konva.Group({
@@ -57,27 +89,75 @@ const showPressSheet = (sheetLayout) => {
     });
     pressSheetGroup.add(pressSheetRect);
 
-    // dimension lines - START
+}
+
+const showPressSheetDimensionLines = (sheetLayout, options) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
     pressSheetGroup.add(horizontalDimensionLine({
         x: 0,
-        distance: 4,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.pressSheet.width,
-        height: sheetLayout.pressSheet.height,
     }));
 
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 5,
+        distance: options.distance,
         y: 0,
-        // color: "red",
+        color: options.color,
         length: sheetLayout.pressSheet.height,
-        width: sheetLayout.pressSheet.width,
     }));
-
-    // showPressSheetGripMargin(sheetLayout);
 
 }
 
+const showTrimDimensionLines = (sheetLayout, options) => {
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: 0,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.trimLines.left.x,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.trimLines.left.x,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.trimLines.right.x - sheetLayout.trimLines.left.x,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.trimLines.right.x,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.pressSheet.width - (sheetLayout.trimLines.right.x),
+    }));
+
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: 0,
+        color: options.color,
+        length: sheetLayout.trimLines.top.y,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.trimLines.top.y,
+        color: options.color,
+        length: sheetLayout.trimLines.bottom.y - sheetLayout.trimLines.top.y,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.trimLines.bottom.y,
+        color: options.color,
+        length: sheetLayout.pressSheet.height - (sheetLayout.trimLines.bottom.y),
+    }));
+
+}
 const showMaxSheet = (sheetLayout) => {
 
     const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
@@ -101,22 +181,54 @@ const showMaxSheet = (sheetLayout) => {
     });
     maxSheetGroup.add(maxSheetRect);
 
+}
 
-    // dimension lines - START
+const showMaxSheetDimensionLines = (sheetLayout, options) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: 0,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.maxSheet.x,
+    }));
+
     pressSheetGroup.add(horizontalDimensionLine({
         x: sheetLayout.maxSheet.x,
-        distance: 0,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.maxSheet.width,
-        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.maxSheet.x + sheetLayout.maxSheet.width,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.pressSheet.width - (sheetLayout.maxSheet.x + sheetLayout.maxSheet.width),
+    }));
+
+
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: 0,
+        color: options.color,
+        length: sheetLayout.maxSheet.y,
     }));
 
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 0,
+        distance: options.distance,
         y: sheetLayout.maxSheet.y,
-        // color: "red",
+        color: options.color,
         length: sheetLayout.maxSheet.height,
-        width: sheetLayout.pressSheet.width,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.maxSheet.y + sheetLayout.maxSheet.height,
+        color: options.color,
+        length: sheetLayout.pressSheet.height - (sheetLayout.maxSheet.y + sheetLayout.maxSheet.height),
     }));
 
 }
@@ -145,9 +257,56 @@ const showMinSheet = (sheetLayout) => {
     minSheetGroup.add(minSheetRect);
 }
 
+const showMinSheetDimensionLines = (sheetLayout, options) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: 0,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.minSheet.x,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.minSheet.x,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.minSheet.width,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.minSheet.x + sheetLayout.minSheet.width,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.pressSheet.width - (sheetLayout.minSheet.x + sheetLayout.minSheet.width),
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: 0,
+        color: options.color,
+        length: sheetLayout.minSheet.y,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.minSheet.y,
+        color: options.color,
+        length: sheetLayout.minSheet.height,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.minSheet.y + sheetLayout.minSheet.height,
+        color: options.color,
+        length: sheetLayout.pressSheet.height - (sheetLayout.minSheet.y + sheetLayout.minSheet.height),
+    }));
+
+}
+
 const showlayoutArea = (sheetLayout) => {
     showTiles(sheetLayout);
-    showFirstTileDimensionLines(sheetLayout);
 }
 
 const showTiles = (sheetLayout) => {
@@ -218,109 +377,92 @@ const showTiles = (sheetLayout) => {
         // console.log(sheetLayout[i]);
     }
 
-    showlayoutAreaHorizontalDimensionLines(sheetLayout);
-    showlayoutAreaVerticalDimensionLines(sheetLayout);
 }
 
-const showFirstTileDimensionLines = (sheetLayout) => {
+const showFirstTileWithCutBufferDimensionLines = (sheetLayout, options) => {
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.layoutArea.x,
+        distance: options.distance,
+        color: options.color,
+        length: sheetLayout.firstTileWithCutBuffer.width,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: options.distance,
+        y: sheetLayout.layoutArea.y,
+        color: options.color,
+        length: sheetLayout.firstTileWithCutBuffer.height,
+    }));
+
+}
+
+const showFirstTileDimensionLines = (sheetLayout, options) => {
 
     const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
 
-    // first tile with cutBuffer - START
-    pressSheetGroup.add(horizontalDimensionLine({
-        x: sheetLayout.layoutArea.x,
-        distance: 2,
-        // color: "red",
-        length: sheetLayout.firstTileWithCutBuffer.width,
-        height: sheetLayout.pressSheet.height,
-    }));
-
-    pressSheetGroup.add(verticalDimensionLine({
-        distance: 3,
-        y: sheetLayout.layoutArea.y,
-        // color: "red",
-        length: sheetLayout.firstTileWithCutBuffer.height,
-        width: sheetLayout.pressSheet.width,
-    }));
-    // first tile with cutBuffer - END
-
-    // first tile - START
     pressSheetGroup.add(horizontalDimensionLine({
         x: sheetLayout.layoutArea.x + sheetLayout.firstTile.x,
-        distance: 3,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.firstTile.width,
-        height: sheetLayout.pressSheet.height,
     }));
 
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 4,
+        distance: options.distance,
         y: sheetLayout.layoutArea.y + sheetLayout.firstTile.y,
-        // color: "red",
+        color: options.color,
         length: sheetLayout.firstTile.height,
-        width: sheetLayout.pressSheet.width,
     }));
-    // first tile - END
 
 }
 
-const showlayoutAreaHorizontalDimensionLines = (sheetLayout) => {
+const showLayoutAreaDimensionLines = (sheetLayout, options) => {
 
     const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
 
     // used area - START
     pressSheetGroup.add(horizontalDimensionLine({
         x: 0,
-        distance: 1,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.layoutArea.x,
-        height: -30 -30,
     }));
 
     pressSheetGroup.add(horizontalDimensionLine({
         x: sheetLayout.layoutArea.x,
-        distance: 1,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.layoutArea.width,
-        height: sheetLayout.pressSheet.height,
     }));
 
     pressSheetGroup.add(horizontalDimensionLine({
         x: sheetLayout.layoutArea.x + sheetLayout.layoutArea.width,
-        distance: 1,
-        // color: "red",
+        distance: options.distance,
+        color: options.color,
         length: sheetLayout.pressSheet.width - (sheetLayout.layoutArea.x + sheetLayout.layoutArea.width),
-        height: -30 -30,
     }));
 
-}
-
-const showlayoutAreaVerticalDimensionLines = (sheetLayout) => {
-
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
-
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 2,
+        distance: options.distance,
         y: 0,
-        // color: "red",
+        color: options.color,
         length: sheetLayout.layoutArea.y,
-        width: sheetLayout.pressSheet.width,
     }));
 
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 2,
+        distance: options.distance,
         y: sheetLayout.layoutArea.y,
-        // color: "red",
+        color: options.color,
         length: sheetLayout.layoutArea.height,
-        width: -50 -30 ,
     }));
 
     pressSheetGroup.add(verticalDimensionLine({
-        distance: 2,
+        distance: options.distance,
         y: sheetLayout.layoutArea.y + sheetLayout.layoutArea.height,
-        // color: "red",
+        color: options.color,
         length: (sheetLayout.pressSheet.height) - (sheetLayout.layoutArea.y + sheetLayout.layoutArea.height),
-        width: sheetLayout.pressSheet.width,
     }));
 
 }
@@ -369,9 +511,14 @@ const showCutSheet = (sheetLayout) => {
 
 const horizontalDimensionLine = (options) => {
 
+    const pressSheet = baseLayer.findOne("#pressSheet");
+
+    options.y = -1 * (10 + (options.distance * 20));
+    options.height = pressSheet.attrs.height;
+
     const dimensionLineGroup = new Konva.Group({
         x: options.x,
-        y: -1 * (10 + (options.distance * 20)),
+        y: options.y,
     });
 
     const arrow = new Konva.Arrow({
@@ -423,14 +570,34 @@ const horizontalDimensionLine = (options) => {
     });
     dimensionLineGroup.add(rightLine);
 
+    // label.on('pointerenter', function () {
+    //     arrow.fill("red");
+    //     label.fill("red");
+    //     leftLine.stroke("red");
+    //     rightLine.stroke("red");
+    // });
+    //
+    // label.on('pointerleave', function () {
+    //     arrow.fill(options.color || 'black');
+    //     label.fill(options.color || 'black');
+    //     leftLine.stroke(options.color || 'black');
+    //     rightLine.stroke(options.color || 'black');
+    // });
+
+
     return dimensionLineGroup;
 
 }
 
 const verticalDimensionLine = (options) => {
 
+    const pressSheet = baseLayer.findOne("#pressSheet");
+
+    options.x = -1 * (10 + (options.distance * 20));
+    options.width = pressSheet.attrs.width;
+
     const dimensionLineGroup = new Konva.Group({
-        x: -1 * (10 + (options.distance * 20)),
+        x: options.x,
         y: options.y,
     });
 
