@@ -4,181 +4,171 @@ const stage = new Konva.Stage({
     height: window.innerHeight
 });
 
-const scale = 0.9;
+const scale = 0.8;
 
-const layer = new Konva.Layer();
-layer.scale({x: scale, y: scale});
+const layer = new Konva.Layer({
+    id: "baseLayer",
+    scaleX: scale,
+    scaleY: scale,
+});
 stage.add(layer);
 
-const boundingAreaOffset = {
-    x: 120,
-    y: 100
+const baseLayer = stage.findOne("#baseLayer");
+
+const show = (sheetLayout) => {
+
+    console.log(sheetLayout);
+
+    baseLayer.removeChildren();
+
+    showPressSheet(sheetLayout);
+    showMaxSheet(sheetLayout);
+    showMinSheet(sheetLayout);
+    showCutSheet(sheetLayout);
+    showTrimLines(sheetLayout);
+    showlayoutArea(sheetLayout);
+
+    stage.add(baseLayer);
 }
 
-const show = (placementData) => {
+const showPressSheet = (sheetLayout) => {
 
-    console.log(placementData);
+    const sheetOffset = {
+        x: 150,
+        y: 130
+    }
 
-    layer.removeChildren();
+    const pressSheetGroup = new Konva.Group({
+        id: "pressSheetGroup",
+        x: sheetOffset.x,
+        y: sheetOffset.y,
+    });
+    baseLayer.add(pressSheetGroup);
 
-    // bounding area - START
-    const boundingAreaRect = new Konva.Rect({
-        x: boundingAreaOffset.x,
-        y: boundingAreaOffset.y,
-        width: placementData.boundingArea.width,
-        height: placementData.boundingArea.height,
+    const pressSheetRect = new Konva.Rect({
+        id: "pressSheet",
+        x: 0,
+        y: 0,
+        width: sheetLayout.pressSheet.width,
+        height: sheetLayout.pressSheet.height,
         fill: 'white',
         // stroke: 'black',
         strokeWidth: 0
     });
-    layer.add(boundingAreaRect);
+    pressSheetGroup.add(pressSheetRect);
 
-    const gripMarginRect = new Konva.Rect({
-        x: boundingAreaOffset.x,
-        y: boundingAreaOffset.y,
-        width: placementData.boundingArea.width,
-        height: placementData.boundingArea["grip-margin"],
-        fill: 'red',
+    // dimension lines - START
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: 0,
+        distance: 4,
+        // color: "red",
+        length: sheetLayout.pressSheet.width,
+        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 5,
+        y: 0,
+        // color: "red",
+        length: sheetLayout.pressSheet.height,
+        width: sheetLayout.pressSheet.width,
+    }));
+
+    // showPressSheetGripMargin(sheetLayout);
+
+}
+
+const showMaxSheet = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    const maxSheetGroup = new Konva.Group({
+        id: "maxSheetGroup",
+        x: sheetLayout.maxSheet.x,
+        y: sheetLayout.maxSheet.y,
+    });
+    pressSheetGroup.add(maxSheetGroup);
+
+    const maxSheetRect = new Konva.Rect({
+        x: 0,
+        y: 0,
+        width: sheetLayout.maxSheet.width,
+        height: sheetLayout.maxSheet.height,
+        fill: 'orange',
+        opacity: 0.2,
+        // stroke: 'black',
+        strokeWidth: 0,
+    });
+    maxSheetGroup.add(maxSheetRect);
+
+
+    // dimension lines - START
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.maxSheet.x,
+        distance: 0,
+        // color: "red",
+        length: sheetLayout.maxSheet.width,
+        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 0,
+        y: sheetLayout.maxSheet.y,
+        // color: "red",
+        length: sheetLayout.maxSheet.height,
+        width: sheetLayout.pressSheet.width,
+    }));
+
+}
+
+const showMinSheet = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    const minSheetGroup = new Konva.Group({
+        id: "minSheetGroup",
+        x: sheetLayout.minSheet.x,
+        y: sheetLayout.minSheet.y,
+    });
+    pressSheetGroup.add(minSheetGroup);
+
+    const minSheetRect = new Konva.Rect({
+        x: 0,
+        y: 0,
+        width: sheetLayout.minSheet.width,
+        height: sheetLayout.minSheet.height,
+        fill: 'blue',
+        opacity: 0.2,
         // stroke: 'black',
         strokeWidth: 0
     });
-    layer.add(gripMarginRect);
+    minSheetGroup.add(minSheetRect);
+}
 
-    // dimension lines - START
-    layer.add(horizontalDimensionLine({
-        x: boundingAreaOffset.x,
-        y: boundingAreaOffset.y - 10,
-        // color: "red",
-        length: placementData.boundingArea.width,
-        height: placementData.boundingArea.height + 10 + 30,
-    }));
+const showlayoutArea = (sheetLayout) => {
+    showTiles(sheetLayout);
+    showFirstTileDimensionLines(sheetLayout);
+}
 
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 10,
-        y: boundingAreaOffset.y,
-        length: placementData.boundingArea.height,
-        width: placementData.boundingArea.width + 10 + 30,
-    }));
+const showTiles = (sheetLayout) => {
 
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 30,
-        y: boundingAreaOffset.y + placementData.usableArea.y,
-        length: placementData.usableArea.height,
-        width: placementData.boundingArea.width + 30 + 30,
-    }));
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
 
-    // dimension lines - END
-    // bounding area - END
-
-    const placements = placementData.placements;
-
-    // used area - START
-    layer.add(horizontalDimensionLine({
-        x: boundingAreaOffset.x,
-        y: boundingAreaOffset.y - 30,
-        length: placementData.usedArea.x,
-        height: 30,
-    }));
-
-    layer.add(horizontalDimensionLine({
-        x: boundingAreaOffset.x + placementData.usedArea.x,
-        y: boundingAreaOffset.y - 30,
-        // color: "red",
-        length: placementData.usedArea.width,
-        height: placementData.boundingArea.height + 30 + 30,
-    }));
-
-    layer.add(horizontalDimensionLine({
-        x: boundingAreaOffset.x + placementData.usedArea.x + placementData.usedArea.width,
-        y: boundingAreaOffset.y - 30,
-        length: placementData.boundingArea.width - (placementData.usedArea.x + placementData.usedArea.width),
-        // length: placementData.usedArea.x,
-        height: 30,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 50,
-        y: boundingAreaOffset.y + placementData.boundingArea["grip-margin"],
-        // color: "red",
-        length: placementData.usedArea.y - placementData.boundingArea["grip-margin"],
-        width: placementData.boundingArea.width + 50 + 30 ,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 50,
-        y: boundingAreaOffset.y + placementData.usedArea.y,
-        length: placementData.usedArea.height,
-        width: placementData.boundingArea.width + 50 + 30 ,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 50,
-        y: boundingAreaOffset.y + placementData.usedArea.y + placementData.usedArea.height,
-        // color: "blue",
-        length: (placementData.boundingArea.height - placementData.boundingArea["grip-margin"]) - (placementData.usedArea.y + placementData.usedArea.height - placementData.boundingArea["grip-margin"]),
-        width: placementData.boundingArea.width + 50 + 30 ,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 30,
-        y: boundingAreaOffset.y,
-        // color: "blue",
-        length: placementData.boundingArea["grip-margin"],
-        width: placementData.boundingArea.width + 50 + 30 ,
-    }));
-
-    // used area - END
-
-    // first tile with cutBuffer - START
-    layer.add(horizontalDimensionLine({
-        x: boundingAreaOffset.x + placementData.usedArea.x,
-        y: boundingAreaOffset.y - 50,
-        length: placementData.firstTileWithCutBuffer.width,
-        height: placementData.boundingArea.height + 50 + 30 ,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 70,
-        y: boundingAreaOffset.y + placementData.usedArea.y,
-        length: placementData.firstTileWithCutBuffer.height,
-        width: placementData.boundingArea.width + 70 + 30,
-    }));
-    // first tile with cutBuffer - END
-
-    // first tile - START
-    layer.add( horizontalDimensionLine({
-        x: boundingAreaOffset.x + placementData.usedArea.x + placementData.firstTile.x,
-        y: boundingAreaOffset.y - 70,
-        length: placementData.firstTile.width,
-        height: placementData.boundingArea.height + 70 + 30,
-    }));
-
-    layer.add(verticalDimensionLine({
-        x: boundingAreaOffset.x - 90,
-        y: boundingAreaOffset.y + placementData.usedArea.y + placementData.firstTile.y,
-        length: placementData.firstTile.height,
-        width: placementData.boundingArea.width + 90 + 30,
-    }));
-    // first tile - END
-
-    layer.add(horizontalTrimLine(placementData.trimLines.top));
-    layer.add(horizontalTrimLine(placementData.trimLines.bottom));
-    layer.add(verticalTrimLine(placementData.trimLines.left));
-    layer.add(verticalTrimLine(placementData.trimLines.right));
-
-
-    const usedAreaGroup = new Konva.Group({
-        x: placementData.usedArea.x,
-        y: placementData.usedArea.y,
+    const layoutAreaGroup = new Konva.Group({
+        id: "layoutAreaGroup",
+        x: sheetLayout.layoutArea.x,
+        y: sheetLayout.layoutArea.y,
     });
-    layer.add(usedAreaGroup);
+    pressSheetGroup.add(layoutAreaGroup);
 
-    for (let i in placements) {
+    const tiles = sheetLayout.tiles;
 
-        let x = boundingAreaRect.x() + placements[i].mmCutBufferPositions.x;
-        let y = boundingAreaRect.y() + placements[i].mmCutBufferPositions.y;
-        let width = placements[i].mmCutBufferPositions.width;
-        let height = placements[i].mmCutBufferPositions.height;
+    for (let i in tiles) {
+
+        let x = tiles[i].mmCutBufferPositions.x;
+        let y = tiles[i].mmCutBufferPositions.y;
+        let width = tiles[i].mmCutBufferPositions.width;
+        let height = tiles[i].mmCutBufferPositions.height;
 
         const tileWithCutBuffer = new Konva.Rect({
             x: x,
@@ -188,15 +178,14 @@ const show = (placementData) => {
             fill: 'orange',
             stroke: 'black',
             strokeWidth: 0.1,
-            opacity: 0.5,
+            opacity: 1,
         });
-        usedAreaGroup.add(tileWithCutBuffer);
-        // layer.add(tileWithCutBuffer);
+        layoutAreaGroup.add(tileWithCutBuffer);
 
-        x = boundingAreaRect.x() + placements[i].mmPositions.x;
-        y = boundingAreaRect.y() + placements[i].mmPositions.y;
-        width = placements[i].mmPositions.width;
-        height = placements[i].mmPositions.height;
+        x = tiles[i].mmPositions.x;
+        y = tiles[i].mmPositions.y;
+        width = tiles[i].mmPositions.width;
+        height = tiles[i].mmPositions.height;
 
         const tile = new Konva.Rect({
             x: x,
@@ -206,9 +195,9 @@ const show = (placementData) => {
             fill: 'gray',
             stroke: 'black',
             strokeWidth: 0.1,
-            opacity: 0.5,
+            opacity: 1,
         });
-        usedAreaGroup.add(tile);
+        layoutAreaGroup.add(tile);
 
 
         // const simpleText = new Konva.Text({
@@ -218,25 +207,171 @@ const show = (placementData) => {
         //     height: height,
         //     align: "center",
         //     verticalAlign: "middle",
-        //     text: `${placements[i].gridPosition.x};${placements[i].gridPosition.y}`,
+        //     text: `${tiles[i].gridPosition.x};${tiles[i].gridPosition.y}`,
         //     fontSize: 12,
         //     fontFamily: 'Helvetica Neue',
         //     fill: 'white',
         //     opacity: 1,
         // });
-        // layer.add(simpleText);
+        // baseLayer.add(simpleText);
 
-        // console.log(placementData[i]);
+        // console.log(sheetLayout[i]);
     }
 
-    stage.add(layer);
+    showlayoutAreaHorizontalDimensionLines(sheetLayout);
+    showlayoutAreaVerticalDimensionLines(sheetLayout);
 }
+
+const showFirstTileDimensionLines = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    // first tile with cutBuffer - START
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.layoutArea.x,
+        distance: 2,
+        // color: "red",
+        length: sheetLayout.firstTileWithCutBuffer.width,
+        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 3,
+        y: sheetLayout.layoutArea.y,
+        // color: "red",
+        length: sheetLayout.firstTileWithCutBuffer.height,
+        width: sheetLayout.pressSheet.width,
+    }));
+    // first tile with cutBuffer - END
+
+    // first tile - START
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.layoutArea.x + sheetLayout.firstTile.x,
+        distance: 3,
+        // color: "red",
+        length: sheetLayout.firstTile.width,
+        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 4,
+        y: sheetLayout.layoutArea.y + sheetLayout.firstTile.y,
+        // color: "red",
+        length: sheetLayout.firstTile.height,
+        width: sheetLayout.pressSheet.width,
+    }));
+    // first tile - END
+
+}
+
+const showlayoutAreaHorizontalDimensionLines = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    // used area - START
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: 0,
+        distance: 1,
+        // color: "red",
+        length: sheetLayout.layoutArea.x,
+        height: -30 -30,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.layoutArea.x,
+        distance: 1,
+        // color: "red",
+        length: sheetLayout.layoutArea.width,
+        height: sheetLayout.pressSheet.height,
+    }));
+
+    pressSheetGroup.add(horizontalDimensionLine({
+        x: sheetLayout.layoutArea.x + sheetLayout.layoutArea.width,
+        distance: 1,
+        // color: "red",
+        length: sheetLayout.pressSheet.width - (sheetLayout.layoutArea.x + sheetLayout.layoutArea.width),
+        height: -30 -30,
+    }));
+
+}
+
+const showlayoutAreaVerticalDimensionLines = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 2,
+        y: 0,
+        // color: "red",
+        length: sheetLayout.layoutArea.y,
+        width: sheetLayout.pressSheet.width,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 2,
+        y: sheetLayout.layoutArea.y,
+        // color: "red",
+        length: sheetLayout.layoutArea.height,
+        width: -50 -30 ,
+    }));
+
+    pressSheetGroup.add(verticalDimensionLine({
+        distance: 2,
+        y: sheetLayout.layoutArea.y + sheetLayout.layoutArea.height,
+        // color: "red",
+        length: (sheetLayout.pressSheet.height) - (sheetLayout.layoutArea.y + sheetLayout.layoutArea.height),
+        width: sheetLayout.pressSheet.width,
+    }));
+
+}
+
+const showTrimLines = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    pressSheetGroup.add(horizontalTrimLine(sheetLayout.trimLines.top));
+    pressSheetGroup.add(horizontalTrimLine(sheetLayout.trimLines.bottom));
+    pressSheetGroup.add(verticalTrimLine(sheetLayout.trimLines.left));
+    pressSheetGroup.add(verticalTrimLine(sheetLayout.trimLines.right));
+}
+
+const showCutSheet = (sheetLayout) => {
+
+    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+
+    const cutSheetRect = new Konva.Rect({
+        id: "cutSheetRect",
+        x: sheetLayout.cutSheet.x,
+        y: sheetLayout.cutSheet.y,
+        width: sheetLayout.cutSheet.width,
+        height: sheetLayout.cutSheet.height,
+        fill: "yellow",
+        opacity: 0.4
+
+    });
+    pressSheetGroup.add(cutSheetRect);
+
+    const cutSheetGripMarginRect = new Konva.Rect({
+        id: "cutSheetGripMarginRect",
+        x: sheetLayout.cutSheet.gripMargin.x,
+        y: sheetLayout.cutSheet.gripMargin.y,
+        width: sheetLayout.cutSheet.gripMargin.width,
+        height: sheetLayout.cutSheet.gripMargin.height,
+        fill: "red",
+        opacity: 0.4
+
+    });
+    pressSheetGroup.add(cutSheetGripMarginRect);
+
+}
+
+// generic
 
 const horizontalDimensionLine = (options) => {
 
     const dimensionLineGroup = new Konva.Group({
         x: options.x,
-        y: options.y,
+        y: -1 * (10 + (options.distance * 20)),
     });
 
     const arrow = new Konva.Arrow({
@@ -271,7 +406,7 @@ const horizontalDimensionLine = (options) => {
     const leftLine = new Konva.Line({
         x: 0,
         y: 0,
-        points: [0, 0, 0, options.height],
+        points: [0, 0, 0, options.height - options.y + 30],
         stroke: options.color || 'black',
         strokeWidth: 0.5,
         dash: [3, 3]
@@ -281,7 +416,7 @@ const horizontalDimensionLine = (options) => {
     const rightLine = new Konva.Line({
         x: options.length,
         y: 0,
-        points: [0, 0, 0, options.height],
+        points: [0, 0, 0, options.height - options.y + 30],
         stroke: options.color || 'black',
         strokeWidth: 0.5,
         dash: [3, 3]
@@ -295,7 +430,7 @@ const horizontalDimensionLine = (options) => {
 const verticalDimensionLine = (options) => {
 
     const dimensionLineGroup = new Konva.Group({
-        x: options.x,
+        x: -1 * (10 + (options.distance * 20)),
         y: options.y,
     });
 
@@ -331,7 +466,7 @@ const verticalDimensionLine = (options) => {
     const topLine = new Konva.Line({
         x: 0,
         y: 0,
-        points: [0, 0, options.width, 0],
+        points: [0, 0, options.width - options.x + 30, 0],
         stroke: options.color || 'black',
         strokeWidth: 0.5,
         dash: [3, 3]
@@ -341,7 +476,7 @@ const verticalDimensionLine = (options) => {
     const bottomLine = new Konva.Line({
         x: 0,
         y: options.length,
-        points: [0, 0, options.width, 0],
+        points: [0, 0, options.width - options.x + 30, 0],
         stroke: options.color || 'black',
         strokeWidth: 0.5,
         dash: [3, 3]
@@ -355,8 +490,8 @@ const verticalDimensionLine = (options) => {
 const horizontalTrimLine = (options) => {
 
     return new Konva.Line({
-        x: boundingAreaOffset.x + options.x,
-        y: boundingAreaOffset.y + options.y,
+        x: options.x,
+        y: options.y,
         points: [-30, 0, options.length + 30, 0],
         stroke: 'black',
         strokeWidth: 1.5,
@@ -366,8 +501,8 @@ const horizontalTrimLine = (options) => {
 
 const verticalTrimLine = (options) => {
     return new Konva.Line({
-        x: boundingAreaOffset.x + options.x,
-        y: boundingAreaOffset.y + options.y,
+        x: options.x,
+        y: options.y,
         points: [0, -30, 0, options.length + 30],
         stroke: 'black',
         strokeWidth: 1.5,
@@ -390,7 +525,7 @@ const calc = (input) => {
         .then(data => {
 
             // console.log(data);
-            layer.removeChildren();
+            baseLayer.removeChildren();
 
             const variations = document.getElementById("variations");
             variations.innerHTML = "";
