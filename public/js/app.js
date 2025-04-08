@@ -1,84 +1,79 @@
 const stage = new Konva.Stage({
     container: 'konva-container', // id of container <div>
     width: window.innerWidth,
-    height: 5000
+    height: 400
     // height: window.innerHeight
 });
 
 const scale = 0.8;
 
-let baseLayer = null;
+let baseLayer = new Konva.Layer({
+    x: 0,
+    y: 0,
+    id: "base",
+    scaleX: scale,
+    scaleY: scale,
+});
+stage.add(baseLayer);
 
-const show = (sheetLayout, machineId, machineIndex) => {
+const show = (sheetLayout, machineGroup, content) => {
 
-    const layerId = `baseLayer.${machineId}`;
+    console.log(content);
 
-    const layer = new Konva.Layer({
-        x: 0,
-        y: machineIndex * 800,
-        id: layerId,
-        scaleX: scale,
-        scaleY: scale,
-    });
-    stage.add(layer);
+    // stage.height(stage.height() + 1000);
 
-    baseLayer = stage.findOne(`#${layerId}`);
-    baseLayer.removeChildren();
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
+    if (pressSheetGroup) {
+        pressSheetGroup.remove();
+    }
 
-    // const baseLayer = stage.findOne("#baseLayer");
+    showPressSheet(sheetLayout, machineGroup);
+    showTrimLines(sheetLayout, machineGroup);
 
+    showCutSheet(sheetLayout, machineGroup);
+    showLayoutArea(sheetLayout, machineGroup);
 
-    // console.log(sheetLayout);
-
-    baseLayer.removeChildren();
-
-    showPressSheet(sheetLayout);
-    showCutSheet(sheetLayout);
-    showTrimLines(sheetLayout);
-    showlayoutArea(sheetLayout);
-    showMaxSheet(sheetLayout);
-    showMinSheet(sheetLayout);
+    showMaxSheet(sheetLayout, machineGroup);
+    showMinSheet(sheetLayout, machineGroup);
 
     let distance = 0;
-    showPressSheetDimensionLines(sheetLayout, {
+    showPressSheetDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
         color: "black"
     });
-    showTrimDimensionLines(sheetLayout, {
+    showTrimDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
         color: "black"
     });
-    // showMaxSheetDimensionLines(sheetLayout, {
+    // showMaxSheetDimensionLines(sheetLayout, machineGroup, {
     //     distance: distance++,
     //     color: "black",
     // });
-    // showMinSheetDimensionLines(sheetLayout, {
+    // showMinSheetDimensionLines(sheetLayout, machineGroup, {
     //     distance: distance++,
     //     color: "black",
     // });
-    showLayoutAreaDimensionLines(sheetLayout, {
+    showLayoutAreaDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
         color: "black"
     });
-    showFirstTileWithCutBufferDimensionLines(sheetLayout, {
+    showFirstTileWithCutBufferDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
         color: "black"
     });
-    showFirstTileDimensionLines(sheetLayout, {
+    showFirstTileDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
         color: "black"
     });
 
-
-
-    stage.add(baseLayer);
+    // stage.add(machineGroup);
 }
 
-const showPressSheet = (sheetLayout) => {
+const showPressSheet = (sheetLayout, machineGroup) => {
 
     const sheetOffset = {
         x: 150,
-        y: 150
+        y: 300
     }
 
     const pressSheetGroup = new Konva.Group({
@@ -86,7 +81,7 @@ const showPressSheet = (sheetLayout) => {
         x: sheetOffset.x,
         y: sheetOffset.y,
     });
-    baseLayer.add(pressSheetGroup);
+    machineGroup.add(pressSheetGroup);
 
     const pressSheetRect = new Konva.Rect({
         id: "pressSheet",
@@ -102,18 +97,18 @@ const showPressSheet = (sheetLayout) => {
 
 }
 
-const showPressSheetDimensionLines = (sheetLayout, options) => {
+const showPressSheetDimensionLines = (sheetLayout, machineGroup, options) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: 0,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.pressSheet.width,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: 0,
         color: options.color,
@@ -122,24 +117,24 @@ const showPressSheetDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showTrimDimensionLines = (sheetLayout, options) => {
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+const showTrimDimensionLines = (sheetLayout, machineGroup, options) => {
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: 0,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.trimLines.left.x,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.trimLines.left.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.trimLines.right.x - sheetLayout.trimLines.left.x,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.trimLines.right.x,
         distance: options.distance,
         color: options.color,
@@ -147,21 +142,21 @@ const showTrimDimensionLines = (sheetLayout, options) => {
     }));
 
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: 0,
         color: options.color,
         length: sheetLayout.trimLines.top.y,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.trimLines.top.y,
         color: options.color,
         length: sheetLayout.trimLines.bottom.y - sheetLayout.trimLines.top.y,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.trimLines.bottom.y,
         color: options.color,
@@ -169,9 +164,9 @@ const showTrimDimensionLines = (sheetLayout, options) => {
     }));
 
 }
-const showMaxSheet = (sheetLayout) => {
+const showMaxSheet = (sheetLayout, machineGroup) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     const maxSheetGroup = new Konva.Group({
         id: "maxSheetGroup",
@@ -193,25 +188,25 @@ const showMaxSheet = (sheetLayout) => {
 
 }
 
-const showMaxSheetDimensionLines = (sheetLayout, options) => {
+const showMaxSheetDimensionLines = (sheetLayout, machineGroup, options) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: 0,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.maxSheet.x,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.maxSheet.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.maxSheet.width,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.maxSheet.x + sheetLayout.maxSheet.width,
         distance: options.distance,
         color: options.color,
@@ -220,21 +215,21 @@ const showMaxSheetDimensionLines = (sheetLayout, options) => {
 
 
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: 0,
         color: options.color,
         length: sheetLayout.maxSheet.y,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.maxSheet.y,
         color: options.color,
         length: sheetLayout.maxSheet.height,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.maxSheet.y + sheetLayout.maxSheet.height,
         color: options.color,
@@ -243,9 +238,9 @@ const showMaxSheetDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showMinSheet = (sheetLayout) => {
+const showMinSheet = (sheetLayout, machineGroup) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     const minSheetGroup = new Konva.Group({
         id: "minSheetGroup",
@@ -266,46 +261,46 @@ const showMinSheet = (sheetLayout) => {
     minSheetGroup.add(minSheetRect);
 }
 
-const showMinSheetDimensionLines = (sheetLayout, options) => {
+const showMinSheetDimensionLines = (sheetLayout, machineGroup, options) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: 0,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.minSheet.x,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.minSheet.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.minSheet.width,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.minSheet.x + sheetLayout.minSheet.width,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.pressSheet.width - (sheetLayout.minSheet.x + sheetLayout.minSheet.width),
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: 0,
         color: options.color,
         length: sheetLayout.minSheet.y,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.minSheet.y,
         color: options.color,
         length: sheetLayout.minSheet.height,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.minSheet.y + sheetLayout.minSheet.height,
         color: options.color,
@@ -314,13 +309,13 @@ const showMinSheetDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showlayoutArea = (sheetLayout) => {
-    showTiles(sheetLayout);
+const showLayoutArea = (sheetLayout, machineGroup) => {
+    showTiles(sheetLayout, machineGroup);
 }
 
-const showTiles = (sheetLayout) => {
+const showTiles = (sheetLayout, machineGroup) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     const layoutAreaGroup = new Konva.Group({
         id: "layoutAreaGroup",
@@ -368,38 +363,21 @@ const showTiles = (sheetLayout) => {
         });
         layoutAreaGroup.add(tile);
 
-
-        // const simpleText = new Konva.Text({
-        //     x: x,
-        //     y: y,
-        //     width: width,
-        //     height: height,
-        //     align: "center",
-        //     verticalAlign: "middle",
-        //     text: `${tiles[i].gridPosition.x};${tiles[i].gridPosition.y}`,
-        //     fontSize: 12,
-        //     fontFamily: 'Helvetica Neue',
-        //     fill: 'white',
-        //     opacity: 1,
-        // });
-        // baseLayer.add(simpleText);
-
-        // console.log(sheetLayout[i]);
     }
 
 }
 
-const showFirstTileWithCutBufferDimensionLines = (sheetLayout, options) => {
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+const showFirstTileWithCutBufferDimensionLines = (sheetLayout, machineGroup, options) => {
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.layoutArea.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.firstTileWithCutBuffer.width,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.layoutArea.y,
         color: options.color,
@@ -408,18 +386,18 @@ const showFirstTileWithCutBufferDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showFirstTileDimensionLines = (sheetLayout, options) => {
+const showFirstTileDimensionLines = (sheetLayout, machineGroup, options) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.layoutArea.x + sheetLayout.firstTile.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.firstTile.width,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.layoutArea.y + sheetLayout.firstTile.y,
         color: options.color,
@@ -428,47 +406,47 @@ const showFirstTileDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showLayoutAreaDimensionLines = (sheetLayout, options) => {
+const showLayoutAreaDimensionLines = (sheetLayout, machineGroup, options) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     // used area - START
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: 0,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.layoutArea.x,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.layoutArea.x,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.layoutArea.width,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine({
+    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.layoutArea.x + sheetLayout.layoutArea.width,
         distance: options.distance,
         color: options.color,
         length: sheetLayout.pressSheet.width - (sheetLayout.layoutArea.x + sheetLayout.layoutArea.width),
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: 0,
         color: options.color,
         length: sheetLayout.layoutArea.y,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.layoutArea.y,
         color: options.color,
         length: sheetLayout.layoutArea.height,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine({
+    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
         y: sheetLayout.layoutArea.y + sheetLayout.layoutArea.height,
         color: options.color,
@@ -477,9 +455,9 @@ const showLayoutAreaDimensionLines = (sheetLayout, options) => {
 
 }
 
-const showTrimLines = (sheetLayout) => {
+const showTrimLines = (sheetLayout, machineGroup) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     pressSheetGroup.add(horizontalTrimLine(sheetLayout.trimLines.top));
     pressSheetGroup.add(horizontalTrimLine(sheetLayout.trimLines.bottom));
@@ -487,9 +465,9 @@ const showTrimLines = (sheetLayout) => {
     pressSheetGroup.add(verticalTrimLine(sheetLayout.trimLines.right));
 }
 
-const showCutSheet = (sheetLayout) => {
+const showCutSheet = (sheetLayout, machineGroup) => {
 
-    const pressSheetGroup = baseLayer.findOne("#pressSheetGroup");
+    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     const cutSheetRect = new Konva.Rect({
         id: "cutSheetRect",
@@ -521,9 +499,9 @@ const showCutSheet = (sheetLayout) => {
 
 // generic
 
-const horizontalDimensionLine = (options) => {
+const horizontalDimensionLine = (machineGroup, options) => {
 
-    const pressSheet = baseLayer.findOne("#pressSheet");
+    const pressSheet = machineGroup.findOne("#pressSheet");
 
     options.y = -1 * (10 + (options.distance * 20));
     options.height = pressSheet.attrs.height;
@@ -601,9 +579,9 @@ const horizontalDimensionLine = (options) => {
 
 }
 
-const verticalDimensionLine = (options) => {
+const verticalDimensionLine = (machineGroup, options) => {
 
-    const pressSheet = baseLayer.findOne("#pressSheet");
+    const pressSheet = machineGroup.findOne("#pressSheet");
 
     options.x = -1 * (10 + (options.distance * 20));
     options.width = pressSheet.attrs.width;
@@ -690,9 +668,7 @@ const verticalTrimLine = (options) => {
 
 }
 
-// let machineIndex = 0;
-
-const calc = (input, machineIndex) => {
+const calc = (input, machineIndex, content) => {
 
     if (machineIndex < input.machines.length) {
 
@@ -708,12 +684,7 @@ const calc = (input, machineIndex) => {
         })
             .then(response => response.json())
             .then(data => {
-
-                // console.log(data);
-                // baseLayer.removeChildren();
-
-                displayMachineVariations(data, input, machineIndex);
-
+                displayMachineVariations(data, input, machineIndex, content);
             })
             .catch(error => {
                 console.error('Error loading JSON:', error);
@@ -721,52 +692,167 @@ const calc = (input, machineIndex) => {
         }
 }
 
-const displayMachineVariations = (data, input, machineIndex) => {
-    const display = document.getElementById("display");
-    // display.innerHTML = "";
+const displayMachineVariations = (data, input, machineIndex, content) => {
+    const machineId = input.machines[machineIndex].id;
+    const machineGroupId = `machineGroup-${machineId}`;
 
-    const variations = document.createElement("div");
-    variations.id = `variations-${machineIndex}`;
-    variations.innerHTML = "";
-    display.appendChild(variations);
+    let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
 
-    const rotatedVariations = document.createElement("div");
-    rotatedVariations.id = `rotated-variations-${machineIndex}`;
-    rotatedVariations.innerHTML = "";
-    rotatedVariations.style.marginBottom = "50px";
-    display.appendChild(rotatedVariations);
+    if (!machineGroup) {
+        machineGroup = new Konva.Group({
+            id: machineGroupId,
+            x: 0,
+            y: machineIndex * 1200,
+        });
+        baseLayer.add(machineGroup);
+    }
 
-    // if (machineIndex < input.machines.length) {
+    showControlPanel(input, data, machineIndex, machineGroup, content);
 
-        for (let i in data) {
-            const variation = document.createElement("button");
-            variation.innerHTML = data[i].size;
-            variation.onclick = () => {
-                show(data[i], input.machines[machineIndex].id, machineIndex);
-
-                // machineIndex++;
-
-                input.zone = {
-                    width: data[i].cutSheet.width,
-                    height: data[i].cutSheet.height,
-                }
-
-                // console.log(input);
-                // console.log(data[i]);
-
-                    calc(input, machineIndex+1);
-
-
-            }
-            if (data[i].rotated) {
-                rotatedVariations.appendChild(variation);
-            } else {
-                variations.appendChild(variation);
-            }
-        }
+    // if (data.length > 0) {
+    //     show(data[0], machineGroup);
     // }
 }
 
+const showControlPanel = (input, data, machineIndex, machineGroup, content) => {
+    const controlPanelGroup = new Konva.Group({
+        id: "controlPanelGroup",
+        x: 0,
+        y: 0,
+        width: baseLayer.attrs.width,
+        height: 100,
+    });
+    machineGroup.add(controlPanelGroup);
+
+    showControlPanelNumbers(data, machineGroup);
+    showControlPanelSelectors(input, data, machineIndex, machineGroup, content);
+
+}
+
+const showControlPanelNumbers = (data, machineGroup) => {
+
+    let maxSizes = {
+        unRotated: {
+            cols: 0,
+            rows: 0,
+        },
+        rotated: {
+            cols: 0,
+            rows: 0,
+        },
+    };
+    data.map((item) => {
+        if (!item.rotated) {
+            if (item.cols > maxSizes.unRotated.cols) {
+                maxSizes.unRotated.cols = item.cols;
+            }
+            if (item.rows > maxSizes.unRotated.rows) {
+                maxSizes.unRotated.rows = item.rows;
+            }
+        }
+        if (item.rotated) {
+            if (item.cols > maxSizes.rotated.cols) {
+                maxSizes.rotated.cols = item.cols;
+            }
+            if (item.rows > maxSizes.rotated.rows) {
+                maxSizes.rotated.rows = item.rows;
+            }
+        }
+    });
+
+    for (let i = 1; i <= maxSizes.unRotated.cols; i++) {
+        showHorizontalSelectorNumber(machineGroup, i, 0);
+    }
+
+    for (let i = 1; i <= maxSizes.rotated.cols; i++) {
+        showHorizontalSelectorNumber(machineGroup, i, 200);
+    }
+
+    for (let i = 1; i <= maxSizes.unRotated.rows; i++) {
+        showVerticalSelectorNumber(machineGroup, i, 0);
+    }
+
+    for (let i = 1; i <= maxSizes.rotated.rows; i++) {
+        showVerticalSelectorNumber(machineGroup, i, 200);
+    }
+}
+
+const showHorizontalSelectorNumber = (machineGroup, i, offset) => {
+
+    const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
+    const number = new Konva.Text({
+        x: i * 30 + offset,
+        y: 5,
+        width: 20,
+        text: i.toString(),
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        align: "center",
+        verticalAlign: "middle"
+    });
+    controlPanelGroup.add(number);
+}
+
+const showVerticalSelectorNumber = (machineGroup, i, offset) => {
+
+    const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
+    const number = new Konva.Text({
+        x: 5 + offset,
+        y: i * 30,
+        height: 20,
+        text: i.toString(),
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        align: "center",
+        verticalAlign: "middle"
+    });
+    controlPanelGroup.add(number);
+}
+
+const showControlPanelSelectors = (input, data, machineIndex, machineGroup, content) => {
+
+    const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
+
+    for (let i in data) {
+
+        const selector = new Konva.Rect({
+            x: (data[i].cols * 30) + (data[i].rotated ? 200 : 0),
+            y: (data[i].rows * 30),
+            width: 20,
+            height: 20,
+            // fill: "black",
+            stroke: "black",
+            strokeWidth: 1,
+        });
+
+        selector.on("click", function () {
+            const newContent = show(data[i], machineGroup, content);
+            stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
+
+            // todo: delete machineGroups with higher indexes
+            for (let j = machineIndex + 1; j < input.machines.length; j++) {
+
+                const machineId = input.machines[j].id;
+                const machineGroupId = `machineGroup-${machineId}`;
+
+                const machineGroup = baseLayer.findOne(`#${machineGroupId}`);
+                if (machineGroup) {
+                    machineGroup.remove();
+                }
+            }
+
+            input.zone = {
+                width: data[i].cutSheet.width,
+                height: data[i].cutSheet.height,
+            }
+            calc(input, machineIndex + 1, newContent);
+        });
+        controlPanelGroup.add(selector);
+
+    }
+}
 
 // 👇 Expose it globally
 window.calc = calc;

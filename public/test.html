@@ -16,6 +16,13 @@
     </style>
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script language="JavaScript" src="js/app.js" type="module"></script>
+    <script language="JavaScript">
+        const doCalculations = () => {
+            const display = document.getElementById('display');
+            display.innerHTML = '';
+            calc(JSON.parse(document.getElementById('input').value), 0, null);
+        }
+    </script>
 </head>
 <body>
 <div>
@@ -84,7 +91,7 @@
             }
         }
     </textarea>
-    <button onclick="const display = document.getElementById('display'); display.innerHTML = ''; calc(JSON.parse(document.getElementById('input').value), 0);">CALC</button>
+    <button onclick="doCalculations()">CALC</button>
     <div id="display"></div>
 <!--    <div>unrotated</div>-->
 <!--    <div id="variations"></div>-->
