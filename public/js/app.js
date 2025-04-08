@@ -1,32 +1,43 @@
 const stage = new Konva.Stage({
     container: 'konva-container', // id of container <div>
     width: window.innerWidth,
-    height: window.innerHeight
+    height: 5000
+    // height: window.innerHeight
 });
 
 const scale = 0.8;
 
-const layer = new Konva.Layer({
-    id: "baseLayer",
-    scaleX: scale,
-    scaleY: scale,
-});
-stage.add(layer);
+let baseLayer = null;
 
-const baseLayer = stage.findOne("#baseLayer");
+const show = (sheetLayout, machineId, machineIndex) => {
 
-const show = (sheetLayout) => {
+    const layerId = `baseLayer.${machineId}`;
 
-    console.log(sheetLayout);
+    const layer = new Konva.Layer({
+        x: 0,
+        y: machineIndex * 800,
+        id: layerId,
+        scaleX: scale,
+        scaleY: scale,
+    });
+    stage.add(layer);
+
+    baseLayer = stage.findOne(`#${layerId}`);
+    baseLayer.removeChildren();
+
+    // const baseLayer = stage.findOne("#baseLayer");
+
+
+    // console.log(sheetLayout);
 
     baseLayer.removeChildren();
 
     showPressSheet(sheetLayout);
-    showMaxSheet(sheetLayout);
-    showMinSheet(sheetLayout);
     showCutSheet(sheetLayout);
     showTrimLines(sheetLayout);
     showlayoutArea(sheetLayout);
+    showMaxSheet(sheetLayout);
+    showMinSheet(sheetLayout);
 
     let distance = 0;
     showPressSheetDimensionLines(sheetLayout, {
@@ -174,10 +185,9 @@ const showMaxSheet = (sheetLayout) => {
         y: 0,
         width: sheetLayout.maxSheet.width,
         height: sheetLayout.maxSheet.height,
-        fill: 'orange',
-        opacity: 0.2,
-        // stroke: 'black',
-        strokeWidth: 0,
+        stroke: "red",
+        strokeWidth: 1,
+        opacity: 1,
     });
     maxSheetGroup.add(maxSheetRect);
 
@@ -249,10 +259,9 @@ const showMinSheet = (sheetLayout) => {
         y: 0,
         width: sheetLayout.minSheet.width,
         height: sheetLayout.minSheet.height,
-        fill: 'blue',
-        opacity: 0.2,
-        // stroke: 'black',
-        strokeWidth: 0
+        stroke: "#f4a70c",
+        strokeWidth: 1,
+        opacity: 1,
     });
     minSheetGroup.add(minSheetRect);
 }
@@ -334,7 +343,7 @@ const showTiles = (sheetLayout) => {
             y: y,
             width: width,
             height: height,
-            fill: 'orange',
+            // fill: 'orange',
             stroke: 'black',
             strokeWidth: 0.1,
             opacity: 1,
@@ -351,7 +360,8 @@ const showTiles = (sheetLayout) => {
             y: y,
             width: width,
             height: height,
-            fill: 'gray',
+            fill: '#eee8f5',
+            // fill: '#8d8d8d',
             stroke: 'black',
             strokeWidth: 0.1,
             opacity: 1,
@@ -487,9 +497,11 @@ const showCutSheet = (sheetLayout) => {
         y: sheetLayout.cutSheet.y,
         width: sheetLayout.cutSheet.width,
         height: sheetLayout.cutSheet.height,
-        fill: "yellow",
-        opacity: 0.4
-
+        // fill: "yellow",
+        fill: "#f1dde6",
+        // stroke: "red",
+        // strokeWidth: 1,
+        opacity: 1,
     });
     pressSheetGroup.add(cutSheetRect);
 
@@ -499,8 +511,8 @@ const showCutSheet = (sheetLayout) => {
         y: sheetLayout.cutSheet.gripMargin.y,
         width: sheetLayout.cutSheet.gripMargin.width,
         height: sheetLayout.cutSheet.gripMargin.height,
-        fill: "red",
-        opacity: 0.4
+        fill: "#cccdcd",
+        opacity: 1
 
     });
     pressSheetGroup.add(cutSheetGripMarginRect);
@@ -678,38 +690,81 @@ const verticalTrimLine = (options) => {
 
 }
 
-const calc = (input) => {
+// let machineIndex = 0;
 
-    fetch('/test', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(input)
-    })
-        .then(response => response.json())
-        .then(data => {
+const calc = (input, machineIndex) => {
 
-            // console.log(data);
-            baseLayer.removeChildren();
+    if (machineIndex < input.machines.length) {
 
-            const variations = document.getElementById("variations");
-            variations.innerHTML = "";
+        input.machine = input.machines[machineIndex];
 
-            for (let i in data) {
-                const variation = document.createElement("button");
-                variation.innerHTML = data[i].size;
-                variation.onclick = () => {
-                    show(data[i]);
+        fetch('/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(input)
+        })
+            .then(response => response.json())
+            .then(data => {
+
+                // console.log(data);
+                // baseLayer.removeChildren();
+
+                displayMachineVariations(data, input, machineIndex);
+
+            })
+            .catch(error => {
+                console.error('Error loading JSON:', error);
+            });
+        }
+}
+
+const displayMachineVariations = (data, input, machineIndex) => {
+    const display = document.getElementById("display");
+    // display.innerHTML = "";
+
+    const variations = document.createElement("div");
+    variations.id = `variations-${machineIndex}`;
+    variations.innerHTML = "";
+    display.appendChild(variations);
+
+    const rotatedVariations = document.createElement("div");
+    rotatedVariations.id = `rotated-variations-${machineIndex}`;
+    rotatedVariations.innerHTML = "";
+    rotatedVariations.style.marginBottom = "50px";
+    display.appendChild(rotatedVariations);
+
+    // if (machineIndex < input.machines.length) {
+
+        for (let i in data) {
+            const variation = document.createElement("button");
+            variation.innerHTML = data[i].size;
+            variation.onclick = () => {
+                show(data[i], input.machines[machineIndex].id, machineIndex);
+
+                // machineIndex++;
+
+                input.zone = {
+                    width: data[i].cutSheet.width,
+                    height: data[i].cutSheet.height,
                 }
+
+                // console.log(input);
+                // console.log(data[i]);
+
+                    calc(input, machineIndex+1);
+
+
+            }
+            if (data[i].rotated) {
+                rotatedVariations.appendChild(variation);
+            } else {
                 variations.appendChild(variation);
             }
-
-        })
-        .catch(error => {
-            console.error('Error loading JSON:', error);
-        });
+        }
+    // }
 }
 
 

@@ -22,21 +22,53 @@
     <p>INPUT</p>
     <textarea style="width: 100%; height: 300px" id="input">
         {
-            "machine": {
-                "id": "m1",
-                "type": "t1",
-                "grip-margin": 20,
-                "input-dimensions": {
-                    "min": {
-                        "width": 350,
-                        "height": 250
-                    },
-                    "max": {
-                        "width": 750,
-                        "height": 530
+            "machines": [
+                {
+                    "id": "m1",
+                    "type": "t1",
+                    "grip-margin": 20,
+                    "input-dimensions": {
+                        "min": {
+                            "width": 350,
+                            "height": 250
+                        },
+                        "max": {
+                            "width": 750,
+                            "height": 530
+                        }
+                    }
+                },
+                {
+                    "id": "m1b",
+                    "type": "t1",
+                    "grip-margin": 20,
+                    "input-dimensions": {
+                        "min": {
+                            "width": 350,
+                            "height": 250
+                        },
+                        "max": {
+                            "width": 750,
+                            "height": 530
+                        }
+                    }
+                },
+                {
+                    "id": "m2",
+                    "type": "t2",
+                    "grip-margin": 30,
+                    "input-dimensions": {
+                        "min": {
+                            "width": 500,
+                            "height": 350
+                        },
+                        "max": {
+                            "width": 1020,
+                            "height": 700
+                        }
                     }
                 }
-            },
+            ],
             "press-sheet": {
                 "width": 1020,
                 "height": 700,
@@ -52,8 +84,12 @@
             }
         }
     </textarea>
-    <button onclick="calc(JSON.parse(document.getElementById('input').value));">CALC</button>
-    <div id="variations"></div>
+    <button onclick="const display = document.getElementById('display'); display.innerHTML = ''; calc(JSON.parse(document.getElementById('input').value), 0);">CALC</button>
+    <div id="display"></div>
+<!--    <div>unrotated</div>-->
+<!--    <div id="variations"></div>-->
+<!--    <div>rotated</div>-->
+<!--    <div id="rotated-variations"></div>-->
 </div>
 <div id="konva-container"></div>
 </body>

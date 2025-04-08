@@ -19,13 +19,14 @@ class TestController extends AbstractController
         $boundingArea = $data["machine"]["input-dimensions"]["max"];
         $boundingArea["grip-margin"] = $data["machine"]["grip-margin"];
 
-        $layouts = $this->calculateExhaustiveGridFitting($boundingArea, $data["zone"], $data["cutSpacing"]);
-
         $maxSheet = $data["machine"]["input-dimensions"]["max"];
-
         $minSheet = $data["machine"]["input-dimensions"]["min"];
 
         $gridFittings = [];
+
+        // ---
+        $layouts = $this->calculateExhaustiveGridFitting($boundingArea, $data["zone"], $data["cutSpacing"], false);
+
         foreach ($layouts as $gridFitting) {
 
             $gridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["grip-margin"], $gridFitting);
@@ -35,8 +36,25 @@ class TestController extends AbstractController
             }
 
             $gridFittings[] = $gridFitting;
-
         }
+
+        // ---
+
+        $rotatedZone = ["width" => $data["zone"]["height"], "height" => $data["zone"]["width"]];
+        $layouts = $this->calculateExhaustiveGridFitting($boundingArea, $rotatedZone, $data["cutSpacing"], true);
+
+        foreach ($layouts as $gridFitting) {
+
+            $gridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["grip-margin"], $gridFitting);
+
+            if ($this->layoutExceedsMaxSheet($gridFitting, $maxSheet)) {
+                continue;
+            }
+
+            $gridFittings[] = $gridFitting;
+        }
+
+
 
         return new JsonResponse(
             $gridFittings,
@@ -59,7 +77,7 @@ class TestController extends AbstractController
             );
     }
 
-    public function calculateExhaustiveGridFitting(array $boundingArea, array $tileRect, $cutSpacing): array
+    public function calculateExhaustiveGridFitting(array $boundingArea, array $tileRect, $cutSpacing, $rotated): array
     {
         $maxCols = floor(($boundingArea["width"]) / ($tileRect["width"] + (2 * $cutSpacing["horizontal"])));
         $maxRows = floor(($boundingArea["height"]) / ($tileRect["height"] + (2 * $cutSpacing["vertical"])));
@@ -71,13 +89,10 @@ class TestController extends AbstractController
 
                 $tiles = $this->calculateGridFitting($colIndex, $rowIndex, $tileRect, $cutSpacing);
 
-                $totalLayoutWidth = ($tileRect["width"] + (2 * $cutSpacing["vertical"])) * $colIndex;
-                $totalLayoutHeight = ($tileRect["height"] + (2 * $cutSpacing["horizontal"])) * $rowIndex;
-
-
                 $gridFitting = [
                     "tiles" => $tiles,
                     "size" => sprintf("%dx%d", $colIndex, $rowIndex),
+                    "rotated" => $rotated,
                     "cols" => $colIndex,
                     "rows" => $rowIndex,
                     "totalWidth" => ($tileRect["width"] + (2 * $cutSpacing["vertical"])) * $colIndex,
