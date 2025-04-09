@@ -231,6 +231,18 @@ class TestController extends AbstractController
             ],
         ];
 
+        $cutSheetGripMarginPosition = max($totalLayoutWidth, $minSheet["width"]) >= max($totalLayoutHeight, $minSheet["height"]) ? "top" : "left";
+
+        $bothOnTop = ($zoneGripMargin["position"] === "top" && $cutSheetGripMarginPosition === "top");
+        $bothOnLeft = ($zoneGripMargin["position"] === "left" && $cutSheetGripMarginPosition === "left");
+
+        if ($bothOnTop || $bothOnLeft) {
+            $cutSheet["gripMargin"]["size"] = 0;
+        }
+
+        $cutSheet["bothOnLeft"] = $bothOnLeft;
+        $cutSheet["bothOnTop"] = $bothOnTop;
+
         $cutSheet["width"] = $totalLayoutWidth;
         $cutSheet["height"] = $totalLayoutHeight;
 
@@ -239,19 +251,11 @@ class TestController extends AbstractController
 
         $cutSheet["gripMargin"]["position"] = $cutSheet["width"] >= $cutSheet["height"] ? "top" : "left";
 
-        if (
-            $zoneGripMargin["position"] === "top" && $cutSheet["gripMargin"]["position"] === "top"
-            ||
-            $zoneGripMargin["position"] === "left" && $cutSheet["gripMargin"]["position"] === "left"
-        ) {
-//            $cutSheet["gripMargin"]["size"] = max($cutSheet["gripMargin"]["size"] - $zoneGripMargin["size"], 0);
-        }
-
-        if ((($cutSheet["gripMargin"]["position"] === "left"))) {
+        if ($cutSheet["gripMargin"]["position"] === "left") {
             $cutSheet["width"] += $cutSheet["gripMargin"]["size"];
         }
 
-        if ((($cutSheet["gripMargin"]["position"] === "top"))) {
+        if ($cutSheet["gripMargin"]["position"] === "top") {
             $cutSheet["height"] += $cutSheet["gripMargin"]["size"];
         }
 
@@ -262,11 +266,6 @@ class TestController extends AbstractController
         $cutSheet["gripMargin"]["y"] = $cutSheet["y"];
         $cutSheet["gripMargin"]["width"] = $cutSheet["gripMargin"]["position"] === "left" ? $cutSheet["gripMargin"]["size"] : $cutSheet["width"];
         $cutSheet["gripMargin"]["height"] = $cutSheet["gripMargin"]["position"] === "top" ? $cutSheet["gripMargin"]["size"] : $cutSheet["height"];
-
-//        if ($zoneGripMargin["position"] === "top" && $cutSheet["gripMargin"]["position"] === "top") {
-//            $cutSheet["gripMargin"]["height"] = max($cutSheet["gripMargin"]["height"] - $zoneGripMargin["size"], 0);
-//            $cutSheet["height"] -= $cutSheet["gripMargin"]["size"];
-//        }
 
         return $cutSheet;
 
