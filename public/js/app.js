@@ -20,8 +20,6 @@ const show = (sheetLayout, machineGroup, content) => {
 
     // console.log(content);
 
-    // stage.height(stage.height() + 1000);
-
     let pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
     if (pressSheetGroup) {
         pressSheetGroup.remove();
@@ -65,22 +63,7 @@ const show = (sheetLayout, machineGroup, content) => {
         color: "black"
     });
 
-    // stage.add(machineGroup);
-
-
     return cloneContent(pressSheetGroup);
-
-
-
-    return pressSheetGroup.clone({
-        id: "contentGroup",
-        x: 0,
-        y: 10,
-        clipX: sheetLayout.cutSheet.x,
-        clipY: sheetLayout.cutSheet.y,
-        clipWidth: sheetLayout.cutSheet.width,
-        clipHeight: sheetLayout.cutSheet.height,
-    });
 }
 
 const cloneContent = (pressSheetGroup) => {
