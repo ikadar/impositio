@@ -18,21 +18,20 @@ stage.add(baseLayer);
 
 const show = (sheetLayout, machineGroup, content) => {
 
-    console.log(content);
+    // console.log(content);
 
     // stage.height(stage.height() + 1000);
 
-    const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
+    let pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
     if (pressSheetGroup) {
         pressSheetGroup.remove();
     }
 
     showPressSheet(sheetLayout, machineGroup);
+    pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
     showTrimLines(sheetLayout, machineGroup);
-
     showCutSheet(sheetLayout, machineGroup);
-    showLayoutArea(sheetLayout, machineGroup);
-
+    showLayoutArea(sheetLayout, machineGroup, content);
     showMaxSheet(sheetLayout, machineGroup);
     showMinSheet(sheetLayout, machineGroup);
 
@@ -55,7 +54,7 @@ const show = (sheetLayout, machineGroup, content) => {
     // });
     showLayoutAreaDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
-        color: "black"
+        color: "red"
     });
     showFirstTileWithCutBufferDimensionLines(sheetLayout, machineGroup, {
         distance: distance++,
@@ -67,6 +66,49 @@ const show = (sheetLayout, machineGroup, content) => {
     });
 
     // stage.add(machineGroup);
+
+
+    return cloneContent(pressSheetGroup);
+
+
+
+    return pressSheetGroup.clone({
+        id: "contentGroup",
+        x: 0,
+        y: 10,
+        clipX: sheetLayout.cutSheet.x,
+        clipY: sheetLayout.cutSheet.y,
+        clipWidth: sheetLayout.cutSheet.width,
+        clipHeight: sheetLayout.cutSheet.height,
+    });
+}
+
+const cloneContent = (pressSheetGroup) => {
+
+    const contentGroup = new Konva.Group({
+        id: "contentGroup",
+        x: 0,
+        y: 0
+    });
+
+    const cutSheetRect = pressSheetGroup.findOne("#cutSheetRect");
+    // console.log(cutSheetRect.attrs);
+    contentGroup.add(cutSheetRect.clone({
+        x: 0,
+        y: 0,
+        // fill: "#dfe8eb"
+    }));
+
+    const cutSheetGripMarginRect = pressSheetGroup.findOne("#cutSheetGripMarginRect");
+    contentGroup.add(cutSheetGripMarginRect.clone({x: 0, y: 0, fill: "#dfe8eb"}));
+
+    const layoutAreaGroup = pressSheetGroup.findOne("#layoutAreaGroup");
+    contentGroup.add(layoutAreaGroup.clone({
+        x: layoutAreaGroup.attrs.x - cutSheetRect.attrs.x,
+        y: layoutAreaGroup.attrs.y - cutSheetRect.attrs.y,
+    }));
+
+    return contentGroup;
 }
 
 const showPressSheet = (sheetLayout, machineGroup) => {
@@ -309,11 +351,13 @@ const showMinSheetDimensionLines = (sheetLayout, machineGroup, options) => {
 
 }
 
-const showLayoutArea = (sheetLayout, machineGroup) => {
-    showTiles(sheetLayout, machineGroup);
+const showLayoutArea = (sheetLayout, machineGroup, content) => {
+    showTiles(sheetLayout, machineGroup, content);
 }
 
-const showTiles = (sheetLayout, machineGroup) => {
+const showTiles = (sheetLayout, machineGroup, content) => {
+
+    // console.log(sheetLayout);
 
     const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
@@ -350,9 +394,16 @@ const showTiles = (sheetLayout, machineGroup) => {
         width = tiles[i].mmPositions.width;
         height = tiles[i].mmPositions.height;
 
-        const tile = new Konva.Rect({
+        const tileGroup = new Konva.Group({
             x: x,
             y: y,
+        });
+
+        const tile = new Konva.Rect({
+            x: 0,
+            y: 0,
+            // x: x,
+            // y: y,
             width: width,
             height: height,
             fill: '#eee8f5',
@@ -361,9 +412,19 @@ const showTiles = (sheetLayout, machineGroup) => {
             strokeWidth: 0.1,
             opacity: 1,
         });
-        layoutAreaGroup.add(tile);
+        tileGroup.add(tile);
+        layoutAreaGroup.add(tileGroup);
+
+        if (content) {
+            tileGroup.add(content.clone({
+                rotation: sheetLayout.rotated ? 90 : 0,
+                scaleY: sheetLayout.rotated ? -1 : 1,
+            }));
+            // pressSheetGroup.add(content);
+        }
 
     }
+
 
 }
 
@@ -674,6 +735,16 @@ const calc = (input, machineIndex, content) => {
 
         input.machine = input.machines[machineIndex];
 
+        if (machineIndex > 0) {
+            input.cutSpacing = {
+                horizontal: 0,
+                vertical: 0,
+            };
+        }
+
+        console.log(input);
+
+
         fetch('/test', {
             method: 'POST',
             headers: {
@@ -843,10 +914,7 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
                 }
             }
 
-            input.zone = {
-                width: data[i].cutSheet.width,
-                height: data[i].cutSheet.height,
-            }
+            input.zone = data[i].cutSheet;
             calc(input, machineIndex + 1, newContent);
         });
         controlPanelGroup.add(selector);

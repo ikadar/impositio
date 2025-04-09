@@ -28,68 +28,88 @@
 <div>
     <p>INPUT</p>
     <textarea style="width: 100%; height: 300px" id="input">
-        {
-            "machines": [
-                {
-                    "id": "m1",
-                    "type": "t1",
-                    "grip-margin": 20,
-                    "input-dimensions": {
-                        "min": {
-                            "width": 350,
-                            "height": 250
-                        },
-                        "max": {
-                            "width": 750,
-                            "height": 530
-                        }
-                    }
-                },
-                {
-                    "id": "m1b",
-                    "type": "t1",
-                    "grip-margin": 20,
-                    "input-dimensions": {
-                        "min": {
-                            "width": 350,
-                            "height": 250
-                        },
-                        "max": {
-                            "width": 750,
-                            "height": 530
-                        }
-                    }
-                },
-                {
-                    "id": "m2",
-                    "type": "t2",
-                    "grip-margin": 30,
-                    "input-dimensions": {
-                        "min": {
-                            "width": 500,
-                            "height": 350
-                        },
-                        "max": {
-                            "width": 1020,
-                            "height": 700
-                        }
-                    }
-                }
-            ],
-            "press-sheet": {
-                "width": 1020,
-                "height": 700,
-                "grip-margin": 20
-            },
-            "zone": {
-                "width": 120,
-                "height": 85
-            },
-            "cutSpacing": {
-                "horizontal": 10,
-                "vertical": 10
-            }
+{
+  "machines": [
+    {
+      "id": "m1",
+      "type": "t1",
+      "gripMargin": 20,
+      "input-dimensions": {
+        "min": {
+          "width": 350,
+          "height": 250
+        },
+        "max": {
+          "width": 750,
+          "height": 530
         }
+      }
+    },
+    {
+      "id": "m1b",
+      "type": "t1",
+      "gripMargin": 20,
+      "input-dimensions": {
+        "min": {
+          "width": 350,
+          "height": 250
+        },
+        "max": {
+          "width": 750,
+          "height": 530
+        }
+      }
+    },
+    {
+      "id": "m2",
+      "type": "t2",
+      "gripMargin": 30,
+      "input-dimensions": {
+        "min": {
+          "width": 500,
+          "height": 350
+        },
+        "max": {
+          "width": 1020,
+          "height": 700
+        }
+      }
+    }
+  ],
+  "press-sheet": {
+    "width": 1020,
+    "height": 700,
+    "gripMargin": 20
+  },
+  "zone-A5": {
+    "width": 210,
+    "height": 148
+  },
+  "zone-A3": {
+    "width": 420,
+    "height": 297
+  },
+  "zone-A4": {
+    "width": 297,
+    "height": 210
+  },
+  "zone": {
+    "width": 120,
+    "height": 85,
+      "gripMargin": {
+      "size": 0,
+      "position": "top",
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "cutSpacing": {
+    "horizontal": 10,
+    "vertical": 10
+  }
+}
     </textarea>
     <button onclick="doCalculations()">CALC</button>
     <div id="display"></div>
