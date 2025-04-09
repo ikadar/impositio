@@ -213,12 +213,10 @@ class TestController extends AbstractController
         $layoutArea = [
             "width" => $totalWidth,
             "height" => $totalHeight,
-//            "totalHeight" => $totalHeight,
-//            "unusedHeight" => $unusedHeight,
         ];
 
-        $layoutArea["x"] = ($unusedWidth + ($cutSheet["gripMargin"]["position"] === "left" ? $cutSheet["gripMargin"]["size"] : 0)) / 2;
-        $layoutArea["y"] = ($unusedHeight + ($cutSheet["gripMargin"]["position"] === "top" ? $cutSheet["gripMargin"]["size"] : 0)) / 2;
+        $layoutArea["x"] = ($unusedWidth) / 2;
+        $layoutArea["y"] = ($unusedHeight) / 2;
 
         return $layoutArea;
     }
@@ -236,12 +234,13 @@ class TestController extends AbstractController
         $bothOnTop = ($zoneGripMargin["position"] === "top" && $cutSheetGripMarginPosition === "top");
         $bothOnLeft = ($zoneGripMargin["position"] === "left" && $cutSheetGripMarginPosition === "left");
 
-        if ($bothOnTop || $bothOnLeft) {
-            $cutSheet["gripMargin"]["size"] = 0;
+        if ($bothOnLeft) {
+            $totalLayoutWidth -= $zoneGripMargin["size"];
         }
 
-        $cutSheet["bothOnLeft"] = $bothOnLeft;
-        $cutSheet["bothOnTop"] = $bothOnTop;
+        if ($bothOnTop) {
+            $totalLayoutHeight -= $zoneGripMargin["size"];
+        }
 
         $cutSheet["width"] = $totalLayoutWidth;
         $cutSheet["height"] = $totalLayoutHeight;
