@@ -22,40 +22,45 @@ class TestController extends AbstractController
         $maxSheet = $data["machine"]["input-dimensions"]["max"];
         $minSheet = $data["machine"]["input-dimensions"]["min"];
 
+        $zone = $data["zone"];
+        $zoneWithoutGripMargin = $data["zone"];
+        $zoneWithoutGripMargin["width"] = $zoneWithoutGripMargin["width"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "left" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
+        $zoneWithoutGripMargin["height"] = $zoneWithoutGripMargin["height"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "top" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
+
         $gridFittings = [];
 
         // --- UNROTATED
-        $layouts = $this->calculateExhaustiveGridFitting($boundingArea, $data["zone"], $data["cutSpacing"], false);
-        $zoneGripMargin = $data["zone"]["gripMargin"];
+        $exhaustiveGridFittings = $this->calculateExhaustiveGridFitting($boundingArea, $zone, $data["cutSpacing"], false);
+        $zoneGripMargin = $zone["gripMargin"];
 
-        foreach ($layouts as $gridFitting) {
+        foreach ($exhaustiveGridFittings as $placedGridFitting) {
 
-            $gridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["gripMargin"], $gridFitting, $zoneGripMargin);
+            $placedGridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["gripMargin"], $placedGridFitting, $zoneGripMargin);
 
-            if ($this->layoutExceedsMaxSheet($gridFitting, $maxSheet)) {
+            if ($this->layoutExceedsMaxSheet($placedGridFitting, $maxSheet)) {
                 continue;
             }
 
-            $gridFittings[] = $gridFitting;
+            $gridFittings[] = $placedGridFitting;
         }
 
         // --- ROTATED
 
-        $zoneGripMargin = $data["zone"]["gripMargin"];
+        $zoneGripMargin = $zone["gripMargin"];
         $zoneGripMargin["position"] = $zoneGripMargin["position"] === "top" ? "left" : "top";
 
-        $rotatedZone = ["width" => $data["zone"]["height"], "height" => $data["zone"]["width"]];
-        $layouts = $this->calculateExhaustiveGridFitting($boundingArea, $rotatedZone, $data["cutSpacing"], true);
+        $rotatedZone = ["width" => $zone["height"], "height" => $zone["width"]];
+        $exhaustiveGridFittings = $this->calculateExhaustiveGridFitting($boundingArea, $rotatedZone, $data["cutSpacing"], true);
 
-        foreach ($layouts as $gridFitting) {
+        foreach ($exhaustiveGridFittings as $placedGridFitting) {
 
-            $gridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["gripMargin"], $gridFitting, $zoneGripMargin);
+            $placedGridFitting = $this->placeOnSheet($data["press-sheet"], $maxSheet, $minSheet, $data["machine"]["gripMargin"], $placedGridFitting, $zoneGripMargin);
 
-            if ($this->layoutExceedsMaxSheet($gridFitting, $maxSheet)) {
+            if ($this->layoutExceedsMaxSheet($placedGridFitting, $maxSheet)) {
                 continue;
             }
 
-            $gridFittings[] = $gridFitting;
+            $gridFittings[] = $placedGridFitting;
         }
 
 
@@ -85,7 +90,6 @@ class TestController extends AbstractController
     {
         $maxCols = floor(($boundingArea["width"]) / ($tileRect["width"] + (2 * $cutSpacing["horizontal"])));
         $maxRows = floor(($boundingArea["height"]) / ($tileRect["height"] + (2 * $cutSpacing["vertical"])));
-//        dump($maxCols, $maxRows);
 
         $gridFittings = [];
         for ($rowIndex = 1; $rowIndex <= $maxRows; $rowIndex++) {
@@ -159,12 +163,14 @@ class TestController extends AbstractController
 
         $layout["maxSheet"] = $this->calculateMaxSheet($pressSheet, $maxSheet);
         $layout["minSheet"] = $this->calculateMinSheet($pressSheet, $minSheet);
-        $layout["cutSheet"] = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zoneGripMargin);
 
-        $layout["layoutArea"] = $this->calculateLayoutArea($pressSheet, $layout["cutSheet"], $totalWidth, $totalHeight);
+        $layout["cutSheet"] = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zoneGripMargin);
+        $layout["layoutArea"] = $this->calculateLayoutArea($layout, $zoneGripMargin);
+//        $layout["layoutArea"] = $this->calculateLayoutArea($pressSheet, $layout["cutSheet"], $totalWidth, $totalHeight);
 
         $layout["firstTileWithCutBuffer"] = $this->calculateFirstTileWithCutBuffer($firstTile);
         $layout["firstTile"] = $this->calculateFirstTile($firstTile);
+
         $layout["trimLines"] = $this->calculateTrimLines($pressSheet, $layout["minSheet"], $layout["cutSheet"]);
 
         return $layout;
@@ -205,18 +211,36 @@ class TestController extends AbstractController
         return $maxSheet;
     }
 
-    public function calculateLayoutArea($pressSheet, $cutSheet, $totalWidth, $totalHeight)
+    public function calculateLayoutArea($layout, $zoneGripMargin)
     {
-        $unusedWidth = $pressSheet["width"] - $totalWidth;
-        $unusedHeight = $pressSheet["height"] - $totalHeight;
-
-        $layoutArea = [
-            "width" => $totalWidth,
-            "height" => $totalHeight,
+        // take the content's dimensions including inner (content's) grip margins
+        $layoutWithInnerGripMargins = [
+            "width" => $layout["totalWidth"],
+            "height" => $layout["totalHeight"],
         ];
 
-        $layoutArea["x"] = ($unusedWidth) / 2;
-        $layoutArea["y"] = ($unusedHeight) / 2;
+        // also take the content's dimensions excluding inner (content's) grip margins
+        $layoutWithoutInnerGripMargins = [
+            "width" => $layoutWithInnerGripMargins["width"] - $zoneGripMargin["size"],
+            "height" => $layoutWithInnerGripMargins["height"] - $zoneGripMargin["size"],
+        ];
+
+        $bothOnLeft = ($zoneGripMargin["position"] === "left" && $layout["cutSheet"]["gripMargin"]["position"] === "left");
+        $bothOnTop = ($zoneGripMargin["position"] === "top" && $layout["cutSheet"]["gripMargin"]["position"] === "top");
+
+        // center the layout on the usable area of the cut sheet
+        $layoutArea = $this->centerOn($layout["cutSheet"]["usableArea"], [
+            "width" => $bothOnLeft ? $layoutWithoutInnerGripMargins["width"] : $layoutWithInnerGripMargins["width"],
+            "height" => $bothOnTop ? $layoutWithoutInnerGripMargins["height"] : $layoutWithInnerGripMargins["height"],
+        ]);
+
+        if ($bothOnLeft) {
+            $layoutArea["x"] -= $zoneGripMargin["size"];
+        }
+
+        if ($bothOnTop) {
+            $layoutArea["y"] -= $zoneGripMargin["size"];
+        }
 
         return $layoutArea;
     }
@@ -229,42 +253,70 @@ class TestController extends AbstractController
             ],
         ];
 
+        // precalculate $cutSheetGripMarginPosition
         $cutSheetGripMarginPosition = max($totalLayoutWidth, $minSheet["width"]) >= max($totalLayoutHeight, $minSheet["height"]) ? "top" : "left";
 
         $bothOnTop = ($zoneGripMargin["position"] === "top" && $cutSheetGripMarginPosition === "top");
         $bothOnLeft = ($zoneGripMargin["position"] === "left" && $cutSheetGripMarginPosition === "left");
 
-        if ($bothOnLeft) {
-            $totalLayoutWidth -= $zoneGripMargin["size"];
+        if ($cutSheetGripMarginPosition === "left" && !$bothOnLeft) {
+            $totalLayoutWidth += $zoneGripMargin["size"];
         }
 
-        if ($bothOnTop) {
-            $totalLayoutHeight -= $zoneGripMargin["size"];
+        if ($cutSheetGripMarginPosition === "top" && !$bothOnTop) {
+            $totalLayoutHeight += $zoneGripMargin["size"];
         }
 
+        // calculate cut sheet size
         $cutSheet["width"] = $totalLayoutWidth;
         $cutSheet["height"] = $totalLayoutHeight;
 
         $cutSheet["width"] = max($cutSheet["width"], $minSheet["width"]);
         $cutSheet["height"] = max($cutSheet["height"], $minSheet["height"]);
 
+        // center cut sheet on the press sheet
+        $cutSheet = $this->center($pressSheet, $cutSheet);
+
+        // determine grip margin position
         $cutSheet["gripMargin"]["position"] = $cutSheet["width"] >= $cutSheet["height"] ? "top" : "left";
 
-        if ($cutSheet["gripMargin"]["position"] === "left") {
+        if (!$bothOnLeft && $cutSheet["gripMargin"]["position"] === "left" && ($cutSheet["width"] > $minSheet["width"])) {
             $cutSheet["width"] += $cutSheet["gripMargin"]["size"];
         }
 
-        if ($cutSheet["gripMargin"]["position"] === "top") {
+        if (!$bothOnTop && $cutSheet["gripMargin"]["position"] === "top" && ($cutSheet["height"] > $minSheet["height"])) {
             $cutSheet["height"] += $cutSheet["gripMargin"]["size"];
         }
 
-        $cutSheet["x"] = ($pressSheet["width"] - $cutSheet["width"]) / 2;
-        $cutSheet["y"] = ($pressSheet["height"] - $cutSheet["height"]) / 2;
 
+        // calculate grip margin position and dimensions
         $cutSheet["gripMargin"]["x"] = $cutSheet["x"];
         $cutSheet["gripMargin"]["y"] = $cutSheet["y"];
         $cutSheet["gripMargin"]["width"] = $cutSheet["gripMargin"]["position"] === "left" ? $cutSheet["gripMargin"]["size"] : $cutSheet["width"];
         $cutSheet["gripMargin"]["height"] = $cutSheet["gripMargin"]["position"] === "top" ? $cutSheet["gripMargin"]["size"] : $cutSheet["height"];
+
+
+
+
+
+        // calculate cutSheet's usable area - START
+        $cutSheet["usableArea"] = [
+            "x" => $cutSheet["x"],
+            "y" => $cutSheet["y"],
+            "width" => $cutSheet["width"],
+            "height" => $cutSheet["height"],
+        ];
+
+        // calculate sizes without the grip margin
+        if ($cutSheet["gripMargin"]["position"] === "left") {
+            $cutSheet["usableArea"]["x"] += $cutSheet["gripMargin"]["size"];
+            $cutSheet["usableArea"]["width"] -= $cutSheet["gripMargin"]["size"];
+        }
+        if ($cutSheet["gripMargin"]["position"] === "top") {
+            $cutSheet["usableArea"]["y"] += $cutSheet["gripMargin"]["size"];
+            $cutSheet["usableArea"]["height"] -= $cutSheet["gripMargin"]["size"];
+        }
+        // calculate cutSheet's usable area - END
 
         return $cutSheet;
 
@@ -293,5 +345,32 @@ class TestController extends AbstractController
                 "length" => $pressSheet["height"],
             ]
         ];
+    }
+
+    public function center($container, $area)
+    {
+        $unusedWidth = $container["width"] - $area["width"];
+        $unusedHeight = $container["height"] - $area["height"];
+
+        $area["x"] = $unusedWidth / 2;
+        $area["y"] = $unusedHeight / 2;
+
+        return $area;
+    }
+
+    public function placeOnto($container, $area)
+    {
+        $area["x"] = $container["x"] + $area["x"];
+        $area["y"] = $container["y"] + $area["y"];
+
+        return $area;
+    }
+
+    public function centerOn($container, $area)
+    {
+        $area = $this->center($container, $area);
+        $area = $this->placeOnto($container, $area);
+
+        return $area;
     }
 }
