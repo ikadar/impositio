@@ -219,10 +219,12 @@ class TestController extends AbstractController
             "height" => $layout["totalHeight"],
         ];
 
+        $gripMarginOverlap = max(0, ($zoneGripMargin["size"] - $layout["cutSheet"]["gripMargin"]["size"]));
+
         // also take the content's dimensions excluding inner (content's) grip margins
         $layoutWithoutInnerGripMargins = [
-            "width" => $layoutWithInnerGripMargins["width"] - $zoneGripMargin["size"],
-            "height" => $layoutWithInnerGripMargins["height"] - $zoneGripMargin["size"],
+            "width" => $layoutWithInnerGripMargins["width"] - $gripMarginOverlap,
+            "height" => $layoutWithInnerGripMargins["height"] - $gripMarginOverlap,
         ];
 
         $bothOnLeft = ($zoneGripMargin["position"] === "left" && $layout["cutSheet"]["gripMargin"]["position"] === "left");
@@ -235,11 +237,11 @@ class TestController extends AbstractController
         ]);
 
         if ($bothOnLeft) {
-            $layoutArea["x"] -= $zoneGripMargin["size"];
+            $layoutArea["x"] -= $gripMarginOverlap;
         }
 
         if ($bothOnTop) {
-            $layoutArea["y"] -= $zoneGripMargin["size"];
+            $layoutArea["y"] -= $gripMarginOverlap;
         }
 
         return $layoutArea;
