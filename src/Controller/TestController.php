@@ -23,9 +23,9 @@ class TestController extends AbstractController
         $minSheet = $data["machine"]["input-dimensions"]["min"];
 
         $zone = $data["zone"];
-        $zoneWithoutGripMargin = $data["zone"];
-        $zoneWithoutGripMargin["width"] = $zoneWithoutGripMargin["width"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "left" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
-        $zoneWithoutGripMargin["height"] = $zoneWithoutGripMargin["height"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "top" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
+//        $zoneWithoutGripMargin = $data["zone"];
+//        $zoneWithoutGripMargin["width"] = $zoneWithoutGripMargin["width"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "left" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
+//        $zoneWithoutGripMargin["height"] = $zoneWithoutGripMargin["height"] - ($zoneWithoutGripMargin["gripMargin"]["position"] === "top" ? $zoneWithoutGripMargin["gripMargin"]["size"] : 0);
 
         $gridFittings = [];
 
