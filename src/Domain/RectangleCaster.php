@@ -11,7 +11,7 @@ class RectangleCaster
     {
         return [
             "id" => $rect->getId(),
-            "position" => sprintf("%d; %d", $rect->getPosition()->getX()->getValue(), $rect->getPosition()->getX()->getValue()),
+            "position" => sprintf("%d; %d", $rect->getPosition()->getX()->getValue(), $rect->getPosition()->getY()->getValue()),
             "dimensions" => sprintf("%d x %d", $rect->getDimensions()->getWidth(), $rect->getDimensions()->getHeight()),
             "children" => $rect->getChildren(),
         ];
