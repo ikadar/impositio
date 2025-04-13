@@ -58,6 +58,7 @@ class Rectangle extends PositionedRectangle implements RectangleInterface
 
     public function getChildById(string $id): PositionedRectangleInterface
     {
+        $id = sprintf("[%s]", implode("][", explode(".", $id)));
         return $this->geometryFactory->getPropertyAccessor()->getValue($this->getTree(), "{$id}[_]");
     }
 
