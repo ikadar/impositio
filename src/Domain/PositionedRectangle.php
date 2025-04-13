@@ -27,17 +27,6 @@ class PositionedRectangle extends AbstractRectangle implements PositionedRectang
         return $this->dimensions;
     }
 
-    public function getPosition(): ?PositionInterface
-    {
-        return $this->position;
-    }
-
-    public function setPosition(?PositionInterface $position): static
-    {
-        $this->position = $position;
-        return $this;
-    }
-
     public function resetPosition(): static
     {
         $this->position = new Position(new Coordinate(), new Coordinate());
@@ -75,6 +64,38 @@ class PositionedRectangle extends AbstractRectangle implements PositionedRectang
     public function getParent(): ?RectangleInterface
     {
         return $this->parent;
+    }
+
+    public function getPosition(): ?PositionInterface
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?PositionInterface $position): static
+    {
+        $this->position = $position;
+        return $this;
+    }
+
+    public function getAbsolutePosition(): ?PositionInterface
+    {
+        $absolutePosition = $this->geometryFactory->copyPosition($this->getPosition());
+
+        if ($this->getParent()) {
+            $absolutePosition->offset($this->getParent()->getAbsolutePosition());
+        }
+
+        return $absolutePosition;
+    }
+
+    public function setAbsolutePosition(?PositionInterface $position): static
+    {
+        $parentAbsolutePosition = $this->getParent()->getAbsolutePosition();
+        $this->setPosition($this->geometryFactory->newPosition(
+            $position->getX()->getValue() - $parentAbsolutePosition->getX()->getValue(),
+            $position->getY()->getValue() - $parentAbsolutePosition->getY()->getValue()
+        ));
+        return $this;
     }
 
 

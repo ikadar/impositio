@@ -16,6 +16,10 @@ interface PositionedRectangleInterface extends AbstractRectangleInterface
 
     public function setPosition(?PositionInterface $position): static;
 
+    public function getAbsolutePosition(): ?PositionInterface;
+
+    public function setAbsolutePosition(?PositionInterface $position): static;
+
     public function resetPosition(): static;
 
     public function offsetByPosition(Position $offset): static;
