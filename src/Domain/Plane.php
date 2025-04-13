@@ -54,6 +54,7 @@ class Plane implements PlaneInterface
 
     public function getChildById(string $id): RectangleInterface
     {
+        $id = sprintf("[%s]", implode("][", explode(".", $id)));
         return $this->propertyAccessor->getValue($this->getTree(), "{$id}[_]");
     }
 
