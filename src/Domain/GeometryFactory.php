@@ -43,6 +43,15 @@ class GeometryFactory implements GeometryFactoryInterface
         return (new Position(new Coordinate($x), new Coordinate($y)));
     }
 
+    public function copyPosition(PositionInterface $position): PositionInterface
+    {
+        return $this->newPosition(
+            $position->getX()->getValue(),
+            $position->getY()->getValue(),
+        );
+
+    }
+
     public function getPropertyAccessor(): PropertyAccessorInterface
     {
         return $this->propertyAccessor;
