@@ -11,8 +11,9 @@ abstract class AbstractRectangle implements AbstractRectangleInterface
     protected string $id;
 
     public function __construct(
+        protected DimensionsInterface $dimensions,
         ?RectangleId $id = null,
-        protected ?DimensionsInterface $dimensions = null
+//        protected ?DimensionsInterface $dimensions = null
     )
     {
         $this->setId($id);

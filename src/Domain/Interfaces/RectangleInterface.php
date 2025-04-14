@@ -18,4 +18,6 @@ interface RectangleInterface extends AbstractRectangleInterface, PositionedRecta
 
     public function dump(): ?string;
 
+    public function toJson(): ?string;
+
 }

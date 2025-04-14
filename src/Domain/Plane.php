@@ -67,4 +67,9 @@ class Plane implements PlaneInterface
     {
         return $this->getRectangle()->dump();
     }
+
+    public function toJson(): ?string
+    {
+        return $this->getRectangle()->toJson();
+    }
 }

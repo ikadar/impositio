@@ -14,4 +14,6 @@ interface PlaneInterface
     public function getChildById(string $id): RectangleInterface;
 
     public function dump(): ?string;
+
+    public function toJson(): ?string;
 }

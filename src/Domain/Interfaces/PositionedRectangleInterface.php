@@ -2,13 +2,14 @@
 
 namespace App\Domain\Interfaces;
 
+use App\Domain\AlignmentMode;
+use App\Domain\AlignmentPoint;
+use App\Domain\Direction;
 use App\Domain\Position;
 
 interface PositionedRectangleInterface extends AbstractRectangleInterface
 {
     public function getDimensions(): ?DimensionsInterface;
-
-    public function setDimensions(?DimensionsInterface $dimensions): static;
 
     public function moveTo(PositionInterface $position): static;
 
@@ -31,4 +32,28 @@ interface PositionedRectangleInterface extends AbstractRectangleInterface
     public function setParent(?RectangleInterface $parent): static;
     public function getParent(): ?RectangleInterface;
 
+    public function getOffset(PositionInterface $to): ?PositionInterface;
+
+    public function alignTo(RectangleInterface $to, AlignmentMode $alignmentMode, ?RectangleInterface $what = null): static;
+
+    public function resize(DimensionsInterface $newDimensions, Direction $direction): self;
+
+    public function getLeft(): float;
+    public function getCenter(): float;
+    public function getRight(): float;
+    public function getTop(): float;
+    public function getMiddle(): float;
+    public function getBottom(): float;
+    public function getAbsoluteLeft(): float;
+    public function getAbsoluteCenter(): float;
+    public function getAbsoluteRight(): float;
+    public function getAbsoluteTop(): float;
+    public function getAbsoluteMiddle(): float;
+    public function getAbsoluteBottom(): float;
+
+    public function stretchX($left, $right): static;
+    public function stretchY($top, $bottom): static;
+    public function stretchXTo(PositionedRectangleInterface $rectangle, ?float $gap = 0): static;
+    public function stretchYTo(PositionedRectangleInterface $rectangle, ?float $gap = 0): static;
+    public function stretchTo(PositionedRectangleInterface $rectangle, ?float $gap = 0): static;
 }

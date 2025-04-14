@@ -13,8 +13,8 @@ class Rectangle extends PositionedRectangle implements RectangleInterface
     protected array $children = [];
 
     public function __construct(
-        ?PositionInterface $position = null,
-        ?DimensionsInterface $dimensions = null,
+        PositionInterface $position,
+        DimensionsInterface $dimensions,
         GeometryFactory $geometryFactory,
         ?RectangleId $id,
     )
@@ -68,9 +68,34 @@ class Rectangle extends PositionedRectangle implements RectangleInterface
         return $this;
     }
 
+//    public function alignTo(RectangleInterface $to, ?RectangleInterface $relativeTo = null): static
+//    {
+//        if ($relativeTo === null) {
+//            $relativeTo = $this;
+//        }
+//
+//        $offset = $relativeTo->getOffset($to);
+//        dump($offset);
+//
+////        dump($to->getAbsolutePosition());
+//        $this->setAbsolutePosition($to->getAbsolutePosition());
+//
+//        return $this;
+//    }
+
     public function dump(): ?string // move to Rectangle
     {
         return $this->geometryFactory->getDumper()->d($this);
+    }
+
+    public function toJson(): ?string
+    {
+        return $this->geometryFactory->getSerializer()->serialize(RectangleView::fromEntity($this), "json", [
+            'circular_reference_handler' => function ($object) {
+                return $object->getId(); // or `spl_object_hash($object)` if there's no ID
+            },
+            'json_encode_options' => JSON_PRETTY_PRINT,
+        ]);
     }
 
 

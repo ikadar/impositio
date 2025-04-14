@@ -7,12 +7,15 @@ use App\Domain\Interfaces\PositionedRectangleInterface;
 use App\Domain\Interfaces\GeometryFactoryInterface;
 use App\Domain\Interfaces\PositionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class GeometryFactory implements GeometryFactoryInterface
 {
     public function __construct(
         private PropertyAccessorInterface $propertyAccessor,
         private MyCliDumper               $dumper,
+        private SerializerInterface       $serializer,
+
     )
     {
     }
@@ -62,4 +65,11 @@ class GeometryFactory implements GeometryFactoryInterface
         return $this->dumper;
     }
 
+    /**
+     * @return SerializerInterface
+     */
+    public function getSerializer(): SerializerInterface
+    {
+        return $this->serializer;
+    }
 }
