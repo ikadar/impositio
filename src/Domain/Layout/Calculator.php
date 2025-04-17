@@ -21,8 +21,33 @@ class Calculator
     {
     }
 
-    public function calculateGridFittings(MachineInterface $machine, RectangleInterface $boundingArea, InputSheetInterface $zone, CutSpacing $cutSpacing, RectangleInterface $pressSheet, RectangleInterface $maxSheet, RectangleInterface $minSheet): array
+    public function calculateGridFittings(
+        MachineInterface $machine,
+        RectangleInterface $pressSheet,
+        InputSheetInterface $zone,
+    ): array
     {
+
+        // todo: max(zoneSize, minSheet)
+        $minSheet = $this->printFactory->newRectangle(
+            "maxSheet",
+            0,
+            0,
+            $machine->getMinSheetDimensions()->getWidth(),
+            $machine->getMinSheetDimensions()->getHeight()
+        );
+        $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
+        // todo: min(pressSheet, maxSheet)
+        $maxSheet = $this->printFactory->newRectangle(
+            "maxSheet",
+            0,
+            0,
+            $machine->getMaxSheetDimensions()->getWidth(),
+            $machine->getMaxSheetDimensions()->getHeight()
+        );
+        $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
         $rotatedZone = $this->printFactory->newInputSheet(
             "rotatedZone",
             0,
@@ -33,16 +58,37 @@ class Calculator
         $rotatedZone->setGripMarginSize($zone->getGripMarginSize());
 
         return array_merge(
-            $this->calculateUnRotatedGridFittings($machine, $boundingArea, $zone, $pressSheet, $cutSpacing, $maxSheet, $minSheet, false),
-            $this->calculateUnRotatedGridFittings($machine, $boundingArea, $rotatedZone, $pressSheet, $cutSpacing, $maxSheet, $minSheet, true)
+            $this->calculateUnRotatedGridFittings(
+                $machine,
+                $zone,
+                $pressSheet,
+                $maxSheet,
+                $minSheet,
+                false
+            ),
+            $this->calculateUnRotatedGridFittings(
+                $machine,
+                $rotatedZone,
+                $pressSheet,
+                $maxSheet,
+                $minSheet,
+                true
+            )
         );
     }
 
-    protected function calculateUnRotatedGridFittings(Machine $machine, RectangleInterface $boundingArea, InputSheetInterface $zone, RectangleInterface $pressSheet, $spacing, RectangleInterface $maxSheet, RectangleInterface $minSheet, $rotated): array
+    protected function calculateUnRotatedGridFittings(
+        Machine $machine,
+        InputSheetInterface $zone,
+        RectangleInterface $pressSheet,
+        RectangleInterface $maxSheet,
+        RectangleInterface $minSheet,
+        $rotated
+    ): array
     {
         $gridFittings = [];
 
-        $exhaustiveGridFittings = $this->packer->calculateExhaustiveGridFitting($boundingArea, $zone, $spacing, $rotated);
+        $exhaustiveGridFittings = $this->packer->calculateExhaustiveGridFitting($maxSheet, $zone, $rotated);
 
         foreach ($exhaustiveGridFittings as $layout) {
 
@@ -58,6 +104,7 @@ class Calculator
         return $gridFittings;
     }
 
+    // -----------------
 
     public function calculateTrimLines(RectangleInterface $pressSheet, RectangleInterface $minSheet, RectangleInterface $cutSheet )
     {
@@ -85,7 +132,15 @@ class Calculator
         ];
     }
 
-    public function placeOnSheet(RectangleInterface $pressSheet, RectangleInterface $minSheet, $gripMarginSize, GridFittingInterface $layout, $zone): GridFittingInterface
+    // ------------------
+
+    public function placeOnSheet(
+        RectangleInterface $pressSheet,
+        RectangleInterface $minSheet,
+        $gripMarginSize,
+        GridFittingInterface $layout, ////
+        InputSheetInterface $zone ////
+    ): GridFittingInterface
     {
         $totalWidth = $layout->getTotalWidth();
         $totalHeight = $layout->getTotalHeight();

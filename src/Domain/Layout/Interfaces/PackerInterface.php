@@ -7,7 +7,7 @@ use App\Domain\Layout\CutSpacing;
 
 interface PackerInterface
 {
-    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, CutSpacing $spacing, $rotated): array;
+    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, bool $rotated): array;
 
     public function calculateTiles(int $cols, int $rows, RectangleInterface $tileRect, CutSpacing $cutSpacing): array;
 }

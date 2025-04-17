@@ -14,8 +14,10 @@ class Packer implements Interfaces\PackerInterface
     {
     }
 
-    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, CutSpacing $spacing, $rotated): array
+    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, $rotated): array
     {
+        $spacing = $this->printFactory->getCutSpacing();
+
         $maxCols = floor(($boundingArea->getWidth()) / ($tileRect->getWidth() + (2 * $spacing->getHorizontalSpacing())));
         $maxRows = floor(($boundingArea->getHeight()) / ($tileRect->getHeight() + (2 * $spacing->getVerticalSpacing())));
 

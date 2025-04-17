@@ -2,8 +2,10 @@
 
 namespace App\Domain\Layout;
 
+use App\Domain\Geometry\AlignmentMode;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
+use App\Domain\Sheet\PrintFactory;
 
 class GridFitting implements Interfaces\GridFittingInterface
 {
@@ -19,6 +21,7 @@ class GridFitting implements Interfaces\GridFittingInterface
         protected int $rows,
         protected float $totalWidth,
         protected float $totalHeight,
+        protected PrintFactory $printFactory,
     )
     {
     }
@@ -133,8 +136,14 @@ class GridFitting implements Interfaces\GridFittingInterface
         return $this;
     }
 
-    public function toArray($pressSheet, $minSheet, $maxSheet)
+    public function toArray($machine, $pressSheet): array
     {
+        $minSheet = $machine->getMinSheetRectangle();
+        $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
+        $maxSheet = $machine->getMaxSheetRectangle();
+        $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
         $array = [
             "cols" => $this->getCols(),
             "rows" => $this->getRows(),

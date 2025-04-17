@@ -7,6 +7,7 @@ use App\Domain\Geometry\AlignmentMode;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Layout\Calculator;
 use App\Domain\Layout\CutSpacing;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\PrintFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,7 +40,8 @@ class TestController extends AbstractController
             new Dimensions(
                 $data["machine"]["input-dimensions"]["max"]["width"],
                 $data["machine"]["input-dimensions"]["max"]["height"]
-            )
+            ),
+            $this->printFactory
         );
 
         $pressSheet = $this->printFactory->newRectangle(
@@ -50,24 +52,6 @@ class TestController extends AbstractController
             $data["press-sheet"]["height"]
         );
 
-        $minSheet = $this->printFactory->newRectangle(
-            "maxSheet",
-            0,
-            0,
-            $machine->getMinSheetDimensions()->getWidth(),
-            $machine->getMinSheetDimensions()->getHeight()
-        );
-        $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
-
-        $maxSheet = $this->printFactory->newRectangle(
-            "maxSheet",
-            0,
-            0,
-            $machine->getMaxSheetDimensions()->getWidth(),
-            $machine->getMaxSheetDimensions()->getHeight()
-        );
-        $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
-
         $zone = $this->printFactory->newInputSheet(
             "zone",
             0,
@@ -77,24 +61,18 @@ class TestController extends AbstractController
         );
         $zone->setGripMarginSize($data["zone"]["gripMargin"]["size"]);
 
-        $boundingArea = $this->printFactory->newRectangle(
-            "boundingArea",
-            0,
-            0,
-            $machine->getMaxSheetDimensions()->getWidth(),
-            $machine->getMaxSheetDimensions()->getHeight()
+        $gridFittings = $this->layoutCalculator->calculateGridFittings(
+            $machine,
+            $pressSheet,
+            $zone,
         );
-
-        $cutSpacing = new CutSpacing(
-            $data["cutSpacing"]["horizontal"],
-            $data["cutSpacing"]["vertical"],
-        );
-
-        $gridFittings = $this->layoutCalculator->calculateGridFittings($machine, $boundingArea, $zone, $cutSpacing, $pressSheet, $maxSheet, $minSheet);
 
         $gf = [];
-        foreach ($gridFittings as $l1 => $gridFitting) {
-            $gf[] = $gridFitting->toArray($pressSheet, $minSheet, $maxSheet);
+        /**
+         * @var GridFittingInterface $gridFitting
+         */
+        foreach ($gridFittings as $gridFitting) {
+            $gf[] = $gridFitting->toArray($machine, $pressSheet);
         }
 
         return new JsonResponse(

@@ -99,6 +99,16 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
             $rowIndex,
             ($tileRect->getWidth() + (2 * $spacing->getVerticalSpacing())) * $colIndex,
             ($tileRect->getHeight() + (2 * $spacing->getHorizontalSpacing())) * $rowIndex,
+            $this
+        );
+    }
+
+    public function getCutSpacing(): CutSpacing
+    {
+        // todo: move to config
+        return  new CutSpacing(
+            10,
+            10,
         );
     }
 }
