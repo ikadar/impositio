@@ -2,29 +2,18 @@
 
 namespace App\Command;
 
-use App\Domain\AlignmentMode;
-use App\Domain\AlignmentPoint;
-use App\Domain\Coordinate;
-use App\Domain\Dimensions;
-use App\Domain\Interfaces\GeometryFactoryInterface;
-use App\Domain\MyCliDumper;
-use App\Domain\Plane;
-use App\Domain\PlaneCaster;
-use App\Domain\Position;
-use App\Domain\PositionedRectangle;
-use App\Domain\AbstractRectangle;
-use App\Domain\Rectangle;
-use App\Domain\RectangleCaster;
+use App\Domain\Geometry\AlignmentMode;
+use App\Domain\Geometry\Interfaces\GeometryFactoryInterface;
+use App\Domain\Geometry\MyCliDumper;
+use App\Domain\Geometry\Plane;
+use App\Domain\Sheet\Interfaces\PrintFactoryInterface;
+use App\Domain\Sheet\PrintFactory;
 use App\Kernel;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
-use Symfony\Component\VarDumper\Cloner\VarCloner;
-use Symfony\Component\VarDumper\Dumper\CliDumper;
-use Symfony\Component\VarDumper\Dumper\HtmlDumper;
-use Symfony\Component\VarDumper\VarDumper;
 
 #[AsCommand(
     name: 'app:test',
@@ -33,13 +22,13 @@ use Symfony\Component\VarDumper\VarDumper;
 class Test01 extends Command
 {
     private Kernel $kernel;
-    private GeometryFactoryInterface $geometryFactory;
+    private PrintFactory $printFactory;
     private Plane $plane;
     private PropertyAccessorInterface $propertyAccessor;
 
     public function __construct(
         Kernel                   $kernel,
-        GeometryFactoryInterface $geometryFactory,
+        PrintFactory             $printFactory,
         Plane                    $plane,
         PropertyAccessorInterface $propertyAccessor,
         MyCliDumper              $dumper,
@@ -49,7 +38,7 @@ class Test01 extends Command
         parent::__construct($name);
         $this->plane = $plane;
         $this->plane->setId("plane");
-        $this->geometryFactory = $geometryFactory;
+        $this->printFactory = $printFactory;
         $this->kernel = $kernel;
         $this->propertyAccessor = $propertyAccessor;
         $this->dumper = $dumper;
@@ -57,6 +46,13 @@ class Test01 extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+
+        $sheet = $this->printFactory->newInputSheet("inputSheet", 0, 0, 400, 350);
+        $sheet->setGripMarginSize(20);
+
+        dump($sheet->toJson());
+
+        die();
 
         $r1 = $this->geometryFactory->newRectangle("r1", 0, 0, 350, 350);
 
