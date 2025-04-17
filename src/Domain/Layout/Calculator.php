@@ -6,6 +6,7 @@ use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Geometry\AlignmentMode;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\PackerInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -84,15 +85,15 @@ class Calculator
         ];
     }
 
-    public function placeOnSheet(RectangleInterface $pressSheet, RectangleInterface $minSheet, $gripMarginSize, $layout, $zone): array
+    public function placeOnSheet(RectangleInterface $pressSheet, RectangleInterface $minSheet, $gripMarginSize, GridFittingInterface $layout, $zone): GridFittingInterface
     {
-        $totalWidth = $layout["totalWidth"];
-        $totalHeight = $layout["totalHeight"];
+        $totalWidth = $layout->getTotalWidth();
+        $totalHeight = $layout->getTotalHeight();
 
         $cutSheet = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zone);
-        $layout["cutSheet"] = $cutSheet;
-        $layout["layoutArea"] = $this->calculateLayoutArea($totalWidth, $totalHeight, $cutSheet, $zone);
-        $layout["trimLines"] = $this->calculateTrimLines($pressSheet, $minSheet, $cutSheet);
+        $layout->setCutSheet($cutSheet);
+        $layout->setLayoutArea($this->calculateLayoutArea($totalWidth, $totalHeight, $cutSheet, $zone));
+        $layout->setTrimLines($this->calculateTrimLines($pressSheet, $minSheet, $cutSheet));
 
         return $layout;
     }
@@ -156,19 +157,19 @@ class Calculator
 
     }
 
-    public function layoutExceedsMaxSheet($layout, RectangleInterface $maxSheet): bool
+    public function layoutExceedsMaxSheet(GridFittingInterface $layout, RectangleInterface $maxSheet): bool
     {
         return
             (
-                (strtolower($layout["cutSheet"]->getGripMarginPosition()->name) === "left")
+                (strtolower($layout->getCutSheet()->getGripMarginPosition()->name) === "left")
                 &&
-                ($layout["totalWidth"] + $layout["cutSheet"]->getChildById("gripMargin")->getWidth() > ($maxSheet->getWidth()))
+                ($layout->getTotalWidth() + $layout->getCutSheet()->getChildById("gripMargin")->getWidth() > ($maxSheet->getWidth()))
             )
             ||
             (
-                (strtolower($layout["cutSheet"]->getGripMarginPosition()->name) === "top")
+                (strtolower($layout->getCutSheet()->getGripMarginPosition()->name) === "top")
                 &&
-                ($layout["totalHeight"] + $layout["cutSheet"]->getChildById("gripMargin")->getHeight()  > ($maxSheet->getHeight()))
+                ($layout->getTotalHeight() + $layout->getCutSheet()->getChildById("gripMargin")->getHeight()  > ($maxSheet->getHeight()))
             );
     }
 

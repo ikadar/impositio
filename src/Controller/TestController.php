@@ -92,63 +92,13 @@ class TestController extends AbstractController
 
         $gridFittings = $this->layoutCalculator->calculateGridFittings($machine, $boundingArea, $zone, $cutSpacing, $pressSheet, $maxSheet, $minSheet);
 
-        // todo: move
+        $gf = [];
         foreach ($gridFittings as $l1 => $gridFitting) {
-            $gridFittings[$l1]["firstTile"] = [
-                "x" => $gridFitting["tiles"][0]["mmPositions"]->getLeft(),
-                "y" => $gridFitting["tiles"][0]["mmPositions"]->getTop(),
-                "width" => $gridFitting["tiles"][0]["mmPositions"]->getWidth(),
-                "height" => $gridFitting["tiles"][0]["mmPositions"]->getHeight()
-            ];
-
-            $gridFittings[$l1]["firstTileWithCutBuffer"] = [
-                "x" => $gridFitting["tiles"][0]["mmCutBufferPositions"]->getLeft(),
-                "y" => $gridFitting["tiles"][0]["mmCutBufferPositions"]->getTop(),
-                "width" => $gridFitting["tiles"][0]["mmCutBufferPositions"]->getWidth(),
-                "height" => $gridFitting["tiles"][0]["mmCutBufferPositions"]->getHeight()
-            ];
-
-            $gridFittings[$l1]["cutSheet"] = [
-                "gripMargin" => [
-                    "size" => $gridFittings[$l1]["cutSheet"]->getGripMarginSize(),
-                    "position" => strtolower($gridFittings[$l1]["cutSheet"]->getGripMarginPosition()->name),
-                    "x" => $gridFittings[$l1]["cutSheet"]->getChildById("gripMargin")->getAbsoluteLeft(),
-                    "y" => $gridFittings[$l1]["cutSheet"]->getChildById("gripMargin")->getAbsoluteTop(),
-                    "width" => $gridFittings[$l1]["cutSheet"]->getChildById("gripMargin")->getWidth(),
-                    "height" => $gridFittings[$l1]["cutSheet"]->getChildById("gripMargin")->getHeight(),
-                ],
-                "usableArea" => [
-                    "x" => $gridFittings[$l1]["cutSheet"]->getChildById("usableArea")->getAbsoluteLeft(),
-                    "y" => $gridFittings[$l1]["cutSheet"]->getChildById("usableArea")->getAbsoluteTop(),
-                    "width" => $gridFittings[$l1]["cutSheet"]->getChildById("usableArea")->getWidth(),
-                    "height" => $gridFittings[$l1]["cutSheet"]->getChildById("usableArea")->getHeight(),
-                ],
-                "x" => $gridFittings[$l1]["cutSheet"]->getAbsoluteLeft(),
-                "y" => $gridFittings[$l1]["cutSheet"]->getAbsoluteTop(),
-                "width" => $gridFittings[$l1]["cutSheet"]->getWidth(),
-                "height" => $gridFittings[$l1]["cutSheet"]->getHeight(),
-            ];
-
-            $gridFittings[$l1]["pressSheet"] = json_decode($pressSheet->toJson(), true);
-            $gridFittings[$l1]["maxSheet"] = json_decode($maxSheet->toJson(), true);
-            $gridFittings[$l1]["minSheet"] = json_decode($minSheet->toJson(), true);
-
-            $gridFittings[$l1]["layoutArea"] = [
-                "x" => $gridFittings[$l1]["layoutArea"]->getAbsoluteLeft(),
-                "y" => $gridFittings[$l1]["layoutArea"]->getAbsoluteTop(),
-                "width" => $gridFittings[$l1]["layoutArea"]->getWidth(),
-                "height" => $gridFittings[$l1]["layoutArea"]->getHeight(),
-            ];
-
-
-            foreach ($gridFitting["tiles"] as $l2 => $tile) {
-                $gridFittings[$l1]["tiles"][$l2]["mmPositions"] = json_decode($tile["mmPositions"]->toJson(), true);
-                $gridFittings[$l1]["tiles"][$l2]["mmCutBufferPositions"] = json_decode($tile["mmCutBufferPositions"]->toJson(), true);
-            }
+            $gf[] = $gridFitting->toArray($pressSheet, $minSheet, $maxSheet);
         }
 
         return new JsonResponse(
-            $gridFittings,
+            $gf,
             JsonResponse::HTTP_OK
         );
     }

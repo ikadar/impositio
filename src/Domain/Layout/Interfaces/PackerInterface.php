@@ -9,5 +9,5 @@ interface PackerInterface
 {
     public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, CutSpacing $spacing, $rotated): array;
 
-    public function calculateGridFitting($cols, $rows, RectangleInterface $tileRect, CutSpacing $cutSpacing): array;
+    public function calculateTiles(int $cols, int $rows, RectangleInterface $tileRect, CutSpacing $cutSpacing): array;
 }
