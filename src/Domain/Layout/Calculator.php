@@ -5,9 +5,7 @@ namespace App\Domain\Layout;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Geometry\AlignmentMode;
-use App\Domain\Geometry\Interfaces\PositionedRectangleInterface;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
-use App\Domain\Geometry\PositionedRectangle;
 use App\Domain\Layout\Interfaces\PackerInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -45,115 +43,61 @@ class Calculator
 
         $exhaustiveGridFittings = $this->packer->calculateExhaustiveGridFitting($boundingArea, $zone, $spacing, $rotated);
 
-        $zoneGripMargin = [
-            "size" => $zone->getGripMarginSize(),
-            "position" => strtolower($zone->getGripMarginPosition()->name),
-            "x" => $zone->getLeft(),
-            "y" => $zone->getTop(),
-            "width" => $zone->getWidth(),
-            "height" => $zone->getHeight(),
-        ];
+        foreach ($exhaustiveGridFittings as $layout) {
 
-        foreach ($exhaustiveGridFittings as $placedGridFitting) {
+            $layout = $this->placeOnSheet($pressSheet, $minSheet, $machine->getGripMarginSize(), $layout, $zone);
 
-            $machineGripMargin = null; // TODO
-
-            // todo:
-            $placedGridFitting["maxSheet"] = json_decode($maxSheet->toJson());
-            $placedGridFitting["minSheet"] = json_decode($minSheet->toJson());
-
-            $placedGridFitting = $this->placeOnSheet($pressSheet, $minSheet, $machine->getGripMarginSize(), $placedGridFitting, $zoneGripMargin);
-
-            if ($this->layoutExceedsMaxSheet($placedGridFitting, $maxSheet)) {
+            if ($this->layoutExceedsMaxSheet($layout, $maxSheet)) {
                 continue;
             }
 
-            $gridFittings[] = $placedGridFitting;
+            $gridFittings[] = $layout;
         }
 
         return $gridFittings;
     }
 
 
-    public function calculateTrimLines(RectangleInterface $pressSheet, RectangleInterface $minSheet, $cutSheet )
+    public function calculateTrimLines(RectangleInterface $pressSheet, RectangleInterface $minSheet, RectangleInterface $cutSheet )
     {
         return [
             "top" => [
                 "x" => 0,
-                "y" => min($cutSheet["y"], $minSheet->getTop()),
+                "y" => min($cutSheet->getTop(), $minSheet->getTop()),
                 "length" => $pressSheet->getWidth(),
             ],
             "bottom" => [
                 "x" => 0,
-                "y" => max($cutSheet["y"] + $cutSheet["height"], $minSheet->getTop() + $minSheet->getHeight()),
+                "y" => max($cutSheet->getTop() + $cutSheet->getHeight(), $minSheet->getTop() + $minSheet->getHeight()),
                 "length" => $pressSheet->getWidth(),
             ],
             "left" => [
-                "x" => min($cutSheet["x"], $minSheet->getLeft()),
+                "x" => min($cutSheet->getLeft(), $minSheet->getLeft()),
                 "y" => 0,
                 "length" => $pressSheet->getHeight(),
             ],
             "right" => [
-                "x" => max($cutSheet["x"] + $cutSheet["width"], $minSheet->getLeft() + $minSheet->getWidth()),
+                "x" => max($cutSheet->getLeft() + $cutSheet->getWidth(), $minSheet->getLeft() + $minSheet->getWidth()),
                 "y" => 0,
                 "length" => $pressSheet->getHeight(),
             ]
         ];
     }
 
-    public function placeOnSheet(RectangleInterface $pressSheet, RectangleInterface $minSheet, $gripMarginSize, $layout, $zoneGripMargin): array
+    public function placeOnSheet(RectangleInterface $pressSheet, RectangleInterface $minSheet, $gripMarginSize, $layout, $zone): array
     {
-
         $totalWidth = $layout["totalWidth"];
         $totalHeight = $layout["totalHeight"];
-        $firstTile = $layout["tiles"][0];
 
-        // Todo: move
-        $layout["pressSheet"] = json_decode($pressSheet->toJson());;
-
-        $cutSheet = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zoneGripMargin);
-        // Todo: move
-        $layout["cutSheet"] = [
-            "gripMargin" => [
-                "size" => $cutSheet->getGripMarginSize(),
-                "position" => strtolower($cutSheet->getGripMarginPosition()->name),
-                "x" => $cutSheet->getChildById("gripMargin")->getAbsoluteLeft(),
-                "y" => $cutSheet->getChildById("gripMargin")->getAbsoluteTop(),
-                "width" => $cutSheet->getChildById("gripMargin")->getWidth(),
-                "height" => $cutSheet->getChildById("gripMargin")->getHeight(),
-            ],
-            "usableArea" => [
-                "x" => $cutSheet->getChildById("usableArea")->getAbsoluteLeft(),
-                "y" => $cutSheet->getChildById("usableArea")->getAbsoluteTop(),
-                "width" => $cutSheet->getChildById("usableArea")->getWidth(),
-                "height" => $cutSheet->getChildById("usableArea")->getHeight(),
-            ],
-            "x" => $cutSheet->getAbsoluteLeft(),
-            "y" => $cutSheet->getAbsoluteTop(),
-            "width" => $cutSheet->getWidth(),
-            "height" => $cutSheet->getHeight(),
-
-        ];
-
-        $layoutArea = $this->calculateLayoutArea($totalWidth, $totalHeight, $cutSheet, $zoneGripMargin);
-
-        // Todo: move
-        $layout["layoutArea"] = [
-            "x" => $layoutArea->getAbsoluteLeft(),
-            "y" => $layoutArea->getAbsoluteTop(),
-            "width" => $layoutArea->getWidth(),
-            "height" => $layoutArea->getHeight(),
-        ];
-
-        $layout["firstTileWithCutBuffer"] = $this->calculateFirstTileWithCutBuffer($firstTile);
-        $layout["firstTile"] = $this->calculateFirstTile($firstTile);
-
-        $layout["trimLines"] = $this->calculateTrimLines($pressSheet, $minSheet, $layout["cutSheet"]);
+        $cutSheet = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zone);
+        $layout["cutSheet"] = $cutSheet;
+        $layout["layoutArea"] = $this->calculateLayoutArea($totalWidth, $totalHeight, $cutSheet, $zone);
+        $layout["trimLines"] = $this->calculateTrimLines($pressSheet, $minSheet, $cutSheet);
 
         return $layout;
     }
 
-    public function calculateLayoutArea($totalWidth, $totalHeight, InputSheetInterface $cutSheet, $zoneGripMargin): RectangleInterface
+    public function calculateLayoutArea($totalWidth, $totalHeight, InputSheetInterface $cutSheet, $zone): RectangleInterface
     {
         // take the content's dimensions including inner (content's) grip margins
         $layoutWithInnerGripMargins = [
@@ -161,7 +105,7 @@ class Calculator
             "height" => $totalHeight,
         ];
 
-        $gripMarginOverlap = max(0, ($zoneGripMargin["size"] - $cutSheet->getGripMarginSize()));
+        $gripMarginOverlap = max(0, ($zone->getGripMarginSize() - $cutSheet->getGripMarginSize()));
 
         // also take the content's dimensions excluding inner (content's) grip margins
         $layoutWithoutInnerGripMargins = [
@@ -170,8 +114,8 @@ class Calculator
         ];
 
 
-        $bothOnLeft = ($zoneGripMargin["position"] === "left" && strtolower($cutSheet->getGripMarginPosition()->name) === "left");
-        $bothOnTop = ($zoneGripMargin["position"] === "top" && strtolower($cutSheet->getGripMarginPosition()->name) === "top");
+        $bothOnLeft = (strtolower($zone->getGripMarginPosition()->name) === "left" && strtolower($cutSheet->getGripMarginPosition()->name) === "left");
+        $bothOnTop = (strtolower($zone->getGripMarginPosition()->name) === "top" && strtolower($cutSheet->getGripMarginPosition()->name) === "top");
 
         // center the layout on the usable area of the cut sheet
 
@@ -212,68 +156,20 @@ class Calculator
 
     }
 
-    public function calculateFirstTile($firstTile)
-    {
-        return  [
-            "x" => $firstTile["mmPositions"]["x"],
-            "y" => $firstTile["mmPositions"]["y"],
-            "width" => $firstTile["mmPositions"]["width"],
-            "height" => $firstTile["mmPositions"]["height"],
-        ];
-    }
-
-    public function calculateFirstTileWithCutBuffer($firstTile)
-    {
-        return  [
-            "x" => $firstTile["mmCutBufferPositions"]["x"],
-            "y" => $firstTile["mmCutBufferPositions"]["y"],
-            "width" => $firstTile["mmCutBufferPositions"]["width"],
-            "height" => $firstTile["mmCutBufferPositions"]["height"],
-        ];
-    }
-
-    public function layoutExceedsMaxSheet($gridFitting, RectangleInterface $maxSheet): bool
+    public function layoutExceedsMaxSheet($layout, RectangleInterface $maxSheet): bool
     {
         return
             (
-                ($gridFitting["cutSheet"]["gripMargin"]["position"] === "left")
+                (strtolower($layout["cutSheet"]->getGripMarginPosition()->name) === "left")
                 &&
-                ($gridFitting["totalWidth"] + $gridFitting["cutSheet"]["gripMargin"]["width"] > ($maxSheet->getWidth()))
+                ($layout["totalWidth"] + $layout["cutSheet"]->getChildById("gripMargin")->getWidth() > ($maxSheet->getWidth()))
             )
             ||
             (
-                ($gridFitting["cutSheet"]["gripMargin"]["position"] === "top")
+                (strtolower($layout["cutSheet"]->getGripMarginPosition()->name) === "top")
                 &&
-                ($gridFitting["totalHeight"] + $gridFitting["cutSheet"]["gripMargin"]["height"]  > ($maxSheet->getHeight()))
+                ($layout["totalHeight"] + $layout["cutSheet"]->getChildById("gripMargin")->getHeight()  > ($maxSheet->getHeight()))
             );
     }
-
-    public function center(PositionedRectangleInterface $container, $area)
-    {
-        $unusedWidth = $container->getWidth() - $area["width"];
-        $unusedHeight = $container->getHeight() - $area["height"];
-
-        $area["x"] = $unusedWidth / 2;
-        $area["y"] = $unusedHeight / 2;
-
-        return $area;
-    }
-
-    public function placeOnto(PositionedRectangleInterface $container, $area)
-    {
-        $area["x"] = $container->getAbsoluteLeft() + $area["x"];
-        $area["y"] = $container->getAbsoluteTop() + $area["y"];
-
-        return $area;
-    }
-
-    public function centerOn(PositionedRectangleInterface $container, $area)
-    {
-        $area = $this->center($container, $area);
-        $area = $this->placeOnto($container, $area);
-
-        return $area;
-    }
-
 
 }
