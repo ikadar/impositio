@@ -37,7 +37,7 @@ interface PositionedRectangleInterface extends AbstractRectangleInterface
 
     public function getOffset(PositionInterface $to): ?PositionInterface;
 
-    public function alignTo(PositionedRectangleInterface $to, AlignmentMode $alignmentMode, ?RectangleInterface $what = null): static;
+    public function alignTo(PositionedRectangleInterface $to, AlignmentMode $alignmentMode, ?PositionedRectangleInterface $what = null): static;
 
     public function resize(DimensionsInterface $newDimensions, Direction $direction): self;
 

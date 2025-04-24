@@ -19,6 +19,8 @@ class InputSheet extends Sheet implements InputSheetInterface
 
     protected string $viewModelClass = InputSheetView::class;
 
+    protected string $contentType;
+
     public function __construct(
         PositionInterface $position,
         DimensionsInterface $dimensions,
@@ -63,6 +65,7 @@ class InputSheet extends Sheet implements InputSheetInterface
             ),
             Direction::TopCenter
         );
+        $this->usableArea->alignTo($this->gripMargin, AlignmentMode::TopCenterToBottomCenter);
 
         $this->setGripMarginPosition(GripMarginPosition::Top);
 
@@ -83,6 +86,7 @@ class InputSheet extends Sheet implements InputSheetInterface
             ),
             Direction::MiddleLeft
         );
+        $this->usableArea->alignTo($this->gripMargin, AlignmentMode::MiddleLeftToMiddleRight);
 
         $this->setGripMarginPosition(GripMarginPosition::Left);
 
@@ -98,6 +102,23 @@ class InputSheet extends Sheet implements InputSheetInterface
     {
         $this->gripMarginPosition = $gripMarginPosition;
         return $this;
+    }
+
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    public function setContentType(string $contentType): InputSheet
+    {
+        $this->contentType = $contentType;
+        return $this;
+    }
+
+    public function resize(DimensionsInterface $newDimensions, Direction $direction): \App\Domain\Geometry\PositionedRectangle
+    {
+        parent::resize($newDimensions, $direction);
+        return $this->setGripMarginSize($this->getGripMarginSize());
     }
 
 }

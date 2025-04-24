@@ -19,9 +19,7 @@ interface GridFittingInterface
     public function getRows(): int;
     public function setRows(int $rows): GridFitting;
     public function getTotalWidth(): float;
-    public function setTotalWidth(float $totalWidth): GridFitting;
     public function getTotalHeight(): float;
-    public function setTotalHeight(float $totalHeight): GridFitting;
 
     public function getCutSheet(): InputSheetInterface;
     public function setCutSheet(InputSheetInterface $cutSheet): GridFitting;

@@ -5,9 +5,12 @@ namespace App\Domain\Layout;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Geometry\AlignmentMode;
+use App\Domain\Geometry\Dimensions;
+use App\Domain\Geometry\Direction;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\PackerInterface;
+use App\Domain\Sheet\GripMarginPosition;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
@@ -24,28 +27,15 @@ class Calculator
     public function calculateGridFittings(
         MachineInterface $machine,
         RectangleInterface $pressSheet,
-        InputSheetInterface $zone,
+        InputSheetInterface $zone, // Tile?
     ): array
     {
-
         // todo: max(zoneSize, minSheet)
-        $minSheet = $this->printFactory->newRectangle(
-            "maxSheet",
-            0,
-            0,
-            $machine->getMinSheetDimensions()->getWidth(),
-            $machine->getMinSheetDimensions()->getHeight()
-        );
+        $minSheet = $machine->getMinSheetRectangle();
         $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
         // todo: min(pressSheet, maxSheet)
-        $maxSheet = $this->printFactory->newRectangle(
-            "maxSheet",
-            0,
-            0,
-            $machine->getMaxSheetDimensions()->getWidth(),
-            $machine->getMaxSheetDimensions()->getHeight()
-        );
+        $maxSheet = $machine->getMaxSheetRectangle();
         $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
         $rotatedZone = $this->printFactory->newInputSheet(
@@ -56,6 +46,8 @@ class Calculator
             $zone->getWidth()
         );
         $rotatedZone->setGripMarginSize($zone->getGripMarginSize());
+        $rotatedZone->setContentType($zone->getContentType());
+
 
         return array_merge(
             $this->calculateUnRotatedGridFittings(
@@ -142,75 +134,145 @@ class Calculator
         InputSheetInterface $zone ////
     ): GridFittingInterface
     {
-        $totalWidth = $layout->getTotalWidth();
-        $totalHeight = $layout->getTotalHeight();
+        // todo: instead
+        // - calculate layout area (totalWidth, totalHeight)
+        // - place it to the cut sheet with proper alignment
+        // - resize cutSheet
 
-        $cutSheet = $this->calculateCutSheet($pressSheet, $gripMarginSize, $totalWidth, $totalHeight, $minSheet, $zone);
+        $cutSheet = $this->calculateCutSheet($pressSheet, $gripMarginSize, $layout, $minSheet);
         $layout->setCutSheet($cutSheet);
-        $layout->setLayoutArea($this->calculateLayoutArea($totalWidth, $totalHeight, $cutSheet, $zone));
+        $layout->setLayoutArea($this->calculateLayoutArea($layout, $cutSheet, $zone, $minSheet, $pressSheet));
         $layout->setTrimLines($this->calculateTrimLines($pressSheet, $minSheet, $cutSheet));
 
         return $layout;
     }
 
-    public function calculateLayoutArea($totalWidth, $totalHeight, InputSheetInterface $cutSheet, $zone): RectangleInterface
-    {
-        // take the content's dimensions including inner (content's) grip margins
-        $layoutWithInnerGripMargins = [
-            "width" => $totalWidth,
-            "height" => $totalHeight,
-        ];
-
-        $gripMarginOverlap = max(0, ($zone->getGripMarginSize() - $cutSheet->getGripMarginSize()));
-
-        // also take the content's dimensions excluding inner (content's) grip margins
-        $layoutWithoutInnerGripMargins = [
-            "width" => $layoutWithInnerGripMargins["width"] - $gripMarginOverlap,
-            "height" => $layoutWithInnerGripMargins["height"] - $gripMarginOverlap,
-        ];
-
-
-        $bothOnLeft = (strtolower($zone->getGripMarginPosition()->name) === "left" && strtolower($cutSheet->getGripMarginPosition()->name) === "left");
-        $bothOnTop = (strtolower($zone->getGripMarginPosition()->name) === "top" && strtolower($cutSheet->getGripMarginPosition()->name) === "top");
-
-        // center the layout on the usable area of the cut sheet
-
-        $layoutArea = $this->printFactory->newRectangle(
-            "layoutArea",
-            0,
-            0,
-            $bothOnLeft ? $layoutWithoutInnerGripMargins["width"] : $layoutWithInnerGripMargins["width"],
-            $bothOnTop ? $layoutWithoutInnerGripMargins["height"] : $layoutWithInnerGripMargins["height"],
-        );
-        $layoutArea->alignTo($cutSheet->getChildById("usableArea"), AlignmentMode::MiddleCenterToMiddleCenter);
-
-
-//        if ($bothOnLeft) {
-//            $layoutArea["x"] -= $gripMarginOverlap;
-//        }
-//
-//        if ($bothOnTop) {
-//            $layoutArea["y"] -= $gripMarginOverlap;
-//        }
-
-        return $layoutArea;
-    }
-
-    public function calculateCutSheet(RectangleInterface $pressSheet, $gripMarginSize, $totalLayoutWidth, $totalLayoutHeight, RectangleInterface $minSheet, $zoneGripMargin): InputSheetInterface
+    public function calculateCutSheet(RectangleInterface $pressSheet, $gripMarginSize, $layout, RectangleInterface $minSheet): InputSheetInterface
     {
         $cutSheet = $this->printFactory->newInputSheet(
             "cutSheet",
             0,
             0,
-            max($totalLayoutWidth, $minSheet->getWidth()),
-            max($totalLayoutHeight, $minSheet->getHeight()),
+            max($layout->getTotalWidth(), $minSheet->getWidth()),
+            max($layout->getTotalHeight(), $minSheet->getHeight()),
         );
         $cutSheet->setGripMarginSize($gripMarginSize);
+
+        $originalDimensions = new Dimensions(
+            max($layout->getTotalWidth(), $minSheet->getWidth()),
+            max($layout->getTotalHeight(), $minSheet->getHeight())
+        );
+
+        // Ha a cutSheet grip marginja felul van
+        if (
+            ($cutSheet->getGripMarginPosition() === GripMarginPosition::Top)
+            &&
+            ($cutSheet->getChildById("usableArea")->getHeight() < $layout->getTotalHeight())
+        ) {
+            // megnöveljük a cutSheet magasságát a grip margin méretével
+            $cutSheet->resize(
+                new Dimensions(
+                    $cutSheet->getWidth(),
+                    $cutSheet->getHeight() + $gripMarginSize
+                ),
+                Direction::BottomCenter
+            );
+        }
+
+        if (
+            ($cutSheet->getGripMarginPosition() === GripMarginPosition::Left)
+            &&
+            ($cutSheet->getChildById("usableArea")->getWidth() < $layout->getTotalWidth())
+        ) {
+            $cutSheet->resize(
+                new Dimensions(
+                    $cutSheet->getWidth() + $gripMarginSize,
+                    $cutSheet->getHeight()),
+                Direction::MiddleRight
+            );
+        }
+
         $cutSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
         return $cutSheet;
 
     }
+
+    public function calculateLayoutArea(GridFittingInterface $layout, InputSheetInterface $cutSheet, $zone, $minSheet, $pressSheet): RectangleInterface
+    {
+        $firstTile = $layout->getTiles()[0]->getTileWithSpacing();
+
+        $layoutArea = $this->printFactory->newInputSheet(
+            "layoutArea",
+            0,
+            0,
+            $layout->getTotalWidth(),
+            $layout->getTotalHeight(),
+        );
+        $layoutArea->setGripMarginSize($firstTile->getGripMarginSize());
+        $layoutArea->placeOnto($cutSheet, $this->printFactory->newPosition(0, 0));
+
+        $layoutArea->alignTo($cutSheet->getChildById("usableArea"), AlignmentMode::MiddleCenterToMiddleCenter);
+
+        // Most a layout a cut sheet usable area-ra van középre igazítva
+
+        $bothGripMarginsAreOnTheTop = (
+            ($cutSheet->getGripMarginPosition() === GripMarginPosition::Top)
+            &&
+            ($firstTile->getGripMarginPosition() === GripMarginPosition::Top)
+        );
+
+        $bothGripMarginsAreOnTheLeft = (
+            ($cutSheet->getGripMarginPosition() === GripMarginPosition::Left)
+            &&
+            ($firstTile->getGripMarginPosition() === GripMarginPosition::Left)
+        );
+
+        if ($bothGripMarginsAreOnTheTop && ($firstTile->getGripMarginSize() > 0)) {
+
+            $alignment = ($firstTile->getGripMarginSize() >= $cutSheet->getGripMarginSize())
+                ? AlignmentMode::TopCenterToTopCenter
+                : AlignmentMode::BottomCenterToBottomCenter
+            ;
+
+            $moveUp = min($firstTile->getGripMarginSize(), $cutSheet->getGripMarginSize());
+
+            $cutSheet->resize(
+                new Dimensions(
+                    max($cutSheet->getWidth(), $minSheet->getWidth()),
+                    max($cutSheet->getHeight() - $moveUp, $minSheet->getHeight()),
+                ),
+                Direction::BottomCenter
+            );
+
+            $layoutArea->alignTo($cutSheet->getChildById("gripMargin"), $alignment, $layoutArea->getChildById("gripMargin"));
+        }
+
+        if ($bothGripMarginsAreOnTheLeft && ($firstTile->getGripMarginSize() > 0)) {
+
+            $alignment = ($firstTile->getGripMarginSize() >= $cutSheet->getGripMarginSize())
+                ? AlignmentMode::MiddleLeftToMiddleLeft
+                : AlignmentMode::MiddleRightToMiddleRight
+            ;
+
+            $moveLeft = min($firstTile->getGripMarginSize(), $cutSheet->getGripMarginSize());
+
+            $cutSheet->resize(
+                new Dimensions(
+                    max($cutSheet->getWidth() - $moveLeft, $minSheet->getWidth()),
+                    max($cutSheet->getHeight(), $minSheet->getHeight()),
+                ),
+                Direction::BottomCenter
+            );
+
+            $layoutArea->alignTo($cutSheet->getChildById("gripMargin"), $alignment, $layoutArea->getChildById("gripMargin"));
+        }
+
+        $cutSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
+        return $layoutArea;
+    }
+
 
     public function layoutExceedsMaxSheet(GridFittingInterface $layout, RectangleInterface $maxSheet): bool
     {

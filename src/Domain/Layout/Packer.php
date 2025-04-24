@@ -3,6 +3,7 @@
 namespace App\Domain\Layout;
 
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class Packer implements Interfaces\PackerInterface
@@ -14,9 +15,13 @@ class Packer implements Interfaces\PackerInterface
     {
     }
 
-    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, RectangleInterface $tileRect, $rotated): array
+    public function calculateExhaustiveGridFitting(RectangleInterface $boundingArea, InputSheetInterface $tileRect, $rotated): array
     {
-        $spacing = $this->printFactory->getCutSpacing();
+        $spacing = new CutSpacing(0, 0);
+
+        if ($tileRect->getContentType() === "Zone") {
+            $spacing = $this->printFactory->getCutSpacing();
+        }
 
         $maxCols = floor(($boundingArea->getWidth()) / ($tileRect->getWidth() + (2 * $spacing->getHorizontalSpacing())));
         $maxRows = floor(($boundingArea->getHeight()) / ($tileRect->getHeight() + (2 * $spacing->getVerticalSpacing())));
@@ -32,7 +37,7 @@ class Packer implements Interfaces\PackerInterface
         return $gridFittings;
     }
 
-    public function calculateTiles(int $cols, int $rows, RectangleInterface $tileRect, CutSpacing $cutSpacing): array
+    public function calculateTiles(int $cols, int $rows, InputSheetInterface $tileRect, CutSpacing $cutSpacing): array
     {
 
         $tiles = [];

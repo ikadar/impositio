@@ -106,7 +106,7 @@ class PositionedRectangle extends AbstractRectangle implements PositionedRectang
         );
     }
 
-    public function alignTo(PositionedRectangleInterface $to, AlignmentMode $alignmentMode, ?RectangleInterface $what = null): static
+    public function alignTo(PositionedRectangleInterface $to, AlignmentMode $alignmentMode, ?PositionedRectangleInterface $what = null): static
     {
 
         $alignmentPoints = $alignmentMode->alignmentPoints();

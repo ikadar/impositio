@@ -19,8 +19,7 @@ class GridFitting implements Interfaces\GridFittingInterface
         protected bool $rotated,
         protected int $cols,
         protected int $rows,
-        protected float $totalWidth,
-        protected float $totalHeight,
+        protected $spacing,
         protected PrintFactory $printFactory,
     )
     {
@@ -83,24 +82,12 @@ class GridFitting implements Interfaces\GridFittingInterface
 
     public function getTotalWidth(): float
     {
-        return $this->totalWidth;
-    }
-
-    public function setTotalWidth(float $totalWidth): GridFitting
-    {
-        $this->totalWidth = $totalWidth;
-        return $this;
+        return ($this->getTiles()[0]->getTileWithSpacing()->getWidth() * $this->getCols());
     }
 
     public function getTotalHeight(): float
     {
-        return $this->totalHeight;
-    }
-
-    public function setTotalHeight(float $totalHeight): GridFitting
-    {
-        $this->totalHeight = $totalHeight;
-        return $this;
+        return ($this->getTiles()[0]->getTileWithSpacing()->getHeight() * $this->getRows());
     }
 
     public function getCutSheet(): InputSheetInterface
@@ -136,6 +123,26 @@ class GridFitting implements Interfaces\GridFittingInterface
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getSpacing()
+    {
+        return $this->spacing;
+    }
+
+    /**
+     * @param mixed $spacing
+     * @return GridFitting
+     */
+    public function setSpacing($spacing)
+    {
+        $this->spacing = $spacing;
+        return $this;
+    }
+
+
+
     public function toArray($machine, $pressSheet): array
     {
         $minSheet = $machine->getMinSheetRectangle();
@@ -167,6 +174,7 @@ class GridFitting implements Interfaces\GridFittingInterface
                 "y" => $this->getCutSheet()->getAbsoluteTop(),
                 "width" => $this->getCutSheet()->getWidth(),
                 "height" => $this->getCutSheet()->getHeight(),
+                "type" => "Sheet",
             ],
 
             "firstTile" => [

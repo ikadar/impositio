@@ -15,7 +15,6 @@ use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\TileInterface;
 use App\Domain\Layout\Tile;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
-use App\Domain\Sheet\Interfaces\PrintFactoryInterface;
 use App\Domain\Sheet\Interfaces\SheetInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -63,7 +62,7 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
             "y" => $rowIndex,
         ];
 
-        $innerTile = $this->newRectangle(
+        $innerTile = $this->newInputSheet(
             sprintf("%dx%d", $colIndex, $rowIndex),
 
             (($colIndex + 1) * $cutSpacing->getHorizontalSpacing()) +
@@ -77,19 +76,22 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
             $tileRect->getWidth(),
             $tileRect->getHeight(),
         );
+        $innerTile->setGripMarginSize($tileRect->getGripMarginSize());
 
-        $tileWithSpacing = $this->newRectangle(
+        $tileWithSpacing = $this->newInputSheet(
             sprintf("WC%dx%d", $colIndex, $rowIndex),
             ($colIndex * ($tileRect->getWidth() + (2 * $cutSpacing->getHorizontalSpacing()))),
             $rowIndex * ($tileRect->getHeight() + (2 * $cutSpacing->getVerticalSpacing())),
             $tileRect->getWidth() + (2 * $cutSpacing->getHorizontalSpacing()),
             $tileRect->getHeight() + (2 * $cutSpacing->getVerticalSpacing()),
         );
+        $tileWithSpacing->setGripMarginSize($tileRect->getGripMarginSize());
+
 
         return new Tile($gridPosition, $innerTile, $tileWithSpacing);
     }
 
-    public function newGridFitting ($tiles, $colIndex, $rowIndex, $rotated, $tileRect, $spacing): GridFittingInterface
+    public function newGridFitting ($tiles, $colIndex, $rowIndex, $rotated, InputSheetInterface $tileRect, $spacing): GridFittingInterface
     {
         return new GridFitting(
             $tiles,
@@ -97,8 +99,7 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
             $rotated,
             $colIndex,
             $rowIndex,
-            ($tileRect->getWidth() + (2 * $spacing->getVerticalSpacing())) * $colIndex,
-            ($tileRect->getHeight() + (2 * $spacing->getHorizontalSpacing())) * $rowIndex,
+            $spacing,
             $this
         );
     }

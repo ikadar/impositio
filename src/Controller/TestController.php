@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
+use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
-use App\Domain\Geometry\AlignmentMode;
 use App\Domain\Geometry\Dimensions;
+use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Layout\Calculator;
-use App\Domain\Layout\CutSpacing;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +17,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TestController extends AbstractController
 {
+    protected MachineInterface $machine;
+    protected RectangleInterface $pressSheet;
+    protected InputSheetInterface $zone;
+
     public function __construct(
         protected Calculator $layoutCalculator,
         protected PrintFactory $printFactory,
@@ -27,10 +32,23 @@ class TestController extends AbstractController
     public function getTest(
     ): JsonResponse
     {
+        $this->processPayload();
+
+        $gridFittings = $this->layoutCalculator->calculateGridFittings(
+            $this->machine,
+            $this->pressSheet,
+            $this->zone, // tile
+        );
+
+        return $this->createResponse($gridFittings);
+    }
+
+    protected function processPayload(): void
+    {
         $request = Request::createFromGlobals();
         $data = json_decode($request->getContent(), true);
 
-        $machine = new Machine(
+        $this->machine = new Machine(
             $data["machine"]["id"],
             $data["machine"]["gripMargin"],
             new Dimensions(
@@ -44,7 +62,7 @@ class TestController extends AbstractController
             $this->printFactory
         );
 
-        $pressSheet = $this->printFactory->newRectangle(
+        $this->pressSheet = $this->printFactory->newRectangle(
             "pressSheet",
             0,
             0,
@@ -52,33 +70,33 @@ class TestController extends AbstractController
             $data["press-sheet"]["height"]
         );
 
-        $zone = $this->printFactory->newInputSheet(
+//        $this->zone = $this->printFactory->newZone(
+//        $this->zone = $this->printFactory->newInputSheet(
+        $this->zone = $this->printFactory->newInputSheet( // perhaps better to handle it as a Tile?
             "zone",
             0,
             0,
             $data["zone"]["width"],
             $data["zone"]["height"]
         );
-        $zone->setGripMarginSize($data["zone"]["gripMargin"]["size"]);
+        $this->zone->setGripMarginSize($data["zone"]["gripMargin"]["size"]);
+        $this->zone->setContentType($data["zone"]["type"]); // todo: make it better
+    }
 
-        $gridFittings = $this->layoutCalculator->calculateGridFittings(
-            $machine,
-            $pressSheet,
-            $zone,
-        );
-
-        $gf = [];
+    protected function createResponse($gridFittings): JsonResponse
+    {
+        $responseData = [];
         /**
          * @var GridFittingInterface $gridFitting
          */
         foreach ($gridFittings as $gridFitting) {
-            $gf[] = $gridFitting->toArray($machine, $pressSheet);
+            $responseData[] = $gridFitting->toArray($this->machine, $this->pressSheet);
         }
 
         return new JsonResponse(
-            $gf,
+            $responseData,
             JsonResponse::HTTP_OK
         );
-    }
 
+    }
 }
