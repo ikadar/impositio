@@ -351,6 +351,18 @@ const showTiles = (sheetLayout, machineGroup, content) => {
     });
     pressSheetGroup.add(layoutAreaGroup);
 
+    // const layoutAreaRect = new Konva.Rect({
+    //     x: 0,
+    //     y: 0,
+    //     width: sheetLayout.layoutArea.width,
+    //     height: sheetLayout.layoutArea.height,
+    //     fill: 'orange',
+    //     // stroke: 'black',
+    //     // strokeWidth: 0.1,
+    //     opacity: 0.8,
+    // });
+    // layoutAreaGroup.add(layoutAreaRect);
+
     const tiles = sheetLayout.tiles;
 
     for (let i in tiles) {
