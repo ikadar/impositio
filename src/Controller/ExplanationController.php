@@ -89,7 +89,8 @@ class ExplanationController extends AbstractController
                     "height" => $action["pressSheet"]["height"],
                 ];
             } else {
-                $actionData["inputSheet"] = $prevMachineAction["cutSheet"];
+                $actionData["inputSheet"] = $action["cutSheet"];
+//                $actionData["inputSheet"] = $prevMachineAction["cutSheet"];
             }
 
             $responseData[] = $actionData;
