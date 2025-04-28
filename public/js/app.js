@@ -162,53 +162,53 @@ const showExplanation = (sheetLayout, machineGroup, actionPath) => {
     });
     explanationGroup.add(machineMinConstraints);
 
-    const cutSheetSize = new Konva.Text({
-        x: 320,
-        y: 200,
-        width: 300,
-        height: 20,
-        align: "left",
-        verticalAlign: "middle",
-        text: `Output sheet: ${sheetLayout.cutSheet.width}mm x ${sheetLayout.cutSheet.height}mm`,
-        fontSize: 16,
-        fontFamily: 'Helvetica Neue',
-        fill: 'black',
-        opacity: 1,
-        rotation: 0,
-    });
-    explanationGroup.add(cutSheetSize);
-
-    const cutSheetCount = new Konva.Text({
-        x: 320,
-        y: 220,
-        width: 300,
-        height: 20,
-        align: "left",
-        verticalAlign: "middle",
-        text: `Number of items: ${sheetLayout.cols*sheetLayout.rows}`,
-        fontSize: 16,
-        fontFamily: 'Helvetica Neue',
-        fill: 'black',
-        opacity: 1,
-        rotation: 0,
-    });
-    explanationGroup.add(cutSheetCount);
-
-    const poseRotation = new Konva.Text({
-        x: 320,
-        y: 240,
-        width: 300,
-        height: 20,
-        align: "left",
-        verticalAlign: "middle",
-        text: `Rotation: ${sheetLayout.rotated ? "Yes" : "No"}`,
-        fontSize: 16,
-        fontFamily: 'Helvetica Neue',
-        fill: 'black',
-        opacity: 1,
-        rotation: 0,
-    });
-    explanationGroup.add(poseRotation);
+    // const cutSheetSize = new Konva.Text({
+    //     x: 320,
+    //     y: 200,
+    //     width: 300,
+    //     height: 20,
+    //     align: "left",
+    //     verticalAlign: "middle",
+    //     text: `Output sheet: ${sheetLayout.cutSheet.width}mm x ${sheetLayout.cutSheet.height}mm`,
+    //     fontSize: 16,
+    //     fontFamily: 'Helvetica Neue',
+    //     fill: 'black',
+    //     opacity: 1,
+    //     rotation: 0,
+    // });
+    // explanationGroup.add(cutSheetSize);
+    //
+    // const cutSheetCount = new Konva.Text({
+    //     x: 320,
+    //     y: 220,
+    //     width: 300,
+    //     height: 20,
+    //     align: "left",
+    //     verticalAlign: "middle",
+    //     text: `Number of items: ${sheetLayout.cols*sheetLayout.rows}`,
+    //     fontSize: 16,
+    //     fontFamily: 'Helvetica Neue',
+    //     fill: 'black',
+    //     opacity: 1,
+    //     rotation: 0,
+    // });
+    // explanationGroup.add(cutSheetCount);
+    //
+    // const poseRotation = new Konva.Text({
+    //     x: 320,
+    //     y: 240,
+    //     width: 300,
+    //     height: 20,
+    //     align: "left",
+    //     verticalAlign: "middle",
+    //     text: `Rotation: ${sheetLayout.rotated ? "Yes" : "No"}`,
+    //     fontSize: 16,
+    //     fontFamily: 'Helvetica Neue',
+    //     fill: 'black',
+    //     opacity: 1,
+    //     rotation: 0,
+    // });
+    // explanationGroup.add(poseRotation);
 
 }
 
