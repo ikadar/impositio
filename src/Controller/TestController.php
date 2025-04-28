@@ -20,6 +20,7 @@ class TestController extends AbstractController
     protected MachineInterface $machine;
     protected RectangleInterface $pressSheet;
     protected InputSheetInterface $zone;
+    protected array $actionPath;
 
     public function __construct(
         protected Calculator $layoutCalculator,
@@ -40,7 +41,7 @@ class TestController extends AbstractController
             $this->zone, // tile
         );
 
-        return $this->createResponse($gridFittings);
+        return $this->createResponse($gridFittings, $this->actionPath);
     }
 
     protected function processPayload(): void
@@ -81,16 +82,20 @@ class TestController extends AbstractController
         );
         $this->zone->setGripMarginSize($data["zone"]["gripMargin"]["size"]);
         $this->zone->setContentType($data["zone"]["type"]); // todo: make it better
+
+        $this->actionPath = $data["action-path"];
     }
 
-    protected function createResponse($gridFittings): JsonResponse
+    protected function createResponse($gridFittings, $actionPath): JsonResponse
     {
         $responseData = [];
         /**
          * @var GridFittingInterface $gridFitting
          */
         foreach ($gridFittings as $gridFitting) {
-            $responseData[] = $gridFitting->toArray($this->machine, $this->pressSheet);
+            $data = $gridFitting->toArray($this->machine, $this->pressSheet);
+            $data["actionPath"] = $actionPath;
+            $responseData[] = $data;
         }
 
         return new JsonResponse(

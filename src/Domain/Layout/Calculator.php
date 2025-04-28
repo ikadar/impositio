@@ -90,6 +90,14 @@ class Calculator
                 continue;
             }
 
+            $layout->setExplanation([
+                "machine" => [
+                    "name" => $machine->getId(),
+                    "minSheet" => $machine->getMinSheetDimensions(),
+                    "maxSheet" => $machine->getMaxSheetDimensions(),
+                ]
+            ]);
+
             $gridFittings[] = $layout;
         }
 
@@ -122,6 +130,31 @@ class Calculator
                 "length" => $pressSheet->getHeight(),
             ]
         ];
+
+//        return [
+//            "top" => [
+//                "x" => 0,
+//                "y" => min($cutSheet->getChildById("usableArea")->getAbsoluteTop(), $minSheet->getTop()),
+//                "length" => $pressSheet->getWidth(),
+//            ],
+//            "bottom" => [
+//                "x" => 0,
+//                "y" => max($cutSheet->getTop() + $cutSheet->getHeight(), $minSheet->getTop() + $minSheet->getHeight()),
+//                "length" => $pressSheet->getWidth(),
+//            ],
+//            "left" => [
+//                "x" => min($cutSheet->getChildById("usableArea")->getAbsoluteLeft(), $minSheet->getLeft()),
+//                "y" => 0,
+//                "length" => $pressSheet->getHeight(),
+//            ],
+//            "right" => [
+//                "x" => max($cutSheet->getLeft() + $cutSheet->getWidth(), $minSheet->getLeft() + $minSheet->getWidth()),
+//                "y" => 0,
+//                "length" => $pressSheet->getHeight(),
+//            ]
+//        ];
+
+
     }
 
     // ------------------

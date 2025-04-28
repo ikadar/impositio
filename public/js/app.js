@@ -16,7 +16,7 @@ let baseLayer = new Konva.Layer({
 });
 stage.add(baseLayer);
 
-const show = (sheetLayout, machineGroup, content) => {
+const show = (sheetLayout, machineGroup, content, actionPath) => {
 
     // console.log(content);
 
@@ -24,6 +24,8 @@ const show = (sheetLayout, machineGroup, content) => {
     if (pressSheetGroup) {
         pressSheetGroup.remove();
     }
+
+    showExplanation(sheetLayout, machineGroup, actionPath);
 
     showPressSheet(sheetLayout, machineGroup);
     pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
@@ -94,11 +96,127 @@ const cloneContent = (pressSheetGroup) => {
     return contentGroup;
 }
 
+const showExplanation = (sheetLayout, machineGroup, actionPath) => {
+
+    console.log(actionPath);
+
+    const existingExplanationGroup = baseLayer.findOne(`#explanationGroup-${machineGroup.attrs.id}`);
+    if (existingExplanationGroup) {
+        existingExplanationGroup.remove();
+    }
+
+
+    const explanationGroup = new Konva.Group({
+        id: `explanationGroup-${machineGroup.attrs.id}`,
+        x: 0,
+        y: 0,
+    });
+    machineGroup.add(explanationGroup);
+
+
+    const machine = new Konva.Text({
+        x: 20,
+        y: 200,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `Machine: ${sheetLayout.explanation.machine.name}`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(machine);
+
+    const machineMaxConstraints = new Konva.Text({
+        x: 20,
+        y: 220,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `max sheet: ${sheetLayout.explanation.machine.maxSheet.width}mm x ${sheetLayout.explanation.machine.maxSheet.height}mm`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(machineMaxConstraints);
+
+    const machineMinConstraints = new Konva.Text({
+        x: 20,
+        y: 240,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `min sheet: ${sheetLayout.explanation.machine.minSheet.width}mm x ${sheetLayout.explanation.machine.minSheet.height}mm`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(machineMinConstraints);
+
+    const cutSheetSize = new Konva.Text({
+        x: 320,
+        y: 200,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `Output sheet: ${sheetLayout.cutSheet.width}mm x ${sheetLayout.cutSheet.height}mm`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(cutSheetSize);
+
+    const cutSheetCount = new Konva.Text({
+        x: 320,
+        y: 220,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `Number of items: ${sheetLayout.cols*sheetLayout.rows}`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(cutSheetCount);
+
+    const poseRotation = new Konva.Text({
+        x: 320,
+        y: 240,
+        width: 300,
+        height: 20,
+        align: "left",
+        verticalAlign: "middle",
+        text: `Rotation: ${sheetLayout.rotated ? "Yes" : "No"}`,
+        fontSize: 16,
+        fontFamily: 'Helvetica Neue',
+        fill: 'black',
+        opacity: 1,
+        rotation: 0,
+    });
+    explanationGroup.add(poseRotation);
+
+}
+
 const showPressSheet = (sheetLayout, machineGroup) => {
 
     const sheetOffset = {
         x: 150,
-        y: 300
+        y: 400
     }
 
     const pressSheetGroup = new Konva.Group({
@@ -737,9 +855,6 @@ const calc = (input, machineIndex, content) => {
             };
         }
 
-        console.log(input);
-
-
         fetch('/test', {
             method: 'POST',
             headers: {
@@ -755,10 +870,28 @@ const calc = (input, machineIndex, content) => {
             .catch(error => {
                 console.error('Error loading JSON:', error);
             });
-        }
+    } else {
+        fetch('/explanation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(input["action-path"])
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(JSON.stringify(data, null, 2));
+                document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error loading JSON:', error);
+            });
+    }
 }
 
 const displayMachineVariations = (data, input, machineIndex, content) => {
+
     const machineId = input.machines[machineIndex].id;
     const machineGroupId = `machineGroup-${machineId}`;
 
@@ -894,7 +1027,11 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
         });
 
         selector.on("click", function () {
-            const newContent = show(data[i], machineGroup, content);
+
+            input.zone = data[i].cutSheet;
+            input["action-path"][input.machines[machineIndex].id] = data[i];
+
+            const newContent = show(data[i], machineGroup, content, input["action-path"]);
             stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
 
             // todo: delete machineGroups with higher indexes
@@ -909,7 +1046,7 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
                 }
             }
 
-            input.zone = data[i].cutSheet;
+            // calculate nex machine's data
             calc(input, machineIndex + 1, newContent);
         });
         controlPanelGroup.add(selector);

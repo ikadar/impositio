@@ -13,6 +13,8 @@ class GridFitting implements Interfaces\GridFittingInterface
     protected RectangleInterface $layoutArea;
     protected array $trimLines;
 
+    protected array $explanation;
+
     public function __construct(
         protected array $tiles,
         protected string $size,
@@ -141,6 +143,17 @@ class GridFitting implements Interfaces\GridFittingInterface
         return $this;
     }
 
+    public function getExplanation(): array
+    {
+        return $this->explanation;
+    }
+
+    public function setExplanation(array $explanation): GridFitting
+    {
+        $this->explanation = $explanation;
+        return $this;
+    }
+
 
 
     public function toArray($machine, $pressSheet): array
@@ -209,6 +222,19 @@ class GridFitting implements Interfaces\GridFittingInterface
             "minSheet" => json_decode($minSheet->toJson(), true),
             "pressSheet" => json_decode($pressSheet->toJson(), true),
 
+            "explanation" => [
+                "machine" => [
+                    "name" => $this->getExplanation()["machine"]["name"],
+                    "minSheet" => [
+                        "width" => $this->getExplanation()["machine"]["minSheet"]->getWidth(),
+                        "height" => $this->getExplanation()["machine"]["minSheet"]->getHeight(),
+                    ],
+                    "maxSheet" => [
+                        "width" => $this->getExplanation()["machine"]["maxSheet"]->getWidth(),
+                        "height" => $this->getExplanation()["machine"]["maxSheet"]->getHeight(),
+                    ],
+                ]
+            ],
         ];
 
         foreach ($this->getTiles() as $tile) {
