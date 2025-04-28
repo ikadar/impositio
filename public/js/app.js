@@ -882,7 +882,7 @@ const calc = (input, machineIndex, content) => {
             .then(response => response.json())
             .then(data => {
                 console.log(JSON.stringify(data, null, 2));
-                document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
+                // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
                 displayTextualExplanation(data);
             })
             .catch(error => {
@@ -909,7 +909,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "trim") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Polar 137 (trim)</div>`;
+            actionDiv.innerHTML += `<div class="sub-title">Polar 137 (trim)</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
@@ -918,7 +918,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "cut") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Polar 137 (cut)</div>`;
+            actionDiv.innerHTML += `<div class="sub-title">Polar 137 (cut)</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
@@ -927,7 +927,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "rotation") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div><i>Rotation</i></div>`;
+            actionDiv.innerHTML += `<div style="padding-left: 5px"><i>Rotation</i></div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
         }

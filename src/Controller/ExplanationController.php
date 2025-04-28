@@ -128,6 +128,8 @@ class ExplanationController extends AbstractController
             }
 
             if (
+                $nextAction !== null
+                &&
                 $action["rotated"]
             ) {
                 $responseData[] = [
