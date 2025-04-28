@@ -45,69 +45,97 @@
 {
   "machines": [
     {
-      "id": "m1",
-      "type": "t1",
-      "gripMargin": 20,
+      "id": "Hohner",
+      "type": "stitching machine",
+      "gripMargin": 0,
       "input-dimensions": {
         "min": {
-          "width": 350,
-          "height": 250
+          "width": 105,
+          "height": 105
         },
         "max": {
-          "width": 750,
-          "height": 530
-        }
-      }
-    },
-    {
-      "id": "m1b",
-      "type": "t1",
-      "gripMargin": 20,
-      "input-dimensions": {
-        "min": {
-          "width": 350,
-          "height": 250
-        },
-        "max": {
-          "width": 750,
-          "height": 530
-        }
-      }
-    },
-    {
-      "id": "m2",
-      "type": "t2",
-      "gripMargin": 30,
-      "input-dimensions": {
-        "min": {
-          "width": 500,
+          "width": 360,
           "height": 350
+        }
+      }
+    },
+    {
+      "id": "Neptune",
+      "type": "laminator",
+      "gripMargin": 10,
+      "input-dimensions": {
+        "min": {
+          "width": 740,
+          "height": 100
         },
         "max": {
-          "width": 1020,
-          "height": 700
+          "width": 740,
+          "height": 520
+        }
+      }
+    },
+    {
+      "id": "Komori G40",
+      "type": "printing press",
+      "gripMargin": 15,
+      "input-dimensions": {
+        "min": {
+          "width": 520,
+          "height": 360
+        },
+        "max": {
+          "width": 1050,
+          "height": 750
         }
       }
     }
+
   ],
   "press-sheet": {
-    "width": 1020,
-    "height": 700,
+    "width": 1050,
+    "height": 750,
     "gripMargin": 20
   },
-  "zone-A5": {
+  "zone": {
     "width": 210,
-    "height": 148
+    "height": 148,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
   },
   "zone-A3": {
     "width": 420,
-    "height": 297
+    "height": 297,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
   },
   "zone-A4": {
     "width": 297,
-    "height": 210
+    "height": 210,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
   },
-  "zone": {
+  "zone-TEST": {
     "width": 120,
     "height": 85,
     "type": "Zone",

@@ -898,8 +898,9 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "print") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Print</div>`;
-            actionDiv.innerHTML += `<div><div class="label">Machine:</div> ${item.machine} (min: ${item.minSheet.width} x ${item.minSheet.height}; max: ${item.maxSheet.width} x ${item.maxSheet.height})</div>`;
+            actionDiv.innerHTML += `<div class="title">${item.machine}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">min:</div> ${item.minSheet.width} x ${item.minSheet.height}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">max:</div> ${item.maxSheet.width} x ${item.maxSheet.height}</div>`;
             actionDiv.innerHTML += `<div><div class="label">Input sheet:</div> ${item.inputSheet.width} x ${item.inputSheet.height}</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
@@ -908,7 +909,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "trim") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Trim</div>`;
+            actionDiv.innerHTML += `<div class="title">Polar 137 (trim)</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
@@ -917,7 +918,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "cut") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Cut</div>`;
+            actionDiv.innerHTML += `<div class="title">Polar 137 (cut)</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
@@ -926,7 +927,7 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "rotation") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="title">Rotation</div>`;
+            actionDiv.innerHTML += `<div><i>Rotation</i></div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
         }
