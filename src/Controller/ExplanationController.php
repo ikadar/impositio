@@ -83,6 +83,15 @@ class ExplanationController extends AbstractController
                 ]
             ];
 
+            if ($actionIndex === 0) {
+                $actionData["inputSheet"] = [
+                    "width" => $action["pressSheet"]["width"],
+                    "height" => $action["pressSheet"]["height"],
+                ];
+            } else {
+                $actionData["inputSheet"] = $prevMachineAction["cutSheet"];
+            }
+
             $responseData[] = $actionData;
 
             if (
@@ -95,11 +104,16 @@ class ExplanationController extends AbstractController
                 )
 
             ) {
+                $numberOfCuts = 0;
+                $numberOfCuts += (($action["trimLines"]["top"]["y"] > 0) ? 2 : 0);
+                $numberOfCuts += (($action["trimLines"]["left"]["x"] > 0) ? 2 : 0);
+
+
                 $responseData[] = [
                     "actionType" => "trim",
                     "machine" => "cutter",
                     "trimLines" => $action["trimLines"],
-                    "numberOfCuts" => 4,
+                    "numberOfCuts" => $numberOfCuts,
                 ];
             }
 
@@ -110,6 +124,16 @@ class ExplanationController extends AbstractController
                     "actionType" => "cut",
                     "machine" => "cutter",
                     "numberOfCuts" => $numberOfCuts,
+                ];
+            }
+
+            if (
+                $action["rotated"]
+            ) {
+                $responseData[] = [
+                    "actionType" => "rotation",
+//                    "machine" => "cutter",
+//                    "numberOfCuts" => $numberOfCuts,
                 ];
             }
 

@@ -13,6 +13,20 @@
             height: 100%;
             background-color: #cccdcd;
         }
+        #textual-explanation{
+          margin: 20px;
+        }
+        #textual-explanation .title{
+          background-color: #cccdcd;
+        }
+        #textual-explanation .label{
+          font-weight: bold;
+          width: 200px;
+          display: inline-block;
+        }
+        #textual-explanation-container {
+          margin: 20px;
+        }
     </style>
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
     <script language="JavaScript" src="js/app.js" type="module"></script>
@@ -118,6 +132,10 @@
 <!--    <div id="rotated-variations"></div>-->
 </div>
 <div id="konva-container"></div>
+<div id="textual-explanation-container">
+  <pre id="textual-explanation"></pre>
+</div>
+<div style="height: 50px; background-color: #cccdcd;"></div>
 <div>
   <pre id="explanation"></pre>
 </div>
