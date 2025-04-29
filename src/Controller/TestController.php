@@ -21,6 +21,7 @@ class TestController extends AbstractController
     protected RectangleInterface $pressSheet;
     protected InputSheetInterface $zone;
     protected array $actionPath;
+    protected array $pose;
 
     public function __construct(
         protected Calculator $layoutCalculator,
@@ -84,6 +85,7 @@ class TestController extends AbstractController
         $this->zone->setContentType($data["zone"]["type"]); // todo: make it better
 
         $this->actionPath = $data["action-path"];
+        $this->pose = $data["pose"];
     }
 
     protected function createResponse($gridFittings, $actionPath): JsonResponse
@@ -93,8 +95,16 @@ class TestController extends AbstractController
          * @var GridFittingInterface $gridFitting
          */
         foreach ($gridFittings as $gridFitting) {
+
             $data = $gridFitting->toArray($this->machine, $this->pressSheet);
+
+            if (($data["totalHeight"] > $data["pressSheet"]["height"]) || ($data["totalWidth"] > $data["pressSheet"]["width"])) {
+                continue;
+            }
+
             $data["actionPath"] = $actionPath;
+            $data["pose"] = $this->pose;
+
             $responseData[] = $data;
         }
 

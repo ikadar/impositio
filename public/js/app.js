@@ -98,7 +98,7 @@ const cloneContent = (pressSheetGroup) => {
 
 const showExplanation = (sheetLayout, machineGroup, actionPath) => {
 
-    console.log(actionPath);
+    // console.log(actionPath);
 
     const existingExplanationGroup = baseLayer.findOne(`#explanationGroup-${machineGroup.attrs.id}`);
     if (existingExplanationGroup) {
@@ -534,6 +534,42 @@ const showTiles = (sheetLayout, machineGroup, content) => {
                 scaleY: sheetLayout.rotated ? -1 : 1,
             }));
             // pressSheetGroup.add(content);
+        } else {
+
+            const poseWidth = sheetLayout.pose.width;
+            const poseHeight = sheetLayout.pose.height;
+
+            const hPoses = Math.floor(width / poseWidth);
+            const hRemaining = width - (hPoses * poseWidth);
+            const hSpace = hRemaining / (hPoses + 1);
+
+            const vPoses = Math.floor(height / poseHeight);
+            const vRemaining = height - (vPoses * poseHeight);
+            const vSpace = vRemaining / (vPoses + 1);
+
+
+            for (let m = hSpace; m <= width - poseWidth; m+=(poseWidth + hSpace)) {
+                for (let n = vSpace; n <= height - poseHeight; n+=(poseHeight + vSpace)) {
+                    const pose  = new Konva.Rect({
+                        id: "pose",
+                        x: m,
+                        y: n,
+                        // x: sheetLayout.cutSheet.x,
+                        // y: sheetLayout.cutSheet.y,
+                        width: poseWidth,
+                        height: poseHeight,
+                        // width: sheetLayout.cutSheet.width,
+                        // height: sheetLayout.cutSheet.height,
+                        // fill: "yellow",
+                        // fill: "#C81365FF",
+                        stroke: "black",
+                        strokeWidth: 0.2,
+                        opacity: 1,
+                    });
+                    tileGroup.add(pose);
+                }
+            }
+
         }
 
     }
@@ -585,12 +621,12 @@ const showLayoutAreaDimensionLines = (sheetLayout, machineGroup, options) => {
     const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
     // used area - START
-    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
-        x: 0,
-        distance: options.distance,
-        color: options.color,
-        length: sheetLayout.layoutArea.x,
-    }));
+    // pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
+    //     x: 0,
+    //     distance: options.distance,
+    //     color: options.color,
+    //     length: sheetLayout.layoutArea.x,
+    // }));
 
     pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
         x: sheetLayout.layoutArea.x,
@@ -599,19 +635,19 @@ const showLayoutAreaDimensionLines = (sheetLayout, machineGroup, options) => {
         length: sheetLayout.layoutArea.width,
     }));
 
-    pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
-        x: sheetLayout.layoutArea.x + sheetLayout.layoutArea.width,
-        distance: options.distance,
-        color: options.color,
-        length: sheetLayout.pressSheet.width - (sheetLayout.layoutArea.x + sheetLayout.layoutArea.width),
-    }));
+    // pressSheetGroup.add(horizontalDimensionLine(machineGroup, {
+    //     x: sheetLayout.layoutArea.x + sheetLayout.layoutArea.width,
+    //     distance: options.distance,
+    //     color: options.color,
+    //     length: sheetLayout.pressSheet.width - (sheetLayout.layoutArea.x + sheetLayout.layoutArea.width),
+    // }));
 
-    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
-        distance: options.distance,
-        y: 0,
-        color: options.color,
-        length: sheetLayout.layoutArea.y,
-    }));
+    // pressSheetGroup.add(verticalDimensionLine(machineGroup, {
+    //     distance: options.distance,
+    //     y: 0,
+    //     color: options.color,
+    //     length: sheetLayout.layoutArea.y,
+    // }));
 
     pressSheetGroup.add(verticalDimensionLine(machineGroup, {
         distance: options.distance,
@@ -620,12 +656,12 @@ const showLayoutAreaDimensionLines = (sheetLayout, machineGroup, options) => {
         length: sheetLayout.layoutArea.height,
     }));
 
-    pressSheetGroup.add(verticalDimensionLine(machineGroup, {
-        distance: options.distance,
-        y: sheetLayout.layoutArea.y + sheetLayout.layoutArea.height,
-        color: options.color,
-        length: (sheetLayout.pressSheet.height) - (sheetLayout.layoutArea.y + sheetLayout.layoutArea.height),
-    }));
+    // pressSheetGroup.add(verticalDimensionLine(machineGroup, {
+    //     distance: options.distance,
+    //     y: sheetLayout.layoutArea.y + sheetLayout.layoutArea.height,
+    //     color: options.color,
+    //     length: (sheetLayout.pressSheet.height) - (sheetLayout.layoutArea.y + sheetLayout.layoutArea.height),
+    // }));
 
 }
 
@@ -663,7 +699,8 @@ const showCutSheet = (sheetLayout, machineGroup) => {
         y: sheetLayout.cutSheet.gripMargin.y,
         width: sheetLayout.cutSheet.gripMargin.width,
         height: sheetLayout.cutSheet.gripMargin.height,
-        fill: "#cccdcd",
+        fill: "#888888",
+        // fill: "#ff7700",
         opacity: 1
 
     });
@@ -938,7 +975,7 @@ const displayTextualExplanation = (data) => {
 const displayMachineVariations = (data, input, machineIndex, content) => {
 
     const machineId = input.machines[machineIndex].id;
-    const machineGroupId = `machineGroup-${machineId}`;
+    const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
 
     let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
 
@@ -1083,13 +1120,15 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
             for (let j = machineIndex + 1; j < input.machines.length; j++) {
 
                 const machineId = input.machines[j].id;
-                const machineGroupId = `machineGroup-${machineId}`;
+                const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
 
                 const machineGroup = baseLayer.findOne(`#${machineGroupId}`);
                 if (machineGroup) {
                     machineGroup.remove();
                 }
             }
+
+            document.getElementById("textual-explanation").innerHTML = "";
 
             // calculate nex machine's data
             calc(input, machineIndex + 1, newContent);

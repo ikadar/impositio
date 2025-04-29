@@ -86,7 +86,7 @@ class Calculator
 
             $layout = $this->placeOnSheet($pressSheet, $minSheet, $machine->getGripMarginSize(), $layout, $zone);
 
-            if ($this->layoutExceedsMaxSheet($layout, $maxSheet)) {
+            if ($this->layoutExceedsMaxSheet($layout, $pressSheet)) {
                 continue;
             }
 
