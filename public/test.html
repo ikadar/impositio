@@ -66,7 +66,14 @@
           "width": 360,
           "height": 350
         }
-      }
+      },
+      "input-sheet-dimensions": {
+          "width": 230,
+          "height": 168
+      },
+      "base-setup-duration": 15,
+      "documents-per-hour": 4000,
+      "cost-per-hour": 60
     },
     {
       "id": "MBO XL",
@@ -81,7 +88,13 @@
           "width": 1050,
           "height": 750
         }
-      }
+      },
+      "number-of-folds": 2,
+      "document-spacing": 0.05,
+      "meters-per-hour": 1500,
+      "base-setup-duration": 20,
+      "setup-duration-by-fold": 3.5,
+      "cost-per-hour": 60
     },
     {
       "id": "Komori G40",
@@ -96,18 +109,46 @@
           "width": 1050,
           "height": 750
         }
-      }
+      },
+      "base-setup-duration": 6.6666,
+      "setup-duration-per-color": 3.3333,
+      "two-pass": false,
+      "pass-per-color": 75,
+      "sheets-per-hour": 8000,
+      "max-input-stack-height": 120,
+      "stack-replenishment-duration": 3,
+      "cost-per-hour": 130
     }
 
   ],
+  "number-of-colors": 4,
+  "number-of-copies": 1000,
+  "paper-weight": 115,
+  "cutting-machine": {
+    "setup-duration": 3,
+    "paper-circuit-duration": 1.5,
+    "cut-duration": 0.3333,
+    "cost-per-hour": 130
+  },
+  "ctp-machine": {
+    "sqm-per-hour": 26,
+    "cost-per-hour": 60
+  },
   "press-sheet": {
     "width": 1020,
     "height": 700,
-    "gripMargin": 20
+    "gripMargin": 20,
+    "price": 1
   },
   "pose": {
-    "width": 105,
-    "height": 74
+    "width": 210,
+    "height": 148,
+    "width1": 105,
+    "height1": 74
+  },
+  "openPose": {
+    "width": 420,
+    "height": 296
   },
   "zone": {
     "width": 210,
@@ -152,7 +193,7 @@
     "width": 120,
     "height": 80,
     "type": "Zone",
-    "gripMargin": {
+    "grip-margin": {
       "size": 0,
       "position": null,
       "x": 0,

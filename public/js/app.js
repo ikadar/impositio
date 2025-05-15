@@ -31,7 +31,7 @@ const show = (sheetLayout, machineGroup, content, actionPath) => {
     pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
     showTrimLines(sheetLayout, machineGroup);
     showCutSheet(sheetLayout, machineGroup);
-    showLayoutArea(sheetLayout, machineGroup, content);
+    showLayoutArea(sheetLayout, machineGroup, content, actionPath);
     showMaxSheet(sheetLayout, machineGroup);
     showMinSheet(sheetLayout, machineGroup);
 
@@ -452,13 +452,16 @@ const showMinSheetDimensionLines = (sheetLayout, machineGroup, options) => {
 
 }
 
-const showLayoutArea = (sheetLayout, machineGroup, content) => {
-    showTiles(sheetLayout, machineGroup, content);
+const showLayoutArea = (sheetLayout, machineGroup, content, actionPath) => {
+    showTiles(sheetLayout, machineGroup, content, actionPath);
 }
 
-const showTiles = (sheetLayout, machineGroup, content) => {
+const showTiles = (sheetLayout, machineGroup, content, actionPath) => {
 
     // console.log(sheetLayout);
+
+    const keys = Object.keys(actionPath);
+    const lastMachineKey = keys[keys.length - 1];
 
     const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
@@ -496,8 +499,10 @@ const showTiles = (sheetLayout, machineGroup, content) => {
             width: width,
             height: height,
             // fill: 'orange',
-            stroke: 'black',
-            strokeWidth: 0.1,
+            stroke: 'green',
+            strokeWidth: 2,
+            // stroke: 'black',
+            // strokeWidth: 0.1,
             opacity: 1,
         });
         layoutAreaGroup.add(tileWithCutBuffer);
@@ -521,19 +526,36 @@ const showTiles = (sheetLayout, machineGroup, content) => {
             height: height,
             fill: '#eee8f5',
             // fill: '#8d8d8d',
-            stroke: 'black',
-            strokeWidth: 0.1,
+            stroke: 'red',
+            strokeWidth: 2,
+            // stroke: 'black',
+            // strokeWidth: 0.1,
             opacity: 1,
         });
         tileGroup.add(tile);
         layoutAreaGroup.add(tileGroup);
 
         if (content) {
-            tileGroup.add(content.clone({
-                rotation: sheetLayout.rotated ? 90 : 0,
-                scaleY: sheetLayout.rotated ? -1 : 1,
-            }));
-            // pressSheetGroup.add(content);
+
+            if (lastMachineKey === "MBO XL") {
+
+                const poseWidth = sheetLayout.pose.width;
+                const poseHeight = sheetLayout.pose.height;
+
+                const pose  = new Konva.Rect({
+                    id: "pose",
+                    x: 0,
+                    y: 0,
+                    width: poseWidth,
+                    height: poseHeight,
+                    // fill: "yellow",
+                    // fill: "#C81365FF",
+                    stroke: "black",
+                    strokeWidth: 2,
+                    opacity: 1,
+                });
+            }
+
         } else {
 
             const poseWidth = sheetLayout.pose.width;
@@ -902,23 +924,36 @@ const calc = (input, machineIndex, content) => {
         })
             .then(response => response.json())
             .then(data => {
-                displayMachineVariations(data, input, machineIndex, content);
+                displayMachineVariations(data["grid-fittings"], input, machineIndex, content);
             })
             .catch(error => {
                 console.error('Error loading JSON:', error);
             });
     } else {
+
+        input.machines.map((item) => {
+            input["action-path"][item.id]["options"] = item;
+        });
+
+        // console.log(input.machines);
+        console.log(input["action-path"]);
+        const payload = {
+            "action-path": input["action-path"],
+            "config": JSON.parse(document.getElementById('input').value),
+        };
+
         fetch('/explanation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(input["action-path"])
+            body: JSON.stringify(payload)
+            // body: JSON.stringify(input["action-path"])
         })
             .then(response => response.json())
             .then(data => {
-                console.log(JSON.stringify(data, null, 2));
+                // console.log(JSON.stringify(data, null, 2));
                 // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
                 displayTextualExplanation(data);
             })
@@ -931,14 +966,48 @@ const calc = (input, machineIndex, content) => {
 const displayTextualExplanation = (data) => {
     const textualExplanation = document.getElementById("textual-explanation");
     textualExplanation.innerHTML = "";
-    data.map(item => {
-        if (item.actionType === "print") {
+    data.actions.map(item => {
+        if (item.actionType === "print" || item.actionType === "print" || item.actionType === "folding" || item.actionType === "stitching" || item.actionType === "ctp") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
             actionDiv.innerHTML += `<div class="title">${item.machine}</div>`;
             actionDiv.innerHTML += `<div><div class="label">min:</div> ${item.minSheet.width} x ${item.minSheet.height}</div>`;
             actionDiv.innerHTML += `<div><div class="label">max:</div> ${item.maxSheet.width} x ${item.maxSheet.height}</div>`;
             actionDiv.innerHTML += `<div><div class="label">Input sheet:</div> ${item.inputSheet.width} x ${item.inputSheet.height}</div>`;
+
+            if (item.actionType === "print") {
+                actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Products per sheet:</div> ${item.productsPerSheet}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Required sheet count:</div> ${item.printingSheets}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Sheet price:</div> ${item.sheetPrice}€</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Paper cost per product:</div> ${item.paperCostPerProduct}€</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Printing paper cost:</div> ${item.printingPaperCost}€</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+            }
+
+            if (item.actionType === "folding") {
+                actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+            }
+
+            if (item.actionType === "stitching") {
+                actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+            }
+
+            if (item.actionType === "ctp") {
+                actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+                actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+            }
+
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
         }
@@ -946,8 +1015,13 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "trim") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="sub-title">Polar 137 (trim)</div>`;
+            actionDiv.innerHTML += `<div class="sub-title">Polar 115 (trim)</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
         }
@@ -955,8 +1029,13 @@ const displayTextualExplanation = (data) => {
         if (item.actionType === "cut") {
             const actionDiv = document.createElement("div");
             actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-            actionDiv.innerHTML += `<div class="sub-title">Polar 137 (cut)</div>`;
+            actionDiv.innerHTML += `<div class="sub-title">Polar 115 (cut & trim)</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
             actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+            actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
             actionDiv.innerHTML += `</div>`;
             textualExplanation.appendChild(actionDiv);
         }
@@ -970,6 +1049,15 @@ const displayTextualExplanation = (data) => {
         }
 
     });
+
+    const totalDiv = document.createElement("div");
+    totalDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    totalDiv.innerHTML += `<div class="title">Total</div>`;
+    totalDiv.innerHTML += `<div><div class="label">Duration:</div> ${data.total.totalDuration} min</div>`;
+    totalDiv.innerHTML += `<div><div class="label">Cost:</div> ${data.total.totalCost}€</div>`;
+    totalDiv.innerHTML += `</div>`;
+    textualExplanation.appendChild(totalDiv);
+
 }
 
 const displayMachineVariations = (data, input, machineIndex, content) => {
@@ -1111,9 +1199,12 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
         selector.on("click", function () {
 
             input.zone = data[i].cutSheet;
+            // console.log(data[i]);
+
             input["action-path"][input.machines[machineIndex].id] = data[i];
 
             const newContent = show(data[i], machineGroup, content, input["action-path"]);
+
             stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
 
             // todo: delete machineGroups with higher indexes
@@ -1130,7 +1221,7 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
 
             document.getElementById("textual-explanation").innerHTML = "";
 
-            // calculate nex machine's data
+            // calculate next machine's data
             calc(input, machineIndex + 1, newContent);
         });
         controlPanelGroup.add(selector);

@@ -11,6 +11,7 @@ class Machine implements MachineInterface
 {
     public function __construct(
         protected string $id,
+        protected MachineType $type,
         protected float $gripMarginSize,
         protected Dimensions $minSheetDimensions,
         protected Dimensions $maxSheetDimensions,
@@ -33,10 +34,35 @@ class Machine implements MachineInterface
         return $this->minSheetDimensions;
     }
 
+    public function setMinSheetDimensions(Dimensions $minSheetDimensions): Machine
+    {
+        $this->minSheetDimensions = $minSheetDimensions;
+        return $this;
+    }
+
     public function getMaxSheetDimensions(): Dimensions
     {
         return $this->maxSheetDimensions;
     }
+
+    public function setMaxSheetDimensions(Dimensions $maxSheetDimensions): Machine
+    {
+        $this->maxSheetDimensions = $maxSheetDimensions;
+        return $this;
+    }
+
+
+    public function getType(): MachineType
+    {
+        return $this->type;
+    }
+
+    public function setType(MachineType $type): Machine
+    {
+        $this->type = $type;
+        return $this;
+    }
+
 
     public function getMinSheetRectangle(): RectangleInterface
     {
