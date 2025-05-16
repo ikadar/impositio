@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Geometry\Dimensions;
@@ -13,6 +14,7 @@ use App\Domain\Sheet\PrintFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ExplanationController extends AbstractController
@@ -23,6 +25,7 @@ class ExplanationController extends AbstractController
     public function __construct(
         protected Calculator $layoutCalculator,
         protected PrintFactory $printFactory,
+        protected EquipmentServiceInterface $equipmentService,
     )
     {
     }
@@ -41,6 +44,22 @@ class ExplanationController extends AbstractController
         $request = Request::createFromGlobals();
         $data = json_decode($request->getContent(), true);
 
+        $equipments = $this->equipmentService->load();
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $machines = [];
+        foreach ($data["config"]["actions"] as $action) {
+            $machine = $accessor->getValue($equipments, "[" . $action["machine"] . "]");
+            $machines[] = $machine;
+        }
+
+//        dump($machines);
+//        dump($data["config"]["machines"]);
+//        die();
+
+
+        $data["config"]["machines"] = $machines;
+
         $this->actionPath = $data["action-path"];
         $this->config = $data["config"];
     }
@@ -51,6 +70,8 @@ class ExplanationController extends AbstractController
 //            $this->actionPath,
 //            JsonResponse::HTTP_OK
 //        );
+
+        $equipments = $this->equipmentService->load();
 
         $actionPath = array_reverse($this->actionPath);
         $cutSheetCount = $this->config["number-of-copies"];
@@ -128,7 +149,7 @@ class ExplanationController extends AbstractController
                                 1.05
                             )
                             /
-                            $this->config["ctp-machine"]["sqm-per-hour"]
+                            $equipments["ctp-machine"]["sqm-per-hour"]
                         )
                         *
                         60
@@ -144,7 +165,7 @@ class ExplanationController extends AbstractController
                         60
                     )
                     *
-                    $this->config["ctp-machine"]["cost-per-hour"]
+                    $equipments["ctp-machine"]["cost-per-hour"]
                 ;
 
                 $responseData[] = [
@@ -370,6 +391,7 @@ class ExplanationController extends AbstractController
             $numberOfCuts = $numberOfTrimCuts + $numberOfCutCuts;
 
             if ($numberOfCuts > 0) {
+
                 // calculate number of handfuls
                 $numberOfHandfuls =
                     $cutSheetCount
@@ -392,15 +414,15 @@ class ExplanationController extends AbstractController
                         (
                             $numberOfCutCuts
                             *
-                            $this->config["cutting-machine"]["cut-duration"]
+                            $equipments["cutting-machine"]["cut-duration"]
                         )
                         +
-                        $this->config["cutting-machine"]["paper-circuit-duration"]
+                        $equipments["cutting-machine"]["paper-circuit-duration"]
                     )
                 ;
                 $runDuration = round($runDuration, 2);
 
-                $duration = round($runDuration + $this->config["cutting-machine"]["setup-duration"], 2);
+                $duration = round($runDuration + $equipments["cutting-machine"]["setup-duration"], 2);
                 $cuttingCost =
                     (
                         $duration
@@ -408,7 +430,7 @@ class ExplanationController extends AbstractController
                         60
                     )
                     *
-                    $this->config["cutting-machine"]["cost-per-hour"]
+                    $equipments["cutting-machine"]["cost-per-hour"]
                 ;
 
                 $responseData[] = [
@@ -417,11 +439,11 @@ class ExplanationController extends AbstractController
                     "numberOfSheets" => $cutSheetCount,
                     "numberOfCuts" => $numberOfCuts,
                     "numberOfHandfuls" => $numberOfHandfuls,
-                    "setupDuration" => $this->config["cutting-machine"]["setup-duration"],
+                    "setupDuration" => $equipments["cutting-machine"]["setup-duration"],
                     "runDuration" => $runDuration,
                     "cost" => round($cuttingCost, 2)
                 ];
-                $totalDuration += ($this->config["cutting-machine"]["setup-duration"] + $runDuration);
+                $totalDuration += ($equipments["cutting-machine"]["setup-duration"] + $runDuration);
                 $totalCost += $cuttingCost;
 
                 if ($numberOfCutCuts > 0) {

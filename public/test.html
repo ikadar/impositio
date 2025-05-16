@@ -41,9 +41,30 @@
     <script language="JavaScript" src="js/app.js" type="module"></script>
     <script language="JavaScript">
         const doCalculations = () => {
-            const display = document.getElementById('display');
-            display.innerHTML = '';
-            calc(JSON.parse(document.getElementById('input').value), 0, null);
+
+          // const display = document.getElementById('display');
+          // display.innerHTML = '';
+          // calc(JSON.parse(document.getElementById('input').value), 0, null);
+
+          fetch('/machines', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: document.getElementById('input').value
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log(data);
+              const display = document.getElementById('display');
+              display.innerHTML = '';
+              calc(data, 0, null);
+            })
+            .catch(error => {
+              console.error('Error loading JSON:', error);
+            }
+          );
         }
     </script>
 </head>
@@ -52,88 +73,23 @@
     <p>INPUT</p>
     <textarea style="width: 100%; height: 300px" id="input">
 {
-  "machines": [
+  "actions": [
     {
-      "id": "Hohner",
-      "type": "stitching machine",
-      "gripMargin": 0,
-      "input-dimensions": {
-        "min": {
-          "width": 105,
-          "height": 105
-        },
-        "max": {
-          "width": 360,
-          "height": 350
-        }
-      },
-      "input-sheet-dimensions": {
-          "width": 230,
-          "height": 168
-      },
-      "base-setup-duration": 15,
-      "documents-per-hour": 4000,
-      "cost-per-hour": 60
+      "type": "stitching",
+      "machine": "Hohner"
     },
     {
-      "id": "MBO XL",
-      "type": "folder",
-      "gripMargin": 0,
-      "input-dimensions": {
-        "min": {
-          "width": 300,
-          "height": 210
-        },
-        "max": {
-          "width": 1050,
-          "height": 750
-        }
-      },
-      "number-of-folds": 2,
-      "document-spacing": 0.05,
-      "meters-per-hour": 1500,
-      "base-setup-duration": 20,
-      "setup-duration-by-fold": 3.5,
-      "cost-per-hour": 60
+      "type": "folding",
+      "machine": "MBO XL"
     },
     {
-      "id": "Komori G40",
-      "type": "printing press",
-      "gripMargin": 15,
-      "input-dimensions": {
-        "min": {
-          "width": 520,
-          "height": 360
-        },
-        "max": {
-          "width": 1050,
-          "height": 750
-        }
-      },
-      "base-setup-duration": 6.6666,
-      "setup-duration-per-color": 3.3333,
-      "two-pass": false,
-      "pass-per-color": 75,
-      "sheets-per-hour": 8000,
-      "max-input-stack-height": 120,
-      "stack-replenishment-duration": 3,
-      "cost-per-hour": 130
+      "type": "printing",
+      "machine": "Komori G40"
     }
-
   ],
   "number-of-colors": 4,
   "number-of-copies": 1000,
   "paper-weight": 115,
-  "cutting-machine": {
-    "setup-duration": 3,
-    "paper-circuit-duration": 1.5,
-    "cut-duration": 0.3333,
-    "cost-per-hour": 130
-  },
-  "ctp-machine": {
-    "sqm-per-hour": 26,
-    "cost-per-hour": 60
-  },
   "press-sheet": {
     "width": 1020,
     "height": 700,

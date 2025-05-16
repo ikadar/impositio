@@ -1,0 +1,61 @@
+Hohner:
+  id: "Hohner"
+  type: "stitching machine"
+  gripMargin: 0
+  input-dimensions:
+    min:
+      width: 105
+      height: 105
+    max:
+      width: 360
+      height: 350
+  base-setup-duration: 15
+  documents-per-hour: 4000
+  cost-per-hour: 60
+MBO XL:
+  id: "MBO XL"
+  type: "folder"
+  gripMargin: 0
+  input-dimensions:
+    min:
+      width: 300
+      height: 210
+    max:
+      width: 1050
+      height: 750
+  number-of-folds: 2
+  document-spacing: 0.05
+  meters-per-hour: 1500
+  base-setup-duration: 20
+  setup-duration-by-fold: 3.5
+  cost-per-hour: 60
+Komori G40:
+  id: "Komori G40"
+  type: "printing press"
+  gripMargin: 15
+  input-dimensions:
+    min:
+      width: 520
+      height: 360
+    max:
+      width: 1050
+      height: 750
+  base-setup-duration: 6.6666
+  setup-duration-per-color: 3.3333
+  two-pass: false
+  pass-per-color: 75
+  sheets-per-hour: 8000
+  max-input-stack-height: 120
+  stack-replenishment-duration: 3
+  cost-per-hour: 130
+cutting-machine:
+  setup-duration: 3
+  paper-circuit-duration: 1.5
+  cut-duration: 0.3333
+  cost-per-hour: 130
+ctp-machine:
+    sqm-per-hour: 26
+    cost-per-hour: 60
+
+
+

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Equipment\MachineType;
@@ -14,6 +15,7 @@ use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -31,6 +33,7 @@ class TestController extends AbstractController
     public function __construct(
         protected Calculator $layoutCalculator,
         protected PrintFactory $printFactory,
+        protected EquipmentServiceInterface $equipmentService,
     )
     {
     }
@@ -55,12 +58,13 @@ class TestController extends AbstractController
         $request = Request::createFromGlobals();
         $data = json_decode($request->getContent(), true);
 
+        $accessor = PropertyAccess::createPropertyAccessor();
+
         $machineType = MachineType::tryFrom($data["machine"]["type"]);
         if ($machineType === null) {
             throw new BadRequestHttpException();
         }
 
-        $accessor = PropertyAccess::createPropertyAccessor();
 
         if ($accessor->getValue($data, "[machine][input-sheet-dimensions]")) {
             $minDimensions = new Dimensions(
@@ -142,6 +146,7 @@ class TestController extends AbstractController
                 $zoneWidth,
                 $zoneHeight
             ));
+
         }
 
         $this->zone = $this->printFactory->newInputSheet( // perhaps better to handle it as a Tile?
