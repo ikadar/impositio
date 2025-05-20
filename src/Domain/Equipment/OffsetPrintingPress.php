@@ -43,13 +43,13 @@ class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrin
 
         $options = array_merge($defaultOptions, $options);
 
-        $this->setBaseSetupDuration($options['base-setup-duration']);
-        $this->setSetupDurationPerColor($options['setup-duration-per-color']);
-        $this->setTwoPass($options['two-pass']);
-        $this->setPassPerColor($options['pass-per-color']);
-        $this->setSheetsPerHour($options['sheets-per-hour']);
-        $this->setMaxInputStackHeight($options['max-input-stack-height']);
-        $this->setStackReplenishmentDuration($options['stack-replenishment-duration']);
+        $this->setBaseSetupDuration($options["base-setup-duration"]);
+        $this->setSetupDurationPerColor($options["setup-duration-per-color"]);
+        $this->setTwoPass($options["two-pass"]);
+        $this->setPassPerColor($options["pass-per-color"]);
+        $this->setSheetsPerHour($options["sheets-per-hour"]);
+        $this->setMaxInputStackHeight($options["max-input-stack-height"]);
+        $this->setStackReplenishmentDuration($options["stack-replenishment-duration"]);
 
     }
 
