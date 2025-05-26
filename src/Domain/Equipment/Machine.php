@@ -2,6 +2,8 @@
 
 namespace App\Domain\Equipment;
 
+use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
@@ -16,6 +18,7 @@ class Machine implements MachineInterface
         protected Dimensions $minSheetDimensions,
         protected Dimensions $maxSheetDimensions,
         protected PrintFactory $printFactory,
+        protected EquipmentServiceInterface $equipmentService,
     )
     {
     }
@@ -83,6 +86,15 @@ class Machine implements MachineInterface
             $this->getMaxSheetDimensions()->getWidth(),
             $this->getMaxSheetDimensions()->getHeight()
         );
+    }
+
+
+    public function setOpenPoseDimensions(Dimensions $dimensions): void
+    {}
+
+    public function calculateCost(ActionPathNodeInterface $action): float
+    {
+        return 999;
     }
 
 }

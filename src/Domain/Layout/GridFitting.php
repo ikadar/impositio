@@ -165,7 +165,7 @@ class GridFitting implements Interfaces\GridFittingInterface
         $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
         $pressSheetJson = json_decode($pressSheet->toJson(), true);
-        $pressSheetJson["price"] = $pressSheet->price;
+        $pressSheetJson["price"] = $pressSheet->getPrice();
 
         $array = [
             "cols" => $this->getCols(),

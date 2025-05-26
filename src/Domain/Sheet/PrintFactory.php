@@ -15,6 +15,7 @@ use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\TileInterface;
 use App\Domain\Layout\Tile;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\Interfaces\SheetInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -37,6 +38,17 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
             new Dimensions($width, $height),
             $this,
             (new RectangleId())->setValue($id),
+        );
+    }
+
+    public function newPressSheet (string $id, float $x, float $y, float $width, float $height, float $price): PressSheetInterface
+    {
+        return new PressSheet(
+            new Position(new Coordinate($x), new Coordinate($y)),
+            new Dimensions($width, $height),
+            $this,
+            (new RectangleId())->setValue($id),
+            $price
         );
     }
 

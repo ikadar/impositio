@@ -2,13 +2,13 @@
 
 namespace App\Domain\Equipment;
 
+use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\OffsetPrintingPressInterface;
-use App\Domain\Equipment\PrintingPress;
 use App\Domain\Geometry\Dimensions;
-use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Sheet\PrintFactory;
 
-class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrintingPressInterface
+class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressInterface
 {
 
     protected float $baseSetupDuration;
@@ -19,6 +19,8 @@ class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrin
     protected float $maxInputStackHeight;
     protected float $stackReplenishmentDuration;
 
+    protected float $costPerHour;
+
     public function __construct(
         string $id,
         MachineType $type,
@@ -26,22 +28,20 @@ class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrin
         Dimensions $minSheetDimensions,
         Dimensions $maxSheetDimensions,
         PrintFactory $printFactory,
-        array $options = []
+        EquipmentServiceInterface $equipmentService,
     )
     {
-        parent::__construct($id, $type, $gripMarginSize, $minSheetDimensions, $maxSheetDimensions, $printFactory);
+        parent::__construct(
+            $id,
+            $type,
+            $gripMarginSize,
+            $minSheetDimensions,
+            $maxSheetDimensions,
+            $printFactory,
+            $equipmentService
+        );
 
-        $defaultOptions = [
-            "base-setup-duration" => 6.6666,
-            "setup-duration-per-color" => 3.3333,
-            "two-pass" => false,
-            "pass-per-color" => 75,
-            "sheets-per-hour" => 8000,
-            "max-input-stack-height" => 120,
-            "stack-replenishment-duration" => 3
-        ];
-
-        $options = array_merge($defaultOptions, $options);
+        $options = $equipmentService->loadById($id);
 
         $this->setBaseSetupDuration($options["base-setup-duration"]);
         $this->setSetupDurationPerColor($options["setup-duration-per-color"]);
@@ -50,6 +50,7 @@ class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrin
         $this->setSheetsPerHour($options["sheets-per-hour"]);
         $this->setMaxInputStackHeight($options["max-input-stack-height"]);
         $this->setStackReplenishmentDuration($options["stack-replenishment-duration"]);
+        $this->setCostPerHour($options["cost-per-hour"]);
 
     }
 
@@ -130,6 +131,108 @@ class OffsetPrintingPress extends PrintingPress implements Interfaces\OffsetPrin
         return $this;
     }
 
+    public function getCostPerHour(): float
+    {
+        return $this->costPerHour;
+    }
 
+    public function setCostPerHour(float $costPerHour): OffsetPrintingPress
+    {
+        $this->costPerHour = $costPerHour;
+        return $this;
+    }
+
+    public function calculateCost(ActionPathNodeInterface $action): float
+    {
+        // paper cost calculation
+        $productsPerSheet = count($action->getGridFitting()->getTiles());
+        $paperCostPerProduct = round($action->getPressSheet()->getPrice() / $productsPerSheet, 2);
+//        $actionData["numberOfSheets"] = $cutSheetCount;
+//        $actionData["sheetPrice"] = $action["pressSheet"]["price"];
+//        $actionData["productsPerSheet"] = $productsPerSheet;
+//        $actionData["printingSheets"] = ceil($this->config["number-of-copies"] / $productsPerSheet);
+//        $actionData["paperCostPerProduct"] = $paperCostPerProduct;
+        $paperCost = $action->getTodo()["numberOfCopies"] * $paperCostPerProduct;
+
+        // setup duration calculation
+        $setupDuration = $this->calculateSetupDuration($action);
+
+        // Calculation of number of stack replenishments
+        $numberOfPrintingSheets = ceil($action->getTodo()["numberOfCopies"] / $productsPerSheet);
+
+        // Calculation of run duration
+        $runDuration = $this->calculateRunDuration($action);
+
+        $duration = $setupDuration + $runDuration;
+        $cost =
+            (
+                $duration
+                /
+                60
+            )
+            *
+            $this->getCostPerHour()
+        ;
+        $cost = round($cost, 2);
+
+        return $cost;
+    }
+
+    public function calculateSetupDuration(ActionPathNodeInterface $action): float
+    {
+        $setupDuration =
+            $this->getBaseSetupDuration()
+            +
+            (
+                $action->getTodo()["numberOfColors"]
+                *
+                $this->getSetupDurationPerColor()
+            )
+        ;
+        return round($setupDuration, 2);
+    }
+
+    public function calculateRunDuration(ActionPathNodeInterface $action): float
+    {
+        // Calculation of number of stack replenishments
+        $productsPerSheet = count($action->getGridFitting()->getTiles());
+        $numberOfPrintingSheets = ceil($action->getTodo()["numberOfCopies"] / $productsPerSheet);
+        $numberOfStackReplenishments =
+            (
+                $numberOfPrintingSheets
+                *
+                (
+                    $action->getTodo()["paperWeight"]
+                    /
+                    115
+                )
+                /
+                100
+            )
+            /
+            $this->getMaxInputStackHeight()
+        ;
+
+        // Calculation of run duration
+        $runDuration =
+            (
+                $numberOfStackReplenishments
+                *
+                $this->getStackReplenishmentDuration()
+            )
+            +
+            (
+                (
+                    $numberOfPrintingSheets
+                    /
+                    $this->getSheetsPerHour()
+                )
+                *
+                60
+            )
+        ;
+
+        return round($runDuration, 2);
+    }
 
 }

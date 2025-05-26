@@ -8,13 +8,14 @@ use App\Domain\Geometry\AlignmentMode;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Direction;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Layout\Interfaces\CalculatorInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\PackerInterface;
 use App\Domain\Sheet\GripMarginPosition;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
-class Calculator
+class Calculator implements CalculatorInterface
 {
 
     public function __construct(

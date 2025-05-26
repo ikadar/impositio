@@ -49,13 +49,33 @@ Komori G40:
   stack-replenishment-duration: 3
   cost-per-hour: 130
 cutting-machine:
+  id: "cutting machine"
+  type: "cutting machine"
+  gripMargin: 15
+  input-dimensions:
+    min:
+      width: 520
+      height: 360
+    max:
+      width: 1050
+      height: 750
   setup-duration: 3
   paper-circuit-duration: 1.5
   cut-duration: 0.3333
   cost-per-hour: 130
 ctp-machine:
-    sqm-per-hour: 26
-    cost-per-hour: 60
+  id: "ctp machine"
+  type: "ctp machine"
+  gripMargin: 15
+  input-dimensions:
+    min:
+      width: 520
+      height: 360
+    max:
+      width: 1050
+      height: 750
+  sqm-per-hour: 26
+  cost-per-hour: 60
 
 
 

@@ -7,6 +7,8 @@ enum MachineType: string
     case PrintingPress = "printing press";
     case Folder = "folder";
     case StitchingMachine = "stitching machine";
+    case CuttingMachine = "cutting machine";
+    case CTPMachine = "ctp machine";
 
     public function stopsImposition(): ?float
     {
