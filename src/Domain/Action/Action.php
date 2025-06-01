@@ -74,37 +74,37 @@ class Action implements ActionInterface
         ));
     }
 
-    public function toArray(): array
-    {
-        $array =  [
-            "machine" => $this->getMachine()->getId(),
-            "zone" => [
-                "width" => $this->getZone()->getWidth(),
-                "height" => $this->getZone()->getHeight(),
-            ],
-            "pressSheet" => [
-                "width" => $this->getPressSheet()->getWidth(),
-                "height" => $this->getPressSheet()->getHeight(),
-            ],
-            "prevActions" => []
-        ];
-
-        foreach ($this->prevActions as $prevAction) {
-            $gf = $prevAction["gridFitting"]->toArray(
-                $prevAction["action"]->getMachine(),
-                $prevAction["action"]->getPressSheet()
-            );
-            $array["prevActions"][] = [
-                "gridFitting" => [
-                    "cols" => $gf["cols"],
-                    "rows" => $gf["rows"],
-                    "rotated" => $gf["rotated"]
-                ],
-                "action" => $prevAction["action"]->toArray(),
-            ];
-        }
-
-        return $array;
-    }
+//    public function toArray(): array
+//    {
+//        $array =  [
+//            "machine" => $this->getMachine()->getId(),
+//            "zone" => [
+//                "width" => $this->getZone()->getWidth(),
+//                "height" => $this->getZone()->getHeight(),
+//            ],
+//            "pressSheet" => [
+//                "width" => $this->getPressSheet()->getWidth(),
+//                "height" => $this->getPressSheet()->getHeight(),
+//            ],
+//            "prevActions" => []
+//        ];
+//
+//        foreach ($this->prevActions as $prevAction) {
+//            $gf = $prevAction["gridFitting"]->toArray(
+//                $prevAction["action"]->getMachine(),
+//                $prevAction["action"]->getPressSheet()
+//            );
+//            $array["prevActions"][] = [
+//                "gridFitting" => [
+//                    "cols" => $gf["cols"],
+//                    "rows" => $gf["rows"],
+//                    "rotated" => $gf["rotated"]
+//                ],
+//                "action" => $prevAction["action"]->toArray(),
+//            ];
+//        }
+//
+//        return $array;
+//    }
 
 }

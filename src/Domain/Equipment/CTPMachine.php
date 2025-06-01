@@ -3,6 +3,7 @@
 namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\CTPMachineInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Geometry\Dimensions;
@@ -106,22 +107,23 @@ class CTPMachine extends Machine implements CTPMachineInterface
             1000000
         ;
 
-        return
+        $duration = (
             (
                 (
-                    (
-                        $sqm
-                        *
-                        1.05
-                    )
-                    /
-                    $this->getSqmPerHour()
+                    $sqm
+                    *
+                    1.05
                 )
-                *
-                60
-                *
-                $action->getTodo()["numberOfColors"]
+                /
+                $this->getSqmPerHour()
             )
+            *
+            60
+            *
+            $action->getTodo()["numberOfColors"]
+        )
         ;
+
+        return round($duration, 2);
     }
 }

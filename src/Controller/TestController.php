@@ -5,8 +5,11 @@ namespace App\Controller;
 use App\Domain\Action\AbstractAction;
 use App\Domain\Action\Action;
 use App\Domain\Action\ActionPathNode;
+use App\Domain\Action\ActionTreeNode;
 use App\Domain\Action\ActionType;
 use App\Domain\Action\Interfaces\ActionInterface;
+use App\Domain\Action\Interfaces\ActionTreeInterface;
+use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
@@ -37,6 +40,7 @@ class TestController extends AbstractController
         protected PrintFactory $printFactory,
         protected EquipmentServiceInterface $equipmentService,
         protected EquipmentFactoryInterface $equipmentFactory,
+        protected ActionTreeInterface $actionTree,
     )
     {
     }
@@ -68,48 +72,55 @@ class TestController extends AbstractController
         $this->numberOfColors = 4;
 
 
-        $abstractActions = [];
-        foreach ($this->abstractActionData as ["type" => $actionTypeName]) {
-            $abstractActions[]= new AbstractAction(
-                ActionType::tryFrom($actionTypeName),
-                $this->equipmentFactory
-            );
-        }
+//        $abstractActions = [];
+//        foreach ($this->abstractActionData as ["type" => $actionTypeName]) {
+//            $abstractActions[]= new AbstractAction(
+//                ActionType::tryFrom($actionTypeName),
+//                $this->equipmentFactory
+//            );
+//        }
+//
+//        $flatActionPaths = $this->calculateFlatActionPaths($abstractActions, $this->pressSheet, $this->zone);
+//
+//        $extendedFlatActionPaths = [];
+//        foreach ($flatActionPaths as $flatActionPath) {
+//            $extendedFlatActionPaths[] = $this->extendFlatActionPath($flatActionPath);
+//        }
+//
+//        $paths = [];
+//        foreach ($extendedFlatActionPaths as $extendedFlatActionPath) {
+//            $path = [
+//                "designation" => [],
+//                "nodes" => []
+//            ];
+//            $cost = 0;
+//            $duration = 0;
+//            foreach ($extendedFlatActionPath as $action) {
+//                $actionArray = $action->toArray();
+//                $cost += $actionArray["cost"];
+//                $duration += ($actionArray["setupDuration"] + $actionArray["runDuration"]);
+//                $path["designation"][] = $actionArray["machine"];
+//
+////                $path["designation"] .= sprintf(
+////                    "- %s (%dx%d %s)<br/>",
+////                    $actionArray["machine"],
+////                    $actionArray["gridFitting"]["cols"],
+////                    $actionArray["gridFitting"]["rows"],
+////                    $actionArray["gridFitting"]["rotated"] ? "rotated" : "unrotated"
+////                );
+//                $path["nodes"][] = $actionArray;
+//            }
+//            $path["designation"] = implode(" > ", $path["designation"]);
+//            $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
+//            $paths[] = $path;
+//        }
 
-        $flatActionPaths = $this->calculateFlatActionPaths($abstractActions, $this->pressSheet, $this->zone);
-
-        $extendedFlatActionPaths = [];
-        foreach ($flatActionPaths as $flatActionPath) {
-            $extendedFlatActionPaths[] = $this->extendFlatActionPath($flatActionPath);
-        }
-
-        $paths = [];
-        foreach ($extendedFlatActionPaths as $extendedFlatActionPath) {
-            $path = [
-                "designation" => "",
-                "nodes" => []
-            ];
-            foreach ($extendedFlatActionPath as $action) {
-                $actionArray = $action->toArray();
-                $path["designation"] .= sprintf(
-                    "%s (%dx%d %s); ",
-                    $actionArray["machine"],
-                    $actionArray["gridFitting"]["cols"],
-                    $actionArray["gridFitting"]["rows"],
-                    $actionArray["gridFitting"]["rotated"] ? "rotated" : "unrotated"
-                );
-                $path["nodes"][] = $actionArray;
-            }
-            $paths[] = $path;
-        }
-
-        return new JsonResponse(
-            $paths,
-        JsonResponse::HTTP_OK
-    );
-
-
-        die();
+//        return new JsonResponse(
+//            $paths,
+//        JsonResponse::HTTP_OK
+//        );
+//
+//        die();
 
         $gridFittings = $this->layoutCalculator->calculateGridFittings(
             $this->machine,
@@ -203,71 +214,17 @@ class TestController extends AbstractController
 
     }
 
-    public function calculateActionPathNodes(array $abstractActions, PressSheetInterface $pressSheet, InputSheetInterface $zone, array $prevNodes = []): array
-    {
-        $abstractAction = array_shift($abstractActions);
 
-        if ($abstractAction === null) {
-            return $prevNodes;
-        }
-
-        $machine = $abstractAction->getAvailableMachines()[0];
-
-        $action = new Action(
-            $machine,
-            $pressSheet,
-            $zone,
-            $this->layoutCalculator
-        );
-
-
-        if ($action->getMachine()->getType()->value === "folder") {
-
-            $zone->setDimensions($this->openPoseDimensions);
-            $machine->setOpenPoseDimensions($this->openPoseDimensions);
-
-            $action = new Action(
-                $machine,
-                $pressSheet,
-                $zone,
-                $this->layoutCalculator
-            );
-        }
-
-        $actionPaths = [];
-        foreach ($action->getGridFittings() as $gridFitting) {
-//            dump(sprintf("ZONE: %d, %d", $zone->getWidth(), $zone->getHeight()));
-//            dump(sprintf("LOOP: %d, MACHINE: %s", count($action->getGridFittings()), $action->getMachine()->getId()));
-
-            $gridFitting->getCutSheet()->setContentType("Sheet");
-
-            $apn = new ActionPathNode(
-                $action->getMachine(),
-                $action->getPressSheet(),
-                $action->getZone(),
-                $gridFitting,
-                []
-            );
-
-            $actionPathNodes = $prevNodes;
-
-            $apn->prevActions = $this->calculateActionPathNodes(
-                $abstractActions,
-                $pressSheet,
-                $gridFitting->getCutSheet(),
-                $actionPathNodes
-            );
-            $actionPaths[] = $apn;
-
-        }
-
-//die("OK");
-        return $actionPaths;
-    }
 
     public function calculateFlatActionPaths($abstractActions, $pressSheet, $zone)
     {
-        $actionTrees = $this->calculateActionPathNodes($abstractActions, $pressSheet, $zone);
+        $this->actionTree->setOpenPoseDimensions($this->openPoseDimensions);
+        $actionTrees = $this->actionTree->calculate($abstractActions, $pressSheet, $zone);
+        dump("----------------");
+        dump(count($actionTrees));
+        die();
+
+//        $actionTrees = $this->calculateActionTreeNodes($abstractActions, $pressSheet, $zone);
 
         $reverseFlatActionPaths = [];
         foreach ($actionTrees as $action) {
@@ -283,17 +240,17 @@ class TestController extends AbstractController
     }
 
 
-    public function flattenActionTree($node, array $path = []): array {
+    public function flattenActionTree(ActionTreeNodeInterface $node, array $path = []): array {
         $current = clone $node;
-        unset($current->prevActions);
+        $current->setPrevActions([]);
         $path[] = $current;
 
-        if (empty($node->prevActions)) {
+        if (empty($node->getPrevActions())) {
             return [$path];
         }
 
         $result = [];
-        foreach ($node->prevActions as $prevNode) {
+        foreach ($node->getPrevActions() as $prevNode) {
             $subPaths = $this->flattenActionTree($prevNode, $path);
             foreach ($subPaths as $sp) {
                 $result[] = $sp;
@@ -354,6 +311,7 @@ class TestController extends AbstractController
             $extendedActionPath[] = $node;
 
             $numberOfTrimCuts = 0;
+            $numberOfCutCuts = 0;
             if ($nextAction !== null) {
 
                 if (
@@ -365,10 +323,10 @@ class TestController extends AbstractController
                     $numberOfTrimCuts += (($node->getGridFitting()->getTrimLines()["top"]["y"] > 0) ? 2 : 0);
                     $numberOfTrimCuts += (($node->getGridFitting()->getTrimLines()["left"]["x"] > 0) ? 2 : 0);
                 }
+                $numberOfCutCuts = $node->getGridFitting()->getCols() - 1 + $node->getGridFitting()->getRows() - 1;
 
             }
 
-            $numberOfCutCuts = $node->getGridFitting()->getCols() - 1 + $node->getGridFitting()->getRows() - 1;
             $numberOfCuts = $numberOfTrimCuts + $numberOfCutCuts;
 
             if ($numberOfCuts > 0) {
@@ -392,7 +350,6 @@ class TestController extends AbstractController
 
 
         }
-
 
         return $extendedActionPath;
     }

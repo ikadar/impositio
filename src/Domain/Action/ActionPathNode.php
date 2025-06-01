@@ -2,7 +2,7 @@
 
 namespace App\Domain\Action;
 
-use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
@@ -25,7 +25,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
         return $this->gridFitting;
     }
 
-    public function setGridFitting(GridFittingInterface $gridFitting): ActionPathNodeInterface
+    public function setGridFitting(GridFittingInterface $gridFitting): ActionTreeNodeInterface
     {
         $this->gridFitting = $gridFitting;
         return $this;

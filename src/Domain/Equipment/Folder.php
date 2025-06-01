@@ -3,6 +3,7 @@
 namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\FolderInterface;
 use App\Domain\Geometry\Dimensions;
@@ -135,7 +136,7 @@ class Folder extends Machine implements FolderInterface
         return $cost;
     }
 
-    public function calculateSetupDuration(ActionPathNodeInterface $action): float
+    public function calculateSetupDuration(ActionTreeNodeInterface $action): float
     {
         return $this->getBaseSetupDuration()
             +

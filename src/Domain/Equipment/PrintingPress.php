@@ -2,7 +2,7 @@
 
 namespace App\Domain\Equipment;
 
-use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\PrintingPressInterface;
 use App\Domain\Geometry\Dimensions;

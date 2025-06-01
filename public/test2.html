@@ -13,55 +13,169 @@
             height: 100%;
             background-color: #cccdcd;
         }
+        #textual-explanation{
+            margin: 20px;
+        }
+        #textual-explanation .title {
+            background-color: dimgray;
+            color: white;
+            font-weight: bold;
+            padding: 5px;
+        }
+        #textual-explanation .sub-title {
+            padding: 5px;
+            background-color: #cccdcd;
+            font-weight: bold;
+        }
+        #textual-explanation .label {
+            font-weight: bold;
+            width: 200px;
+            display: inline-block;
+            padding-left: 5px;
+        }
+        #textual-explanation-container {
+            margin: 20px;
+        }
     </style>
     <script src="https://unpkg.com/konva@9/konva.min.js"></script>
-    <script language="JavaScript" src="js/app2.js" type="module"></script>
+    <script language="JavaScript" src="js/app.js" type="module"></script>
     <script language="JavaScript">
         const doCalculations = () => {
-            const display = document.getElementById('display');
-            display.innerHTML = '';
-            calc(JSON.parse(document.getElementById('input').value), 0, null);
+
+            // const display = document.getElementById('display');
+            // display.innerHTML = '';
+            // calc(JSON.parse(document.getElementById('input').value), 0, null);
+
+            fetch('/machines', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: document.getElementById('input').value
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const display = document.getElementById('display');
+                    display.innerHTML = '';
+                    calc(data, 0, null);
+                })
+                .catch(error => {
+                        console.error('Error loading JSON:', error);
+                    }
+                );
         }
     </script>
 </head>
 <body>
 <div>
-<!--    <p>INPUT</p>-->
-<!--    <textarea style="width: 100%; height: 300px" id="input">-->
-<!--{-->
-<!--    "children": [-->
-<!--        {-->
-<!--            "children": [-->
-<!--                {-->
-<!--                    "children": [],-->
-<!--                    "id": "cr1",-->
-<!--                    "x": 125,-->
-<!--                    "y": 125,-->
-<!--                    "height": 100,-->
-<!--                    "width": 100-->
-<!--                }-->
-<!--            ],-->
-<!--            "id": "r1",-->
-<!--            "x": 100,-->
-<!--            "y": 100,-->
-<!--            "height": 350,-->
-<!--            "width": 350-->
-<!--        }-->
-<!--    ],-->
-<!--    "id": "plane",-->
-<!--    "x": 0,-->
-<!--    "y": 0,-->
-<!--    "height": null,-->
-<!--    "width": null-->
-<!--}-->
-<!--    </textarea>-->
-    <button onclick="showData()">show</button>
+    <p>INPUT</p>
+    <textarea style="width: 100%; height: 300px" id="input">
+{
+  "actions": [
+    {
+      "type": "stitching",
+      "machine": "Hohner"
+    },
+    {
+      "type": "folding",
+      "machine": "MBO XL"
+    },
+    {
+      "type": "printing",
+      "machine": "Komori G40"
+    }
+  ],
+  "number-of-colors": 4,
+  "number-of-copies": 1000,
+  "paper-weight": 115,
+  "press-sheet": {
+    "width": 1020,
+    "height": 700,
+    "gripMargin": 20,
+    "price": 1
+  },
+  "pose": {
+    "width": 210,
+    "height": 148,
+    "width1": 105,
+    "height1": 74
+  },
+  "openPose": {
+    "width": 420,
+    "height": 296
+  },
+  "zone": {
+    "width": 210,
+    "height": 148,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "zone-A3": {
+    "width": 420,
+    "height": 297,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "zone-A4": {
+    "width": 297,
+    "height": 210,
+    "type": "Zone",
+    "gripMargin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "zone-TEST": {
+    "width": 120,
+    "height": 80,
+    "type": "Zone",
+    "grip-margin": {
+      "size": 0,
+      "position": null,
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    }
+  },
+  "action-path": {
+  }
+}
+    </textarea>
+    <button onclick="doCalculations()">CALC</button>
     <div id="display"></div>
-<!--    <div>unrotated</div>-->
-<!--    <div id="variations"></div>-->
-<!--    <div>rotated</div>-->
-<!--    <div id="rotated-variations"></div>-->
+    <!--    <div>unrotated</div>-->
+    <!--    <div id="variations"></div>-->
+    <!--    <div>rotated</div>-->
+    <!--    <div id="rotated-variations"></div>-->
 </div>
 <div id="konva-container"></div>
+<div id="textual-explanation-container">
+    <pre id="textual-explanation"></pre>
+</div>
+<div style="height: 50px; background-color: #cccdcd;"></div>
+<!--<div>-->
+<!--  <pre id="explanation"></pre>-->
+<!--</div>-->
 </body>
 </html>

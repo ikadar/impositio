@@ -1,7 +1,8 @@
 const stage = new Konva.Stage({
     container: 'konva-container', // id of container <div>
     width: window.innerWidth,
-    height: 400
+    height: 0
+    // height: 400
     // height: window.innerHeight
 });
 
@@ -924,7 +925,8 @@ const calc = (input, machineIndex, content) => {
         })
             .then(response => response.json())
             .then(data => {
-                displayMachineVariations(data["grid-fittings"], input, machineIndex, content);
+                // console.log(data);
+                displayAllTextualExplanation(data);
             })
             .catch(error => {
                 console.error('Error loading JSON:', error);
@@ -961,6 +963,136 @@ const calc = (input, machineIndex, content) => {
                 console.error('Error loading JSON:', error);
             });
     }
+}
+
+
+const displayAllTextualExplanation = (data) => {
+
+    const textualExplanation = document.getElementById("textual-explanation");
+    textualExplanation.innerHTML = "";
+    data.map((path) => {
+        const uuid = crypto.randomUUID();
+        console.log(uuid);
+        // console.log(path.designation);
+        const actionDiv = document.createElement("div");
+
+        let divContent = "";
+
+        divContent += `<div style="margin-bottom: 20px">`;
+        divContent += `<div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
+        divContent += `<div class = "details" id="${uuid}" >`;
+        path.nodes.map((node) => {
+            divContent += `<div class="machine">`;
+            divContent += `<div class="sub-title">${node.machine}</div>`;
+            divContent += `<div><div class="label">Zone:</div> ${node.zone.width}x${node.zone.height}mm</div>`;
+            divContent += `<div><div class="label">Setup duration:</div> ${node.setupDuration} min</div>`;
+            divContent += `<div><div class="label">Run duration:</div> ${node.runDuration} min</div>`;
+            divContent += `<div><div class="label">Cost:</div> ${node.cost}€</div>`;
+            divContent += `</div>`;
+            // console.log(node);
+        })
+        divContent += `</div>`;
+        divContent += `</div>`;
+
+        actionDiv.innerHTML = divContent;
+
+        textualExplanation.appendChild(actionDiv);
+    })
+
+    // const textualExplanation = document.getElementById("textual-explanation");
+    // textualExplanation.innerHTML = "";
+    // data.actions.map(item => {
+    //     if (item.actionType === "print" || item.actionType === "print" || item.actionType === "folding" || item.actionType === "stitching" || item.actionType === "ctp") {
+    //         const actionDiv = document.createElement("div");
+    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    //         actionDiv.innerHTML += `<div class="title">${item.machine}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">min:</div> ${item.minSheet.width} x ${item.minSheet.height}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">max:</div> ${item.maxSheet.width} x ${item.maxSheet.height}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Input sheet:</div> ${item.inputSheet.width} x ${item.inputSheet.height}</div>`;
+    //
+    //         if (item.actionType === "print") {
+    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Products per sheet:</div> ${item.productsPerSheet}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Required sheet count:</div> ${item.printingSheets}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Sheet price:</div> ${item.sheetPrice}€</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Paper cost per product:</div> ${item.paperCostPerProduct}€</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Printing paper cost:</div> ${item.printingPaperCost}€</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         }
+    //
+    //         if (item.actionType === "folding") {
+    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         }
+    //
+    //         if (item.actionType === "stitching") {
+    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         }
+    //
+    //         if (item.actionType === "ctp") {
+    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         }
+    //
+    //         actionDiv.innerHTML += `</div>`;
+    //         textualExplanation.appendChild(actionDiv);
+    //     }
+    //
+    //     if (item.actionType === "trim") {
+    //         const actionDiv = document.createElement("div");
+    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (trim)</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         actionDiv.innerHTML += `</div>`;
+    //         textualExplanation.appendChild(actionDiv);
+    //     }
+    //
+    //     if (item.actionType === "cut") {
+    //         const actionDiv = document.createElement("div");
+    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (cut & trim)</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
+    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
+    //         actionDiv.innerHTML += `</div>`;
+    //         textualExplanation.appendChild(actionDiv);
+    //     }
+    //
+    //     if (item.actionType === "rotation") {
+    //         const actionDiv = document.createElement("div");
+    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    //         actionDiv.innerHTML += `<div style="padding-left: 5px"><i>Rotation</i></div>`;
+    //         actionDiv.innerHTML += `</div>`;
+    //         textualExplanation.appendChild(actionDiv);
+    //     }
+    //
+    // });
+    //
+    // const totalDiv = document.createElement("div");
+    // totalDiv.innerHTML = `<div style="margin-bottom: 20px">`;
+    // totalDiv.innerHTML += `<div class="title">Total</div>`;
+    // totalDiv.innerHTML += `<div><div class="label">Duration:</div> ${data.total.totalDuration} min</div>`;
+    // totalDiv.innerHTML += `<div><div class="label">Cost:</div> ${data.total.totalCost}€</div>`;
+    // totalDiv.innerHTML += `</div>`;
+    // textualExplanation.appendChild(totalDiv);
+
 }
 
 const displayTextualExplanation = (data) => {
