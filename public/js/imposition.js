@@ -904,65 +904,81 @@ const verticalTrimLine = (options) => {
 
 const calc = (input, machineIndex, content) => {
 
-    if (machineIndex < input.machines.length) {
+    const machineId = input.nodes[5].machine;
+    const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
 
-        input.machine = input.machines[machineIndex];
+    let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
 
-        if (machineIndex > 0) {
-            input.cutSpacing = {
-                horizontal: 0,
-                vertical: 0,
-            };
-        }
-
-        fetch('/test', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(input)
-        })
-            .then(response => response.json())
-            .then(data => {
-                // console.log(data);
-                displayAllTextualExplanation(data);
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-            });
-    } else {
-
-        input.machines.map((item) => {
-            input["action-path"][item.id]["options"] = item;
+    if (!machineGroup) {
+        machineGroup = new Konva.Group({
+            id: machineGroupId,
+            x: 0,
+            y: machineIndex * 1200,
         });
-
-        // console.log(input.machines);
-        console.log(input["action-path"]);
-        const payload = {
-            "action-path": input["action-path"],
-            "config": JSON.parse(document.getElementById('input').value),
-        };
-
-        fetch('/explanation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-            // body: JSON.stringify(input["action-path"])
-        })
-            .then(response => response.json())
-            .then(data => {
-                // console.log(JSON.stringify(data, null, 2));
-                // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
-                displayTextualExplanation(data);
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-            });
+        baseLayer.add(machineGroup);
     }
+
+    show(input.nodes[5].gridFitting.data, machineGroup, content, input["action-path"]);
+
+    // if (machineIndex < input.machines.length) {
+    //
+    //     input.machine = input.machines[machineIndex];
+    //
+    //     if (machineIndex > 0) {
+    //         input.cutSpacing = {
+    //             horizontal: 0,
+    //             vertical: 0,
+    //         };
+    //     }
+    //
+    //     fetch('/test', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Accept': 'application/json'
+    //         },
+    //         body: JSON.stringify(input)
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             // console.log(data);
+    //             displayAllTextualExplanation(data);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error loading JSON:', error);
+    //         });
+    // } else {
+    //
+    //     input.machines.map((item) => {
+    //         input["action-path"][item.id]["options"] = item;
+    //     });
+    //
+    //     // console.log(input.machines);
+    //     console.log(input["action-path"]);
+    //     const payload = {
+    //         "action-path": input["action-path"],
+    //         "config": JSON.parse(document.getElementById('input').value),
+    //     };
+    //
+    //     fetch('/explanation', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Accept': 'application/json'
+    //         },
+    //         body: JSON.stringify(payload)
+    //         // body: JSON.stringify(input["action-path"])
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             // console.log(JSON.stringify(data, null, 2));
+    //             // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
+    //             displayTextualExplanation(data);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error loading JSON:', error);
+    //         });
+    // }
 }
 
 

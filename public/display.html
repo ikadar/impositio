@@ -91,9 +91,6 @@
             const jobId = params.get('jobId');
             const impId = params.get('impId');
 
-            console.log(jobId);
-            console.log(impId);
-
             fetch(`/display/${jobId}/${impId}`, {
                 method: 'GET',
                 headers: {
@@ -103,7 +100,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
+                    // console.log(data);
                     const display = document.getElementById('display');
                     display.innerHTML = '';
                     calc(data, 0, null);
@@ -124,7 +121,7 @@
   <pre id="textual-explanation"></pre>
 </div>
 <script>
-    // display();
+    display();
 </script>
 </body>
 </html>
