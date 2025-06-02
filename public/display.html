@@ -104,9 +104,9 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    // const display = document.getElementById('display');
-                    // display.innerHTML = '';
-                    // calc(data, 0, null);
+                    const display = document.getElementById('display');
+                    display.innerHTML = '';
+                    calc(data, 0, null);
                 })
                 .catch(error => {
                         console.error('Error loading JSON:', error);
