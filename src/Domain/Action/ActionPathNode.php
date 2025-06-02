@@ -106,6 +106,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
                 "cols" => $this->getGridFitting()->getCols(),
                 "rows" => $this->getGridFitting()->getRows(),
                 "rotated" => $this->getGridFitting()->isRotated(),
+                "data" => $this->getGridFitting()->toArray(0, 0),
             ],
             "trimLines" => $this->getGridFitting()->getTrimLines(),
             "setupDuration" => $this->calculateSetupDuration(),
