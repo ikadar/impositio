@@ -2,7 +2,7 @@ const stage = new Konva.Stage({
     container: 'konva-container', // id of container <div>
     width: window.innerWidth,
     // height: 0
-    height: 400
+    height: 0
     // height: window.innerHeight
 });
 
@@ -214,6 +214,8 @@ const showExplanation = (sheetLayout, machineGroup, actionPath) => {
 }
 
 const showPressSheet = (sheetLayout, machineGroup) => {
+
+    // console.log(sheetLayout);
 
     const sheetOffset = {
         x: 150,
@@ -459,10 +461,11 @@ const showLayoutArea = (sheetLayout, machineGroup, content, actionPath) => {
 
 const showTiles = (sheetLayout, machineGroup, content, actionPath) => {
 
-    // console.log(sheetLayout);
+    console.log(sheetLayout);
 
-    const keys = Object.keys(actionPath);
-    const lastMachineKey = keys[keys.length - 1];
+    // const keys = Object.keys(actionPath);
+    // const lastMachineKey = keys[keys.length - 1];
+    const lastMachineKey = "MBO XL";
 
     const pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
 
@@ -902,23 +905,37 @@ const verticalTrimLine = (options) => {
 
 }
 
-const calc = (input, machineIndex, content) => {
+const calc = (input, machineIndex_, content) => {
 
-    const machineId = input.nodes[5].machine;
-    const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
+    let machineIndex = 0;
+    for (let i = 0; i < input.nodes.length; i++) {
 
-    let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
+        const machineId = input.nodes[i].machine;
+        console.log(machineId !== "ctp-machine" && machineId !== "cutting-machine");
+        if (machineId !== "ctp-machine" && machineId !== "cutting-machine") {
 
-    if (!machineGroup) {
-        machineGroup = new Konva.Group({
-            id: machineGroupId,
-            x: 0,
-            y: machineIndex * 1200,
-        });
-        baseLayer.add(machineGroup);
+            const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
+
+            let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
+
+            if (!machineGroup) {
+                machineGroup = new Konva.Group({
+                    id: machineGroupId,
+                    x: 0,
+                    y: machineIndex * 1200,
+                });
+                baseLayer.add(machineGroup);
+            }
+
+            stage.height(900 * (machineIndex + 1) + 400);
+            show(input.nodes[i].gridFitting.data, machineGroup, content, input["action-path"]);
+            machineIndex++;
+
+        }
+
+
     }
 
-    show(input.nodes[5].gridFitting.data, machineGroup, content, input["action-path"]);
 
     // if (machineIndex < input.machines.length) {
     //

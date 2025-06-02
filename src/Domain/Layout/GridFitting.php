@@ -156,18 +156,16 @@ class GridFitting implements Interfaces\GridFittingInterface
 
 
 
-    public function toArray($machine, $pressSheet): array
+    public function toArray($machine, $pressSheet, $pose): array
     {
-//        $minSheet = $machine->getMinSheetRectangle();
-//        $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
-//
-//        $maxSheet = $machine->getMaxSheetRectangle();
-//        $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
-//
-//        $pressSheetJson = json_decode($pressSheet->toJson(), true);
-//        $pressSheetJson["price"] = $pressSheet->getPrice();
+        $minSheet = $machine->getMinSheetRectangle();
+        $minSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
-        $pressSheetJson = "...";
+        $maxSheet = $machine->getMaxSheetRectangle();
+        $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
+
+        $pressSheetJson = json_decode($pressSheet->toJson(), true);
+        $pressSheetJson["price"] = $pressSheet->getPrice();
 
         $array = [
             "cols" => $this->getCols(),
@@ -223,9 +221,10 @@ class GridFitting implements Interfaces\GridFittingInterface
 
             "trimLines" => $this->getTrimLines(),
 
-//            "maxSheet" => json_decode($maxSheet->toJson(), true),
-//            "minSheet" => json_decode($minSheet->toJson(), true),
+            "maxSheet" => json_decode($maxSheet->toJson(), true),
+            "minSheet" => json_decode($minSheet->toJson(), true),
             "pressSheet" => $pressSheetJson,
+            "pose" => $pose,
 
             "explanation" => [
                 "machine" => [

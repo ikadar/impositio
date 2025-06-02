@@ -926,7 +926,7 @@ const calc = (input, machineIndex, content) => {
             .then(response => response.json())
             .then(data => {
                 // console.log(data);
-                displayAllTextualExplanation(data);
+                displayAllTextualExplanation(data, input.jobId);
             })
             .catch(error => {
                 console.error('Error loading JSON:', error);
@@ -966,7 +966,7 @@ const calc = (input, machineIndex, content) => {
 }
 
 
-const displayAllTextualExplanation = (data) => {
+const displayAllTextualExplanation = (data, jobId) => {
 
     const textualExplanation = document.getElementById("textual-explanation");
     textualExplanation.innerHTML = "";
@@ -979,7 +979,7 @@ const displayAllTextualExplanation = (data) => {
         let divContent = "";
 
         divContent += `<div style="margin-bottom: 20px">`;
-        divContent += `<div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
+        divContent += `<a href="/display.html?jobId=${jobId}&impId=${path.id}" target="_blank">open</a><div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
         divContent += `<div class = "details" id="${uuid}" >`;
         path.nodes.map((node) => {
             divContent += `<div class="machine">`;

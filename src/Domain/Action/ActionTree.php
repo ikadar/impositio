@@ -111,52 +111,55 @@ class ActionTree implements Interfaces\ActionTreeInterface
             return $prevNodes;
         }
 
-        $machine = $abstractAction->getAvailableMachines()[0];
+        $availableMachines = $abstractAction->getAvailableMachines();
+//        $machine = $availableMachines[0];
 
-        $action = new Action(
-            $machine,
-            $pressSheet,
-            $zone,
-            $this->layoutCalculator
-        );
+        // array of actionPathNodes
+        $actionPaths = [];
 
-        if ($action->getMachine()->getType()->value === "folder") {
-            $zone->setDimensions($this->getOpenPoseDimensions());
-            $machine->setOpenPoseDimensions($this->getOpenPoseDimensions());
-
+        foreach ($availableMachines as $machine) {
             $action = new Action(
                 $machine,
                 $pressSheet,
                 $zone,
                 $this->layoutCalculator
             );
-        }
 
-        // array of actionPathNodes
-        $actionPaths = [];
+            if ($action->getMachine()->getType()->value === "folder") {
+                $zone->setDimensions($this->getOpenPoseDimensions());
+                $machine->setOpenPoseDimensions($this->getOpenPoseDimensions());
 
-        foreach ($action->getGridFittings() as $gridFitting) {
+                $action = new Action(
+                    $machine,
+                    $pressSheet,
+                    $zone,
+                    $this->layoutCalculator
+                );
+            }
+
+            foreach ($action->getGridFittings() as $gridFitting) {
 //            dump(sprintf("ZONE: %d, %d", $zone->getWidth(), $zone->getHeight()));
 //            dump(sprintf("LOOP: %d, MACHINE: %s", count($action->getGridFittings()), $action->getMachine()->getId()));
 
-            $gridFitting->getCutSheet()->setContentType("Sheet");
+                $gridFitting->getCutSheet()->setContentType("Sheet");
 
-            $apn = new ActionTreeNode(
-                $action->getMachine(),
-                $action->getPressSheet(),
-                $action->getZone(),
-                $gridFitting,
-                []
-            );
+                $apn = new ActionTreeNode(
+                    $action->getMachine(),
+                    $action->getPressSheet(),
+                    $action->getZone(),
+                    $gridFitting,
+                    []
+                );
 
-            $apn->setPrevActions($this->calculate(
-                $abstractActions,
-                $pressSheet,
-                $gridFitting->getCutSheet(),
-                $prevNodes
-            ));
+                $apn->setPrevActions($this->calculate(
+                    $abstractActions,
+                    $pressSheet,
+                    $gridFitting->getCutSheet(),
+                    $prevNodes
+                ));
 
-            $actionPaths[] = $apn;
+                $actionPaths[] = $apn;
+            }
         }
 
         return $actionPaths;
@@ -258,15 +261,32 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
 
             if ($node->getMachine()->getType()->value === "printing press") {
+                $ctpMachine = $this->equipmentFactory->fromId("ctp-machine");
                 $cuts = new ActionPathNode(
-                    $this->equipmentFactory->fromId("ctp-machine"),
+                    $ctpMachine,
                     $node->getPressSheet(),
                     $node->getZone(),
-                    $node->getGridFitting(),
+                    clone $node->getGridFitting(),
                     [
                         "numberOfColors" => $this->numberOfColors
                     ]
                 );
+
+
+                $explanation = [
+                    "machine" => [
+                        "name" => $ctpMachine->getId(),
+                        "minSheet" => $ctpMachine->getMinSheetDimensions(),
+                        "maxSheet" => $ctpMachine->getMaxSheetDimensions(),
+                    ]
+                ];
+
+                $cuts->getGridFitting()->setExplanation($explanation);
+//                dump($node->getGridFitting()->getExplanation());
+//                dump($node->getGridFitting()->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
+//                dump($cuts->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
+//                die();
+
                 $extendedActionPath[] = $cuts;
 
                 $node->setTodo([

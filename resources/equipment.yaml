@@ -48,6 +48,25 @@ Komori G40:
   max-input-stack-height: 120
   stack-replenishment-duration: 3
   cost-per-hour: 130
+Komori G50:
+  id: "Komori G50"
+  type: "printing press"
+  gripMargin: 15
+  input-dimensions:
+    min:
+      width: 520
+      height: 360
+    max:
+      width: 1050
+      height: 750
+  base-setup-duration: 6.6666
+  setup-duration-per-color: 3.3333
+  two-pass: false
+  pass-per-color: 75
+  sheets-per-hour: 8000
+  max-input-stack-height: 120
+  stack-replenishment-duration: 3
+  cost-per-hour: 180
 cutting-machine:
   id: "cutting machine"
   type: "cutting machine"

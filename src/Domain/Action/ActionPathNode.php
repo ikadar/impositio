@@ -90,7 +90,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
         return $this;
     }
 
-    public function toArray(): array
+    public function toArray($machine, $pressSheet, $pose): array
     {
         return [
             "machine" => $this->getMachine()->getId(),
@@ -106,7 +106,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
                 "cols" => $this->getGridFitting()->getCols(),
                 "rows" => $this->getGridFitting()->getRows(),
                 "rotated" => $this->getGridFitting()->isRotated(),
-                "data" => $this->getGridFitting()->toArray(0, 0),
+                "data" => $this->getGridFitting()->toArray($machine, $pressSheet, $pose),
             ],
             "trimLines" => $this->getGridFitting()->getTrimLines(),
             "setupDuration" => $this->calculateSetupDuration(),

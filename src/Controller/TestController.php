@@ -104,6 +104,7 @@ class TestController extends AbstractController
         $request = Request::createFromGlobals();
         $data = json_decode($request->getContent(), true);
 
+        $this->jobId = $data['jobId'];
         $this->abstractActionData = $data['actions'];
 
         // machine
@@ -154,7 +155,8 @@ class TestController extends AbstractController
             $cost = 0;
             $duration = 0;
             foreach ($actionPath as $action) {
-                $actionArray = $action->toArray();
+
+                $actionArray = $action->toArray($action->getMachine(), $this->pressSheet, $this->pose);
                 $cost += $actionArray["cost"];
                 $duration += ($actionArray["setupDuration"] + $actionArray["runDuration"]);
                 $path["designation"][] = $actionArray["machine"];
@@ -171,10 +173,24 @@ class TestController extends AbstractController
             $path["id"] = Uuid::v4()->toString();
             $path["designation"] = implode(" > ", $path["designation"]);
             $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
+            $path["cost"] = $cost;
+            $path["duration"] = $duration;
             $responseData[] = $path;
         }
 
-        $filePath = sprintf("%s/data/%s.json", realpath($this->kernel->getProjectDir()), Uuid::v4()->toString());
+        usort($responseData, function ($a, $b) {
+            if ($a["cost"] === $b["cost"]) {
+                return $a["duration"] >= $b["duration"];
+            } else {
+                return $a["cost"] >= $b["cost"];
+            }
+        });
+
+//        dump($responseData);
+//        die();
+
+
+        $filePath = sprintf("%s/data/%s.json", realpath($this->kernel->getProjectDir()), $this->jobId);
 //        echo($filePath);
 //        echo(json_encode($responseData, JSON_PRETTY_PRINT));
         file_put_contents($filePath, json_encode($responseData, JSON_PRETTY_PRINT));
