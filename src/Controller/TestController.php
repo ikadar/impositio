@@ -107,23 +107,23 @@ class TestController extends AbstractController
         $this->jobId = $data['jobId'];
         $this->abstractActionData = $data['actions'];
 
-        // machine
-        $this->machine = $this->equipmentFactory->fromId($data["machine"]["id"]);
-
-        // set openPoseDimensions
-        $this->machine->setOpenPoseDimensions(new Dimensions(
-            $data["openPose"]["width"],
-            $data["openPose"]["height"]
-        ));
+//        // machine
+//        $this->machine = $this->equipmentFactory->fromId($data["machine"]["id"]);
+//
+//        // set openPoseDimensions
+//        $this->machine->setOpenPoseDimensions(new Dimensions(
+//            $data["openPose"]["width"],
+//            $data["openPose"]["height"]
+//        ));
 
         // set zone
         $zoneWidth = $data["zone"]["width"];
         $zoneHeight = $data["zone"]["height"];
 
-        if ($this->machine->getType()->value === "folder") {
-            $zoneWidth = $data["openPose"]["width"];
-            $zoneHeight = $data["openPose"]["height"];
-        }
+//        if ($this->machine->getType()->value === "folder") {
+//            $zoneWidth = $data["openPose"]["width"];
+//            $zoneHeight = $data["openPose"]["height"];
+//        }
 
         $this->zone = $this->printFactory->newInputSheet( // perhaps better to handle it as a Tile?
             "zone",
@@ -135,7 +135,7 @@ class TestController extends AbstractController
         $this->zone->setGripMarginSize($data["zone"]["gripMargin"]["size"]);
         $this->zone->setContentType($data["zone"]["type"]); // todo: make it better
 
-        $this->actionPath = $data["action-path"];
+//        $this->actionPath = $data["action-path"];
         $this->pose = $data["pose"];
         $this->openPose = $data["openPose"];
     }

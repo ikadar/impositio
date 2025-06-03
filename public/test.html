@@ -57,30 +57,7 @@
         };
 
         const doCalculations = () => {
-
-          // const display = document.getElementById('display');
-          // display.innerHTML = '';
-          // calc(JSON.parse(document.getElementById('input').value), 0, null);
-
-          fetch('/machines', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: document.getElementById('input').value
-          })
-            .then(response => response.json())
-            .then(data => {
-              // console.log(data);
-              const display = document.getElementById('display');
-              display.innerHTML = '';
-              calc(data, 0, null);
-            })
-            .catch(error => {
-              console.error('Error loading JSON:', error);
-            }
-          );
+          calc(JSON.parse(document.getElementById('input').value), 0, null);
         }
     </script>
 </head>
@@ -92,16 +69,13 @@
   "jobId": "1d128072-aeee-483f-987d-140fb68b7703",
   "actions": [
     {
-      "type": "stitching",
-      "machine": "Hohner"
+      "type": "stitching"
     },
     {
-      "type": "folding",
-      "machine": "MBO XL"
+      "type": "folding"
     },
     {
-      "type": "printing",
-      "machine": "Komori G40"
+      "type": "printing"
     }
   ],
   "pose": {
@@ -126,8 +100,6 @@
       "width": 0,
       "height": 0
     }
-  },
-  "action-path": {
   }
 }
     </textarea>

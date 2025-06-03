@@ -904,65 +904,29 @@ const verticalTrimLine = (options) => {
 
 const calc = (input, machineIndex, content) => {
 
-    if (machineIndex < input.machines.length) {
-
-        input.machine = input.machines[machineIndex];
-
-        if (machineIndex > 0) {
-            input.cutSpacing = {
-                horizontal: 0,
-                vertical: 0,
-            };
-        }
-
-        fetch('/test', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(input)
-        })
-            .then(response => response.json())
-            .then(data => {
-                // console.log(data);
-                displayAllTextualExplanation(data, input.jobId);
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-            });
-    } else {
-
-        input.machines.map((item) => {
-            input["action-path"][item.id]["options"] = item;
-        });
-
-        // console.log(input.machines);
-        console.log(input["action-path"]);
-        const payload = {
-            "action-path": input["action-path"],
-            "config": JSON.parse(document.getElementById('input').value),
+    if (machineIndex > 0) {
+        input.cutSpacing = {
+            horizontal: 0,
+            vertical: 0,
         };
-
-        fetch('/explanation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-            // body: JSON.stringify(input["action-path"])
-        })
-            .then(response => response.json())
-            .then(data => {
-                // console.log(JSON.stringify(data, null, 2));
-                // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
-                displayTextualExplanation(data);
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-            });
     }
+
+    fetch('/test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(input)
+    })
+        .then(response => response.json())
+        .then(data => {
+            // console.log(data);
+            displayAllTextualExplanation(data, input.jobId);
+        })
+        .catch(error => {
+            console.error('Error loading JSON:', error);
+        });
 }
 
 
@@ -972,8 +936,6 @@ const displayAllTextualExplanation = (data, jobId) => {
     textualExplanation.innerHTML = "";
     data.map((path) => {
         const uuid = crypto.randomUUID();
-        console.log(uuid);
-        // console.log(path.designation);
         const actionDiv = document.createElement("div");
 
         let divContent = "";
