@@ -66,41 +66,95 @@
     <p>INPUT</p>
     <textarea style="width: 100%; height: 300px" id="input">
 {
-  "jobId": "1d128072-aeee-483f-987d-140fb68b7703",
-  "actions": [
+  "jobId": "JOB01",
+  "parts": [
     {
-      "type": "stitching"
+      "partId": "PART01",
+      "numberOfCopies": 1000,
+      "actions": [
+        {
+          "type": "stitching"
+        },
+        {
+          "type": "folding"
+        },
+        {
+          "type": "printing"
+        }
+      ],
+      "size": "420x296/210x148",
+      "medium": {
+        "weight": "116g",
+        "inking": {
+          "recto": [
+            "cyan",
+            "magenta",
+            "jaune"
+          ],
+          "verso": [
+            "magenta",
+            "jaune"
+          ]
+        }
+      },
+      "zone": {
+        "width": 210,
+        "height": 148,
+        "type": "Zone",
+        "gripMargin": {
+          "size": 0,
+          "position": null,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      }
     },
     {
-      "type": "folding"
-    },
-    {
-      "type": "printing"
+      "partId": "PART02",
+      "numberOfCopies": 5000,
+      "actions": [
+        {
+          "type": "stitching"
+        },
+        {
+          "type": "folding"
+        },
+        {
+          "type": "printing"
+        }
+      ],
+      "size": "420x296/210x148",
+      "medium": {
+        "weight": "116g",
+        "inking": {
+          "recto": [
+            "cyan",
+            "magenta",
+            "jaune"
+          ],
+          "verso": [
+            "magenta",
+            "jaune"
+          ]
+        }
+      },
+      "zone": {
+        "width": 210,
+        "height": 148,
+        "type": "Zone",
+        "gripMargin": {
+          "size": 0,
+          "position": null,
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        }
+      }
     }
-  ],
-  "pose": {
-    "width": 210,
-    "height": 148,
-    "width1": 105,
-    "height1": 74
-  },
-  "openPose": {
-    "width": 420,
-    "height": 296
-  },
-  "zone": {
-    "width": 210,
-    "height": 148,
-    "type": "Zone",
-    "gripMargin": {
-      "size": 0,
-      "position": null,
-      "x": 0,
-      "y": 0,
-      "width": 0,
-      "height": 0
-    }
-  }
+  ]
 }
     </textarea>
     <button onclick="doCalculations()">CALC</button>

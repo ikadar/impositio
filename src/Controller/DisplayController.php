@@ -43,13 +43,14 @@ class DisplayController extends AbstractController
     {
     }
 
-    #[Route(path: '/display/{jobId}/{impositionId}', requirements: [], methods: ['GET'])]
+    #[Route(path: '/display/{jobId}/{partId}/{impositionId}', requirements: [], methods: ['GET'])]
     public function display(
         $jobId,
+        $partId,
         $impositionId,
     ): JsonResponse
     {
-        $data = $this->loadData($jobId, $impositionId);
+        $data = $this->loadData($jobId, $partId, $impositionId);
 
         return new JsonResponse(
             $data,
@@ -59,9 +60,9 @@ class DisplayController extends AbstractController
 
     }
 
-    public function loadData($jobId, $impositionId): ?array
+    public function loadData($jobId, $partId, $impositionId): ?array
     {
-        $path = sprintf("%s/data/%s.json", $this->kernel->getProjectDir(), $jobId);
+        $path = sprintf("%s/data/%s/%s.json", $this->kernel->getProjectDir(), $jobId, $partId);
 
         $jsonData = file_get_contents($path);
         $data = json_decode($jsonData, true);

@@ -89,9 +89,10 @@
             const params = new URLSearchParams(queryString);
 
             const jobId = params.get('jobId');
+            const partId = params.get('partId');
             const impId = params.get('impId');
 
-            fetch(`/display/${jobId}/${impId}`, {
+            fetch(`/display/${jobId}/${partId}/${impId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -922,7 +922,7 @@ const calc = (input, machineIndex, content) => {
         .then(response => response.json())
         .then(data => {
             // console.log(data);
-            displayAllTextualExplanation(data, input.jobId);
+            displayAllTextualExplanation(data, input.jobId, input.parts[0].partId);
         })
         .catch(error => {
             console.error('Error loading JSON:', error);
@@ -930,36 +930,54 @@ const calc = (input, machineIndex, content) => {
 }
 
 
-const displayAllTextualExplanation = (data, jobId) => {
-
+const displayAllTextualExplanation = (data, jobId, partId) => {
     const textualExplanation = document.getElementById("textual-explanation");
     textualExplanation.innerHTML = "";
-    data.map((path) => {
-        const uuid = crypto.randomUUID();
-        const actionDiv = document.createElement("div");
 
-        let divContent = "";
+    let ctr = 0;
 
-        divContent += `<div style="margin-bottom: 20px">`;
-        divContent += `<a href="/display.html?jobId=${jobId}&impId=${path.id}" target="_blank">open</a><div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
-        divContent += `<div class = "details" id="${uuid}" >`;
-        path.nodes.map((node) => {
-            divContent += `<div class="machine">`;
-            divContent += `<div class="sub-title">${node.machine}</div>`;
-            divContent += `<div><div class="label">Zone:</div> ${node.zone.width}x${node.zone.height}mm</div>`;
-            divContent += `<div><div class="label">Setup duration:</div> ${node.setupDuration} min</div>`;
-            divContent += `<div><div class="label">Run duration:</div> ${node.runDuration} min</div>`;
-            divContent += `<div><div class="label">Cost:</div> ${node.cost}€</div>`;
+    Object.keys(data.parts).map((partId) => {
+
+        const partDiv = document.createElement("div");
+
+        const partTitleContent = `<div>${partId}</div>`;
+        partDiv.innerHTML = partTitleContent;
+
+
+        data.parts[partId].actionPaths.map((path) => {
+            const uuid = crypto.randomUUID();
+            const actionDiv = document.createElement("div");
+
+            let divContent = "";
+
+            divContent += `<div style="margin-bottom: 20px">`;
+            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">open</a><div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
+            divContent += `<div class = "details" id="${uuid}" >`;
+            path.nodes.map((node) => {
+
+                divContent += `<div class="machine">`;
+                divContent += `<div class="sub-title">${node.machine}</div>`;
+                divContent += `<div><div class="label">Zone:</div> ${node.zone.width}x${node.zone.height}mm</div>`;
+                divContent += `<div><div class="label">Imposition:</div> ${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
+                divContent += `<div><div class="label">Setup duration:</div> ${node.setupDuration} min</div>`;
+                divContent += `<div><div class="label">Run duration:</div> ${node.runDuration} min</div>`;
+                divContent += `<div><div class="label">Cost:</div> ${node.cost}€</div>`;
+                divContent += `</div>`;
+                // console.log(node);
+            })
             divContent += `</div>`;
-            // console.log(node);
+            divContent += `</div>`;
+
+            actionDiv.innerHTML = divContent;
+
+            partDiv.appendChild(actionDiv);
         })
-        divContent += `</div>`;
-        divContent += `</div>`;
 
-        actionDiv.innerHTML = divContent;
+        textualExplanation.appendChild(partDiv);
 
-        textualExplanation.appendChild(actionDiv);
-    })
+    });
+
+
 
     // const textualExplanation = document.getElementById("textual-explanation");
     // textualExplanation.innerHTML = "";
