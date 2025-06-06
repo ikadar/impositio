@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+        }
+        #konva-container {
+            width: 100%;
+            height: 100%;
+            background-color: #e47832;
+        }
+        #textual-explanation{
+          margin: 20px;
+        }
+        #textual-explanation .title {
+          background-color: dimgray;
+          color: white;
+          font-weight: bold;
+          padding: 5px;
+        }
+        #textual-explanation .sub-title {
+          padding: 5px;
+          background-color: #cccdcd;
+          font-weight: bold;
+        }
+        #textual-explanation .label {
+          font-weight: bold;
+          width: 200px;
+          display: inline-block;
+          padding-left: 5px;
+        }
+        #textual-explanation .machine {
+            margin-bottom: 10px;
+        }
+        #textual-explanation .details {
+            display: none;
+        }
+        #textual-explanation-container {
+          margin: 20px;
+        }
+    </style>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script language="JavaScript" src="js/app.js" type="module"></script>
+    <script language="JavaScript">
+
+      const parse = () => {
+        // console.log(document.getElementById('input').value);
+
+          const textualExplanation = document.getElementById("textual-explanation");
+          textualExplanation.innerHTML = "";
+
+
+          fetch('/parse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: document.getElementById('input').value.replace(/[\r\n]+/g, "")
+          })
+          .then(async response => {
+              const data = await response.json();
+              if (!response.ok) {
+                  // Server returned 4xx or 5xx status
+                  throw new Error(data.detail);
+              }
+              return data;
+          })
+          .then(data => {
+            // console.log(data);
+            const payload = {
+              jobId: "JOB03",
+              parts: data,
+            }
+            calc(payload, 0, null);
+        })
+        .catch(error => {
+          console.error('Error loading JSON or server error:');
+          console.log(error.message);
+          textualExplanation.innerHTML = error.message;
+        });
+      }
+
+
+      const toggleDetails = (uuid) => {
+            const el = document.getElementById(uuid);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+            } else {
+                el.style.display = 'block';
+            }
+        };
+
+        const doCalculations = () => {
+          calc(JSON.parse(document.getElementById('input').value), 0, null);
+        }
+    </script>
+</head>
+<body>
+<div>
+    <p>JOBLANG</p>
+    <textarea style="width: 100%; height: 300px" id="input">
+        [0001 /  aaa2/10ex /10ex]
+        (
+            (
+                (
+                    leaflet 200x300/100x300  sur old mill bianco 10x20 RV{cyan, magenta, jaune / magenta, jaune}   116g  pelli  RV{brillant /dfsdf}
+                    +
+                    (
+                        feuillet 200x300/100x300 seg segment2 sur R{magenta, jaune} 200g pelli R{brbrb}
+                        +
+                        feuillet 200x300/100x300 segment3 sur R{magenta, jaune} 116g
+                    )
+                    >
+                    (
+                        leaflet 200x300/100x300 segment4 seg sur R{magenta, jaune}  116g
+                        +
+                        (
+                            (
+                                leaflet 200x300/100x300 seg segment5 sur R{magenta, jaune}  116g
+                                +
+                                (
+                                    feuillet 200x300/100x300 segment6 seg sur R{magenta, jaune}  116g
+                                    >
+                                    leaflet 200x300/100x300 segment7 seg sur R{magenta, jaune}  116g
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        @xxx
+
+    </textarea>
+    <button onclick="parse()">PARSE</button>
+    <div id="display"></div>
+<!--    <div>unrotated</div>-->
+<!--    <div id="variations"></div>-->
+<!--    <div>rotated</div>-->
+<!--    <div id="rotated-variations"></div>-->
+</div>
+<div id="konva-container"></div>
+<div id="textual-explanation-container">
+  <pre id="textual-explanation"></pre>
+</div>
+<!--<div style="height: 50px; background-color: #cccdcd;"></div>-->
+<!--<div>-->
+<!--  <pre id="explanation"></pre>-->
+<!--</div>-->
+</body>
+</html>

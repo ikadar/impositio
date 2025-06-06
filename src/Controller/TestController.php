@@ -3,23 +3,15 @@
 namespace App\Controller;
 
 use App\Domain\Action\AbstractAction;
-use App\Domain\Action\Action;
-use App\Domain\Action\ActionPathNode;
-use App\Domain\Action\ActionTreeNode;
 use App\Domain\Action\ActionType;
-use App\Domain\Action\Interfaces\ActionInterface;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
-use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
-use App\Domain\Equipment\MachineType;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Layout\Calculator;
-use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
-use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +25,6 @@ class TestController extends AbstractController
     protected MachineInterface $machine;
     protected RectangleInterface $pressSheet;
     protected InputSheetInterface $zone;
-    protected array $actionPath;
     protected array $pose;
 
     public function __construct(
@@ -51,6 +42,7 @@ class TestController extends AbstractController
     public function getTest(
     ): JsonResponse
     {
+        ini_set('memory_limit', '512M');
         // press sheet
         $this->pressSheet = $this->printFactory->newPressSheet(
             "pressSheet",
@@ -81,7 +73,6 @@ class TestController extends AbstractController
         }
 
         return $this->createResponse($parts);
-//        return $this->createResponse($actionPaths, $payload["parts"][0]["partId"]);
     }
 
     protected function processPayload(): array
@@ -174,48 +165,71 @@ class TestController extends AbstractController
     }
 
     protected function createResponse($parts): JsonResponse
-//    protected function createResponse($actionPaths, $partId): JsonResponse
     {
+
         $responseData = [
             "jobId" => $this->jobId,
             "parts" => []
         ];
 
+        foreach ($this->getActionPaths($parts) as $loop => $actionPaths) {
+            $partId = $parts[$loop]["partId"];
+            $responseData["parts"][$partId]["actionPaths"] = $actionPaths;
+        }
+
+        return new JsonResponse(
+            $responseData,
+            JsonResponse::HTTP_OK
+        );
+
+    }
+
+    public function getActionPathNodes($actionPath)
+    {
+        foreach ($actionPath as $action) {
+            $actionArray = $action->toArray($action->getMachine(), $this->pressSheet, $this->pose);
+            yield $actionArray;
+        }
+    }
+
+    public function getActionPath($part)
+    {
+        foreach ($part["actionPaths"] as $actionPath) {
+            $path = [
+                "designation" => [],
+                "nodes" => []
+            ];
+            $cost = 0;
+            $duration = 0;
+
+            foreach ($this->getActionPathNodes($actionPath) as $node) {
+                $cost += $node["cost"];
+                $duration += ($node["setupDuration"] + $node["runDuration"]);
+                $path["designation"][] = $node["machine"];
+                $path["nodes"][] = $node;
+            }
+
+            $path["designation"] = implode(" > ", $path["designation"]);
+            $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
+            $path["cost"] = $cost;
+            $path["duration"] = $duration;
+            $path["md5"] = md5(serialize($path));
+            $path["id"] = Uuid::v4()->toString();
+            yield $path;
+        }
+
+    }
+
+    public function getActionPaths($parts)
+    {
         foreach ($parts as $part) {
             $actionPathArray = [];
-            foreach ($part["actionPaths"] as $actionPath) {
-                $path = [
-                    "designation" => [],
-                    "nodes" => []
-                ];
-                $cost = 0;
-                $duration = 0;
-                foreach ($actionPath as $action) {
 
-                    $actionArray = $action->toArray($action->getMachine(), $this->pressSheet, $this->pose);
-                    $cost += $actionArray["cost"];
-                    $duration += ($actionArray["setupDuration"] + $actionArray["runDuration"]);
-                    $path["designation"][] = $actionArray["machine"];
-
-//                $path["designation"] .= sprintf(
-//                    "- %s (%dx%d %s)<br/>",
-//                    $actionArray["machine"],
-//                    $actionArray["gridFitting"]["cols"],
-//                    $actionArray["gridFitting"]["rows"],
-//                    $actionArray["gridFitting"]["rotated"] ? "rotated" : "unrotated"
-//                );
-                    $path["nodes"][] = $actionArray;
-                }
-                $path["id"] = Uuid::v4()->toString();
-                $path["designation"] = implode(" > ", $path["designation"]);
-                $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
-                $path["cost"] = $cost;
-                $path["duration"] = $duration;
-                $actionPathArray[] = $path;
+            foreach ($this->getActionPath($part) as $actionPath) {
+                $actionPathArray[] = $actionPath;
             }
 
             usort($actionPathArray, function ($a, $b) {
-//            usort($responseData, function ($a, $b) {
                 if ($a["cost"] === $b["cost"]) {
                     return $a["duration"] >= $b["duration"];
                 } else {
@@ -231,22 +245,10 @@ class TestController extends AbstractController
             $filePath = sprintf("%s/%s.json", $directoryPath, $part["partId"]);
             file_put_contents($filePath, json_encode($actionPathArray, JSON_PRETTY_PRINT));
 
-            $responseData["parts"][$part["partId"]]["actionPaths"] = $actionPathArray;
+            yield $actionPathArray;
         }
 
-
-        return new JsonResponse(
-            $responseData,
-//            [
-//                "jobId" => $this->jobId,
-//                "parts" => [
-//                    $partId
-//                ],
-//                "paths" => $responseData,
-//            ],
-            JsonResponse::HTTP_OK
-        );
-
     }
+
 
 }

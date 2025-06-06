@@ -958,6 +958,7 @@ const displayAllTextualExplanation = (data, jobId, partId) => {
                 divContent += `<div class="machine">`;
                 divContent += `<div class="sub-title">${node.machine}</div>`;
                 divContent += `<div><div class="label">Zone:</div> ${node.zone.width}x${node.zone.height}mm</div>`;
+                divContent += `<div><div class="label">Number of input sheets:</div> ${node.todo.cutSheetCount}</div>`;
                 divContent += `<div><div class="label">Imposition:</div> ${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
                 divContent += `<div><div class="label">Setup duration:</div> ${node.setupDuration} min</div>`;
                 divContent += `<div><div class="label">Run duration:</div> ${node.runDuration} min</div>`;

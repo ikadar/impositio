@@ -93,14 +93,42 @@ class Rectangle extends PositionedRectangle implements RectangleInterface
         return $this->geometryFactory->getDumper()->d($this);
     }
 
-    public function toJson(): ?string
+    public function toJson2(bool $withChildren = false): ?string
     {
-        return $this->geometryFactory->getSerializer()->serialize(($this->viewModelClass)::fromEntity($this), "json", [
+        $viewObj = ($this->viewModelClass)::fromEntity($this);
+        if ($withChildren === false) {
+            $viewObj->children = [];
+        }
+        $serialized = $this->geometryFactory->getSerializer()->serialize($viewObj, "json", [
             'circular_reference_handler' => function ($object) {
                 return $object->getId();
             },
+            'circular_reference_limit' => 1,
             'json_encode_options' => JSON_PRETTY_PRINT,
         ]);
+
+        return $serialized;
+    }
+
+    public function toJson(bool $withChildren = false): ?string
+    {
+        $viewObject = ($this->viewModelClass)::fromEntity($this);
+        $array = [
+            "id" => $viewObject->id,
+            "viewObject" => $viewObject->x,
+            "y" => $viewObject->y,
+            "width" => $viewObject->width,
+            "height" => $viewObject->height,
+//            "children" => $viewObject->children,
+//            "gripMarginPosition" => "left",
+        ];
+
+        if ($withChildren) {
+            $array["children"] = $viewObject->children;
+        }
+
+
+        return json_encode($array, JSON_PRETTY_PRINT);
     }
 
 

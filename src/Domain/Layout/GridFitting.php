@@ -154,8 +154,6 @@ class GridFitting implements Interfaces\GridFittingInterface
         return $this;
     }
 
-
-
     public function toArray($machine, $pressSheet, $pose): array
     {
         $minSheet = $machine->getMinSheetRectangle();
@@ -164,7 +162,13 @@ class GridFitting implements Interfaces\GridFittingInterface
         $maxSheet = $machine->getMaxSheetRectangle();
         $maxSheet->alignTo($pressSheet, AlignmentMode::MiddleCenterToMiddleCenter);
 
-        $pressSheetJson = json_decode($pressSheet->toJson(), true);
+//        $pressSheetJson = json_decode($pressSheet->toJson(), true);
+        $pressSheetJson = [
+            "x" => $pressSheet->getPosition()->getX()->getValue(),
+            "y" => $pressSheet->getPosition()->getY()->getValue(),
+            "width" => $pressSheet->getWidth(),
+            "height" => $pressSheet->getHeight(),
+        ];
         $pressSheetJson["price"] = $pressSheet->getPrice();
 
         $array = [
@@ -221,8 +225,20 @@ class GridFitting implements Interfaces\GridFittingInterface
 
             "trimLines" => $this->getTrimLines(),
 
-            "maxSheet" => json_decode($maxSheet->toJson(), true),
-            "minSheet" => json_decode($minSheet->toJson(), true),
+            "maxSheet" => [
+                "x" => $maxSheet->getPosition()->getX()->getValue(),
+                "y" => $maxSheet->getPosition()->getY()->getValue(),
+                "width" => $maxSheet->getWidth(),
+                "height" => $maxSheet->getHeight(),
+            ],
+            "minSheet" => [
+                "x" => $minSheet->getPosition()->getX()->getValue(),
+                "y" => $minSheet->getPosition()->getY()->getValue(),
+                "width" => $minSheet->getWidth(),
+                "height" => $minSheet->getHeight(),
+            ],
+//            "maxSheet" => json_decode($maxSheet->toJson(), true),
+//            "minSheet" => json_decode($minSheet->toJson(), true),
             "pressSheet" => $pressSheetJson,
             "pose" => $pose,
 
@@ -242,10 +258,29 @@ class GridFitting implements Interfaces\GridFittingInterface
         ];
 
         foreach ($this->getTiles() as $tile) {
+
+            $innerTile = $tile->getInnerTile();
+            $tileWithSpacing = $tile->getTileWithSpacing();
+
             $array["tiles"][] = [
-                "mmPositions" => json_decode($tile->getInnerTile()->toJson(), true),
-                "mmCutBufferPositions" => json_decode($tile->getTileWithSpacing()->toJson(), true)
+                "mmPositions" => [
+                    "x" => $innerTile->getPosition()->getX()->getValue(),
+                    "y" => $innerTile->getPosition()->getY()->getValue(),
+                    "width" => $innerTile->getWidth(),
+                    "height" => $innerTile->getHeight(),
+                ],
+                "mmCutBufferPositions" => [
+                    "x" => $tileWithSpacing->getPosition()->getX()->getValue(),
+                    "y" => $tileWithSpacing->getPosition()->getY()->getValue(),
+                    "width" => $tileWithSpacing->getWidth(),
+                    "height" => $tileWithSpacing->getHeight(),
+                ]
             ];
+
+//            $array["tiles"][] = [
+//                "mmPositions" => json_decode($tile->getInnerTile()->toJson(), true),
+//                "mmCutBufferPositions" => json_decode($tile->getTileWithSpacing()->toJson(), true)
+//            ];
         }
 
         return $array;

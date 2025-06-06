@@ -252,7 +252,10 @@ class ActionTree implements Interfaces\ActionTreeInterface
         $cutSheetCount = $this->getNumberOfCopies();
 
         $extendedActionPath = [];
-        foreach ($flatActionPath as $loop => $node) {
+        foreach ($flatActionPath as $loop => $nodeX) {
+
+            $node = clone $nodeX;
+
             $nextAction = null;
 
             if (array_key_exists($loop+1, $flatActionPath)) {
@@ -262,13 +265,15 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
             if ($node->getMachine()->getType()->value === "printing press") {
                 $ctpMachine = $this->equipmentFactory->fromId("ctp-machine");
-                $cuts = new ActionPathNode(
+                $ctpAction = new ActionPathNode(
                     $ctpMachine,
                     $node->getPressSheet(),
                     $node->getZone(),
                     clone $node->getGridFitting(),
                     [
-                        "numberOfColors" => $this->numberOfColors
+                        "numberOfCopies" => $this->numberOfCopies,
+                        "numberOfColors" => $this->numberOfColors,
+                        "cutSheetCount" => $cutSheetCount
                     ]
                 );
 
@@ -281,18 +286,19 @@ class ActionTree implements Interfaces\ActionTreeInterface
                     ]
                 ];
 
-                $cuts->getGridFitting()->setExplanation($explanation);
+                $ctpAction->getGridFitting()->setExplanation($explanation);
 //                dump($node->getGridFitting()->getExplanation());
 //                dump($node->getGridFitting()->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
 //                dump($cuts->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
 //                die();
 
-                $extendedActionPath[] = $cuts;
+                $extendedActionPath[] = $ctpAction;
 
                 $node->setTodo([
                     "numberOfCopies" => $this->numberOfCopies,
                     "numberOfColors" => $this->numberOfColors,
                     "paperWeight" => $this->paperWeight,
+                    "cutSheetCount" => $cutSheetCount
                 ]);
 
             }
@@ -301,7 +307,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
                 $inputSheetLength = $this->openPoseDimensions->getHeight() / 1000;
                 $node->setTodo([
                     "inputSheetLength" => $inputSheetLength,
-                    "cutSheetCount" => $inputSheetLength,
+                    "cutSheetCount" => $cutSheetCount,
                     "numberOfCopies" => $this->numberOfCopies,
                 ]);
             }
@@ -309,6 +315,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
             if ($node->getMachine()->getType()->value === "stitching machine") {
                 $node->setTodo([
                     "numberOfCopies" => $this->numberOfCopies,
+                    "cutSheetCount" => $cutSheetCount
                 ]);
             }
 
@@ -336,20 +343,25 @@ class ActionTree implements Interfaces\ActionTreeInterface
             if ($numberOfCuts > 0) {
                 $cuts = new ActionPathNode(
                     $this->equipmentFactory->fromId("cutting-machine"),
-                    $flatActionPath[0]->getPressSheet(),
-                    $flatActionPath[0]->getZone(),
-                    $flatActionPath[0]->getGridFitting(),
+                    $node->getPressSheet(),
+                    $node->getZone(),
+                    clone $node->getGridFitting(),
                     [
                         "numberOfCuts" => $numberOfCuts,
                         "numberOfCopies" => $this->numberOfCopies,
                         "numberOfColors" => $this->numberOfColors,
                         "paperWeight" => $this->paperWeight,
+                        "cutSheetCount" => $cutSheetCount,
+                        "trimCuts" => $numberOfTrimCuts,
+                        "cuts" => $numberOfCutCuts,
                     ]
                 );
                 $extendedActionPath[] = $cuts;
 
-                $cutSheetCount = $cutSheetCount * $node->getGridFitting()->getCols() * $node->getGridFitting()->getRows();
+            }
 
+            if ($numberOfCutCuts > 0) {
+                $cutSheetCount = $cutSheetCount * $node->getGridFitting()->getCols() * $node->getGridFitting()->getRows();
             }
 
 
