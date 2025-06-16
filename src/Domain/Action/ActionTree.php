@@ -10,6 +10,7 @@ use App\Domain\Geometry\Interfaces\DimensionsInterface;
 use App\Domain\Layout\Calculator;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class ActionTree implements Interfaces\ActionTreeInterface
 {
@@ -19,6 +20,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
     protected float $numberOfCopies;
     protected float $numberOfColors;
     protected float $paperWeight;
+    protected array $inking;
 
 
     protected ActionPathNodeInterface $action;
@@ -27,6 +29,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
     public function __construct(
         protected Calculator $layoutCalculator,
         protected EquipmentFactoryInterface $equipmentFactory,
+        protected PropertyAccessorInterface $propertyAccessor,
     )
     {}
 
@@ -84,6 +87,18 @@ class ActionTree implements Interfaces\ActionTreeInterface
         $this->paperWeight = $paperWeight;
         return $this;
     }
+
+    public function getInking(): array
+    {
+        return $this->inking;
+    }
+
+    public function setInking(array $inking): ActionTree
+    {
+        $this->inking = $inking;
+        return $this;
+    }
+
 
 
     public function calculateTree(
@@ -209,6 +224,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
         $numberOfCopies,
         $numberOfColors,
         $paperWeight,
+        $inking,
     )
     {
         return $this->extendPaths(
@@ -219,6 +235,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
             $numberOfCopies,
             $numberOfColors,
             $paperWeight,
+            $inking
         );
     }
 
@@ -230,12 +247,14 @@ class ActionTree implements Interfaces\ActionTreeInterface
         $numberOfCopies,
         $numberOfColors,
         $paperWeight,
+        $inking
     ) {
 
         $this->setOpenPoseDimensions($openPoseDimensions);
         $this->setNumberOfCopies($numberOfCopies);
         $this->setNumberOfColors($numberOfColors);
         $this->setPaperWeight($paperWeight);
+        $this->setInking($inking);
 
         $this->calculateTree($abstractActions, $pressSheet, $zone);
         $flatActionPaths = $this->flattenTree();
@@ -264,6 +283,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
 
             if ($node->getMachine()->getType()->value === "printing press") {
+
                 $ctpMachine = $this->equipmentFactory->fromId("ctp-machine");
                 $ctpAction = new ActionPathNode(
                     $ctpMachine,
@@ -273,7 +293,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
                     [
                         "numberOfCopies" => $this->numberOfCopies,
                         "numberOfColors" => $this->numberOfColors,
-                        "cutSheetCount" => $cutSheetCount
+                        "cutSheetCount" => $cutSheetCount,
+                        "inking" => $this->getInking()
                     ]
                 );
 
@@ -298,7 +319,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
                     "numberOfCopies" => $this->numberOfCopies,
                     "numberOfColors" => $this->numberOfColors,
                     "paperWeight" => $this->paperWeight,
-                    "cutSheetCount" => $cutSheetCount
+                    "cutSheetCount" => $cutSheetCount,
                 ]);
 
             }
@@ -320,6 +341,37 @@ class ActionTree implements Interfaces\ActionTreeInterface
             }
 
             $extendedActionPath[] = $node;
+
+
+            if ($node->getMachine()->getType()->value === "printing press") {
+                $versoInking = $this->propertyAccessor->getValue($this->getInking(), "[verso]");
+                if (is_array($versoInking) && $versoInking !== []) {
+
+                    $versoPrintingAction = new ActionPathNode(
+                        $node->getMachine(),
+                        $node->getPressSheet(),
+                        $node->getZone(),
+                        clone $node->getGridFitting(),
+                        [
+                            "numberOfCopies" => $this->numberOfCopies,
+                            "numberOfColors" => $this->numberOfColors,
+                            "cutSheetCount" => $cutSheetCount,
+                            "inking" => $this->getInking()
+                        ]
+                    );
+
+                    $versoPrintingAction->setTodo([
+                        "numberOfCopies" => $this->numberOfCopies,
+                        "numberOfColors" => $this->numberOfColors,
+                        "paperWeight" => $this->paperWeight,
+                        "cutSheetCount" => $cutSheetCount,
+                        "dryTimeBetweenSequences" => 100
+                    ]);
+
+                    $extendedActionPath[] = $versoPrintingAction;
+                }
+
+            }
 
             $numberOfTrimCuts = 0;
             $numberOfCutCuts = 0;

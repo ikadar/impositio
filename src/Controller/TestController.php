@@ -66,6 +66,7 @@ class TestController extends AbstractController
                 $part["numberOfCopies"],
                 $part["numberOfColors"],
                 $part["paperWeight"],
+                $part["medium"]["inking"],
             );
 
             $parts[] = [

@@ -46,7 +46,7 @@ class ParserController extends AbstractController
     }
 
     #[Route(path: '/parse', requirements: [], methods: ['POST'])]
-    public function display(): JsonResponse
+    public function parse(): JsonResponse
     {
         $jobLine = $this->processPayload();
         $parsedJobLine = $this->parseJobLine($jobLine);

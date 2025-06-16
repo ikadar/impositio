@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
+use App\Domain\Equipment\MachineType;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Layout\Calculator;
@@ -26,6 +28,7 @@ class OrdoController extends AbstractController
     public function __construct(
         protected KernelInterface $kernel,
         protected PropertyAccessorInterface $propertyAccessor,
+        protected EquipmentFactoryInterface $equipmentFactory,
     )
     {
     }
@@ -83,7 +86,19 @@ class OrdoController extends AbstractController
                 "actions" => []
             ];
 
-            foreach ($path["nodes"] as $node) {
+            foreach ($path["nodes"] as $loop => $node) {
+
+                $machine = $this->equipmentFactory->fromId($node["machine"]);
+
+                if ($machine->getType() === MachineType::PrintingPress) {
+                    $dryTimeBetweenSequences = $this->propertyAccessor->getValue($node, "[todo][dryTimeBetweenSequences]");
+                    if ($dryTimeBetweenSequences !== null) {
+                        $part["actions"][count($part["actions"])-1]["sequences"] = 2;
+                        $part["actions"][count($part["actions"])-1]["dry_time_between_sequences"] = $dryTimeBetweenSequences;
+                        continue;
+                    }
+                }
+
                 $action = [
                     "machine" => $node["machine"],
                     "setup" => $node["setupDuration"],
