@@ -8,6 +8,16 @@
             margin: 0;
             padding: 0;
         }
+        .show-details {
+          color: #cccdcd;
+          cursor: pointer;
+        }
+        .show-details a {
+          text-decoration: none;
+        }
+        .show-details a:visited {
+          color: #cccdcd;
+        }
         #konva-container {
             width: 100%;
             height: 100%;
@@ -165,9 +175,10 @@
 <!--    <div id="rotated-variations"></div>-->
 </div>
 <div id="konva-container"></div>
-<div id="textual-explanation-container">
-  <pre id="textual-explanation"></pre>
-</div>
+  <button onclick="sendToOrdo()">Send to Ordo</button>
+  <div id="textual-explanation-container">
+      <pre id="textual-explanation"></pre>
+  </div>
 <!--<div style="height: 50px; background-color: #cccdcd;"></div>-->
 <!--<div>-->
 <!--  <pre id="explanation"></pre>-->

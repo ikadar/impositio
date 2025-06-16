@@ -50,12 +50,19 @@ class ParserController extends AbstractController
     {
         $jobLine = $this->processPayload();
         $parsedJobLine = $this->parseJobLine($jobLine);
-        $jobId = $parsedJobLine[0]["metaData"]["jobNumber"];
-        $numberOfCopies = $parsedJobLine[0]["metaData"]["quantity"];
+
+        $metadata = $parsedJobLine[0]["metaData"];
+
+        $jobId = $metadata["jobNumber"];
+        $numberOfCopies = $metadata["quantity"];
 
         $parts = $this->flattenJob($parsedJobLine);
 
-        $response = $this->partsToArray($parts, $numberOfCopies);
+        $response = [
+            "metaData" => $metadata,
+            "parts" => $this->partsToArray($parts, $numberOfCopies)
+        ];
+
         return new JsonResponse(
             $response,
             JsonResponse::HTTP_OK
@@ -138,6 +145,7 @@ class ParserController extends AbstractController
     {
         $array = [];
         foreach ($parts as $part) {
+
             $zone = [
                 "width" => $part->getClosedDimensions()->getWidth(),
                 "height" => $part->getClosedDimensions()->getHeight(),

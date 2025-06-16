@@ -57,6 +57,7 @@ class TestController extends AbstractController
 
         $parts = [];
         foreach ($payload["parts"] as $part) {
+
             $actionPaths = $this->actionTree->process(
                 $part["abstractActions"],
                 $part["pressSheet"],
@@ -66,13 +67,21 @@ class TestController extends AbstractController
                 $part["numberOfColors"],
                 $part["paperWeight"],
             );
+
             $parts[] = [
                 "partId" => $part["partId"],
+                "medium" => $part["medium"],
+                "openPoseDimensions" => $part["openPoseDimensions"],
+                "closedPoseDimensions" => $part["closedPoseDimensions"],
                 "actionPaths" => $actionPaths
             ];
         }
 
-        return $this->createResponse($parts);
+        $response = $this->createResponse($parts);
+
+        $this->writeMetaData();
+
+        return $response;
     }
 
     protected function processPayload(): array
@@ -80,7 +89,7 @@ class TestController extends AbstractController
         $request = Request::createFromGlobals();
         $data = json_decode($request->getContent(), true);
 
-        $this->jobId = $data["jobId"];
+        $this->metaData = $data["metaData"];
 
         $payload = [
             "parts" => []
@@ -130,6 +139,11 @@ class TestController extends AbstractController
             $size["open"]["height"]
         );
 
+        $closedPoseDimensions = new Dimensions(
+            $size["closed"]["width"],
+            $size["closed"]["height"]
+        );
+
         $this->pose = $size["closed"];
 
         // set zone
@@ -156,19 +170,20 @@ class TestController extends AbstractController
             "pressSheet" => $this->pressSheet,
             "zone" => $zone,
             "openPoseDimensions" => $openPoseDimensions,
+            "closedPoseDimensions" => $closedPoseDimensions,
             "numberOfCopies" => $numberOfCopies,
             "numberOfColors" => $numberOfColors,
             "paperWeight" => $paperWeight,
             "partId" => $partId,
+            "medium" => $partPayload["medium"]
         ];
 
     }
 
     protected function createResponse($parts): JsonResponse
     {
-
         $responseData = [
-            "jobId" => $this->jobId,
+            "metaData" => $this->metaData,
             "parts" => []
         ];
 
@@ -194,7 +209,9 @@ class TestController extends AbstractController
 
     public function getActionPath($part)
     {
+
         foreach ($part["actionPaths"] as $actionPath) {
+
             $path = [
                 "designation" => [],
                 "nodes" => []
@@ -211,6 +228,17 @@ class TestController extends AbstractController
 
             $path["designation"] = implode(" > ", $path["designation"]);
             $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
+            $path["medium"] = $part["medium"];
+            $path["openPoseDimensions"] = sprintf(
+                "%dx%d",
+                $part["openPoseDimensions"]->getWidth(),
+                $part["openPoseDimensions"]->getHeight()
+            );
+            $path["closedPoseDimensions"] = sprintf(
+                "%dx%d",
+                $part["closedPoseDimensions"]->getWidth(),
+                $part["closedPoseDimensions"]->getHeight()
+            );
             $path["cost"] = $cost;
             $path["duration"] = $duration;
             $path["md5"] = md5(serialize($path));
@@ -223,6 +251,7 @@ class TestController extends AbstractController
     public function getActionPaths($parts)
     {
         foreach ($parts as $part) {
+
             $actionPathArray = [];
 
             foreach ($this->getActionPath($part) as $actionPath) {
@@ -237,16 +266,30 @@ class TestController extends AbstractController
                 }
             });
 
-            $directoryPath = sprintf("%s/data/%s", realpath($this->kernel->getProjectDir()), $this->jobId);
+            $directoryPath = sprintf("%s/data/%s", realpath($this->kernel->getProjectDir()), $this->metaData["jobNumber"]);
             if (!is_dir($directoryPath)) {
                 mkdir($directoryPath, 0755, true);
+                mkdir(sprintf("%s/parts", $directoryPath), 0755, true);
+                mkdir(sprintf("%s/meta", $directoryPath), 0755, true);
             }
 
-            $filePath = sprintf("%s/%s.json", $directoryPath, $part["partId"]);
+            $filePath = sprintf("%s/parts/%s.json", $directoryPath, $part["partId"]);
             file_put_contents($filePath, json_encode($actionPathArray, JSON_PRETTY_PRINT));
 
             yield $actionPathArray;
         }
+
+    }
+
+    public function writeMetaData()
+    {
+        $filePath = sprintf(
+            "%s/data/%s/meta/metaData.json",
+            realpath($this->kernel->getProjectDir()),
+            $this->metaData["jobNumber"]
+        );
+
+        file_put_contents($filePath, json_encode($this->metaData, JSON_PRETTY_PRINT));
 
     }
 

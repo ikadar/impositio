@@ -8,6 +8,16 @@
             margin: 0;
             padding: 0;
         }
+        .show-details {
+            color: #cccdcd;
+            cursor: pointer;
+        }
+        .show-details a {
+            text-decoration: none;
+        }
+        .show-details a:visited {
+            color: #cccdcd;
+        }
         #konva-container {
             width: 100%;
             height: 100%;
@@ -71,10 +81,12 @@
               return data;
           })
           .then(data => {
-            // console.log(data);
+            console.log(data);
             const payload = {
-              jobId: "JOB03",
-              parts: data,
+              metaData: data["metaData"],
+              // jobId: data["metaData"]["jobNumber"],
+              // jobId: "JOB03",
+              parts: data["parts"],
             }
             calc(payload, 0, null);
         })
@@ -95,9 +107,9 @@
             }
         };
 
-        const doCalculations = () => {
-          calc(JSON.parse(document.getElementById('input').value), 0, null);
-        }
+        // const doCalculations = () => {
+        //   calc(JSON.parse(document.getElementById('input').value), 0, null);
+        // }
     </script>
 </head>
 <body>
@@ -145,6 +157,7 @@
 <!--    <div id="rotated-variations"></div>-->
 </div>
 <div id="konva-container"></div>
+<button onclick="sendToOrdo()">Send to Ordo</button>
 <div id="textual-explanation-container">
   <pre id="textual-explanation"></pre>
 </div>

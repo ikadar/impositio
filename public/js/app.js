@@ -902,6 +902,7 @@ const verticalTrimLine = (options) => {
 
 }
 
+let calculatedData = null;
 const calc = (input, machineIndex, content) => {
 
     if (machineIndex > 0) {
@@ -922,7 +923,8 @@ const calc = (input, machineIndex, content) => {
         .then(response => response.json())
         .then(data => {
             // console.log(data);
-            displayAllTextualExplanation(data, input.jobId, input.parts[0].partId);
+            calculatedData = data;
+            displayAllTextualExplanation(data, input.metaData.jobNumber, input.parts[0].partId);
         })
         .catch(error => {
             console.error('Error loading JSON:', error);
@@ -951,7 +953,7 @@ const displayAllTextualExplanation = (data, jobId, partId) => {
             let divContent = "";
 
             divContent += `<div style="margin-bottom: 20px">`;
-            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">open</a><div class="title" onclick="toggleDetails('${uuid}')">${path.designation}</div>`;
+            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">show impositions</a><div class="title"><input type="radio" name="${partId}" value="${path.id}"><div style="display: inline-block"><span class="show-details" onclick="toggleDetails('${uuid}')">&#9660;</span>${path.designation}</div></div>`;
             divContent += `<div class = "details" id="${uuid}" >`;
             path.nodes.map((node) => {
 
@@ -1342,5 +1344,44 @@ const showControlPanelSelectors = (input, data, machineIndex, machineGroup, cont
     }
 }
 
+const sendToOrdo = () => {
+
+    let isAllSelected = true;
+    let selectedUuids = Object.keys(calculatedData.parts).map((partId) => {
+        const selectedValue = document.querySelector(`input[name="${partId}"]:checked`)?.value;
+        console.log(partId);
+        console.log(selectedValue);
+        isAllSelected = isAllSelected && !!selectedValue;
+        return {partId: partId, value: selectedValue}
+    });
+
+    if (isAllSelected) {
+        const payload = {
+            jobId: calculatedData.metaData.jobNumber,
+            selectedUuids: selectedUuids
+        }
+
+        fetch('/ordo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error loading JSON:', error);
+            });
+
+
+    }
+
+}
+
 // 👇 Expose it globally
 window.calc = calc;
+window.sendToOrdo = sendToOrdo;

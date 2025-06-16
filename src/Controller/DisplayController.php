@@ -62,7 +62,7 @@ class DisplayController extends AbstractController
 
     public function loadData($jobId, $partId, $impositionId): ?array
     {
-        $path = sprintf("%s/data/%s/%s.json", $this->kernel->getProjectDir(), $jobId, $partId);
+        $path = sprintf("%s/data/%s/parts/%s.json", $this->kernel->getProjectDir(), $jobId, $partId);
 
         $jsonData = file_get_contents($path);
         $data = json_decode($jsonData, true);
