@@ -13,6 +13,10 @@ use App\Domain\Layout\Calculator;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
+use League\Flysystem\Filesystem;
+use League\Flysystem\PhpseclibV3\SftpAdapter;
+use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,7 +41,16 @@ class OrdoController extends AbstractController
     public function ordo(
     ): JsonResponse
     {
+
         $this->processPayload();
+
+        $deadline = $this->payload["metaData"]["deadline"];
+        $deadline = substr($deadline, 1);
+        $deadline = explode(" ", $deadline);
+
+        $deadlineOffset = array_pop($deadline);
+        $deadline = implode(" ", $deadline);
+        $deadline = str_replace("/", "-", $deadline);
 
         $ordoPayload = [
             "id" => $this->payload["metaData"]["jobNumber"],
@@ -51,8 +64,8 @@ class OrdoController extends AbstractController
                 "pagination/volets"  => 96
             ],
             "client" => $this->payload["metaData"]["client"],
-            "deadline" => $this->payload["metaData"]["deadline"], // format: "20/09/2024 13h00",
-            "deadline_is_imperative" => true, // needs parse change to extract it, perhaps an exclamation mark means it
+            "deadline" => $deadline, // format: "20/09/2024 13h00",
+            "deadline_imperative" => true, // needs parse change to extract it, perhaps an exclamation mark means it
             "deadline_BAT" => "15/09/2024 13h00", // ask about it
             "BAT" => true, // ask about it
             "required_jobs" => [], // this is not implemented yet
@@ -77,7 +90,7 @@ class OrdoController extends AbstractController
                 "designation" => "cahier 8 pages", // it is not present in the joblang
                 "technique"  => [
                     "type_de_papier"  => $mediumType,
-                    "grammage"  => $mediumWeight,
+                    "grammage"  => floatval($mediumWeight),
                     "format_feuillesr"  => "70x102", // what are the different formats? open, closed, etc?
                     "format_ouvert"  => $path["openPoseDimensions"], // "A4",
                     "format_fermé"  => $path["closedPoseDimensions"], // "A5",
@@ -101,14 +114,16 @@ class OrdoController extends AbstractController
 
                 $action = [
                     "machine" => $node["machine"],
-                    "setup" => $node["setupDuration"],
-                    "run" => $node["runDuration"],
+                    "setup" => round($node["setupDuration"]),
+                    "run" => round($node["runDuration"]),
                 ];
                 $part["actions"][] = $action;
             }
 
             $ordoPayload["parts"][] = $part;
         }
+
+        $this->uploadFtpFiles($ordoPayload);
 
         $response = [
             "ordo" => $ordoPayload,
@@ -601,4 +616,140 @@ class OrdoController extends AbstractController
         $metaData = file_get_contents($path);
         return json_decode($metaData, true);
     }
+
+    protected function uploadFtpFiles($job)
+    {
+        $filesystem = new Filesystem(new SftpAdapter(
+            new SftpConnectionProvider(
+                '135.125.13.215', // host (required)
+                'ordo-manager', // username (required)
+                'Kj87mP9vL2snR5x', // password (optional, default: null) set to null if privateKey is used
+                null, // private key (optional, default: null) can be used instead of password, set to null if password is set
+                null, // passphrase (optional, default: null), set to null if privateKey is not used or has no passphrase
+                2222, // port (optional, default: 22)
+                false, // use agent (optional, default: false)
+                30, // timeout (optional, default: 10)
+                10, // max tries (optional, default: 4)
+                null, // host fingerprint (optional, default: null),
+                null, // connectivity checker (must be an implementation of 'League\Flysystem\PhpseclibV2\ConnectivityChecker' to check if a connection can be established (optional, omit if you don't need some special handling for setting reliable connections)
+            ),
+            '/in', // root path (required)
+            PortableVisibilityConverter::fromArray([
+                'file' => [
+                    'public' => 0640,
+                    'private' => 0604,
+                ],
+                'dir' => [
+                    'public' => 0740,
+                    'private' => 7604,
+                ],
+            ])
+        ));
+
+$machineJson = <<<JSON
+{
+  "id": "Komori G40",
+  "designation": "Komori G40",
+  "designation_technique": "Komori G40",
+  "type": "presse offset",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/komori40.json', $machineJson);
+
+$machineJson = <<<JSON
+{
+  "id": "Komori G50",
+  "designation": "Komori G50",
+  "designation_technique": "Komori G50",
+  "type": "presse offset",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/komori50.json', $machineJson);
+
+$machineJson = <<<JSON
+{
+  "id": "ctp-machine",
+  "designation": "ctp machine",
+  "designation_technique": "ctp-machine",
+  "type": "ctp machine",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/ctp.json', $machineJson);
+
+$machineJson = <<<JSON
+{
+  "id": "cutting-machine",
+  "designation": "cutting machine",
+  "designation_technique": "cutting-machine",
+  "type": "cutting machine",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/cutting.json', $machineJson);
+
+$machineJson = <<<JSON
+{
+  "id": "MBO XL",
+  "designation": "mbo xl",
+  "designation_technique": "MBO XL",
+  "type": "mbo xl",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/mboxl.json', $machineJson);
+
+$machineJson = <<<JSON
+{
+  "id": "Hohner",
+  "designation": "hohner",
+  "designation_technique": "Hohner",
+  "type": "hohner",
+  "capacite": 1,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 1,
+    "productivite": 1
+  }
+}
+JSON;
+
+        $filesystem->write('machines/hohner.json', $machineJson);
+
+        $filesystem->write('jobs/1.json', json_encode($job, JSON_PRETTY_PRINT));
+
+    }
+
 }
