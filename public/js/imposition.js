@@ -712,7 +712,7 @@ const showCutSheet = (sheetLayout, machineGroup) => {
         width: sheetLayout.cutSheet.width,
         height: sheetLayout.cutSheet.height,
         // fill: "yellow",
-        fill: "#f1dde6",
+        // fill: "#f1dde6", // buggy, that"s why I don't display it
         // stroke: "red",
         // strokeWidth: 1,
         opacity: 1,
@@ -916,7 +916,7 @@ const calc = (input, machineIndex_, content) => {
 
             const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
 
-            let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
+            let machineGroup = baseLayer.findOne(`#${machineGroupId}-${i}`);
 
             if (!machineGroup) {
                 machineGroup = new Konva.Group({
