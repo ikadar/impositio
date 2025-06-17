@@ -23,7 +23,8 @@ use Symfony\Component\Uid\Uuid;
 class TestController extends AbstractController
 {
     protected MachineInterface $machine;
-    protected RectangleInterface $pressSheet;
+    protected array $pressSheets;
+//    protected RectangleInterface $pressSheet;
     protected InputSheetInterface $zone;
     protected array $pose;
 
@@ -44,14 +45,24 @@ class TestController extends AbstractController
     {
         ini_set('memory_limit', '512M');
         // press sheet
-        $this->pressSheet = $this->printFactory->newPressSheet(
-            "pressSheet",
-            0,
-            0,
-            1020,
-            700,
-            1
-        );
+        $this->pressSheets = [
+            $this->printFactory->newPressSheet(
+                "pressSheet",
+                0,
+                0,
+                1020,
+                700,
+                1
+            ),
+            $this->printFactory->newPressSheet(
+                "pressSheet",
+                0,
+                0,
+                1000,
+                700,
+                1
+            )
+        ];
 
         $payload = $this->processPayload();
 
@@ -60,7 +71,8 @@ class TestController extends AbstractController
 
             $actionPaths = $this->actionTree->process(
                 $part["abstractActions"],
-                $part["pressSheet"],
+                $part["pressSheets"],
+//                $part["pressSheet"],
                 $part["zone"],
                 $part["openPoseDimensions"],
                 $part["numberOfCopies"],
@@ -168,7 +180,8 @@ class TestController extends AbstractController
 
         return [
             "abstractActions" => $abstractActions,
-            "pressSheet" => $this->pressSheet,
+            "pressSheets" => $this->pressSheets,
+//            "pressSheet" => $this->pressSheets[0],
             "zone" => $zone,
             "openPoseDimensions" => $openPoseDimensions,
             "closedPoseDimensions" => $closedPoseDimensions,
@@ -203,15 +216,22 @@ class TestController extends AbstractController
     public function getActionPathNodes($actionPath)
     {
         foreach ($actionPath as $action) {
-            $actionArray = $action->toArray($action->getMachine(), $this->pressSheet, $this->pose);
+            $actionArray = $action->toArray($action->getMachine(), $action->getPressSheet(), $this->pose);
+//            $actionArray = $action->toArray($action->getMachine(), $this->pressSheets[0], $this->pose);
             yield $actionArray;
         }
     }
 
-    public function getActionPath($part)
+    public function getActionPath($part, $maxTileCount)
     {
 
         foreach ($part["actionPaths"] as $actionPath) {
+
+            $tileCount = $actionPath[0]->getGridFitting()->getCols() * $actionPath[0]->getGridFitting()->getRows();
+
+            if ($tileCount < $maxTileCount) {
+                continue;
+            }
 
             $path = [
                 "designation" => [],
@@ -229,6 +249,11 @@ class TestController extends AbstractController
 
             $path["designation"] = implode(" > ", $path["designation"]);
             $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
+            $pressSheetText = sprintf("(%dx%d)", $path["nodes"][0]["pressSheet"]["width"], $path["nodes"][0]["pressSheet"]["height"]);
+            $path["designation"] = sprintf("%s %s", $pressSheetText, $path["designation"]);
+
+
+
             $path["medium"] = $part["medium"];
             $path["openPoseDimensions"] = sprintf(
                 "%dx%d",
@@ -255,7 +280,15 @@ class TestController extends AbstractController
 
             $actionPathArray = [];
 
-            foreach ($this->getActionPath($part) as $actionPath) {
+            $maxTileCount = 0;
+            foreach ($part["actionPaths"] as $actionPath) {
+                $tileCount = $actionPath[0]->getGridFitting()->getCols() * $actionPath[0]->getGridFitting()->getRows();
+                if ($tileCount > $maxTileCount) {
+                    $maxTileCount = $tileCount;
+                }
+            }
+
+            foreach ($this->getActionPath($part, $maxTileCount) as $actionPath) {
                 $actionPathArray[] = $actionPath;
             }
 

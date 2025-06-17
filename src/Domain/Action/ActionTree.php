@@ -103,17 +103,20 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
     public function calculateTree(
         array $abstractActions,
+//        array $pressSheets,
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
         array $prevNodes = []
     )
     {
+//        $this->setRoot($this->calculate($abstractActions, $pressSheets, $zone, $prevNodes));
         $this->setRoot($this->calculate($abstractActions, $pressSheet, $zone, $prevNodes));
         return $this->getRoot();
     }
 
     protected function calculate (
         array $abstractActions,
+//        array $pressSheets,
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
         array $prevNodes = []
@@ -132,50 +135,55 @@ class ActionTree implements Interfaces\ActionTreeInterface
         // array of actionPathNodes
         $actionPaths = [];
 
-        foreach ($availableMachines as $machine) {
-            $action = new Action(
-                $machine,
-                $pressSheet,
-                $zone,
-                $this->layoutCalculator
-            );
-
-            if ($action->getMachine()->getType()->value === "folder") {
-                $zone->setDimensions($this->getOpenPoseDimensions());
-                $machine->setOpenPoseDimensions($this->getOpenPoseDimensions());
-
+//        foreach ($pressSheets as $pressSheet) {
+            foreach ($availableMachines as $machine) {
                 $action = new Action(
                     $machine,
+//                    $pressSheets[0],
                     $pressSheet,
                     $zone,
                     $this->layoutCalculator
                 );
-            }
 
-            foreach ($action->getGridFittings() as $gridFitting) {
+                if ($action->getMachine()->getType()->value === "folder") {
+                    $zone->setDimensions($this->getOpenPoseDimensions());
+                    $machine->setOpenPoseDimensions($this->getOpenPoseDimensions());
+
+                    $action = new Action(
+                        $machine,
+                        $pressSheet,
+//                        $pressSheets[0],
+                        $zone,
+                        $this->layoutCalculator
+                    );
+                }
+
+                foreach ($action->getGridFittings() as $gridFitting) {
 //            dump(sprintf("ZONE: %d, %d", $zone->getWidth(), $zone->getHeight()));
 //            dump(sprintf("LOOP: %d, MACHINE: %s", count($action->getGridFittings()), $action->getMachine()->getId()));
 
-                $gridFitting->getCutSheet()->setContentType("Sheet");
+                    $gridFitting->getCutSheet()->setContentType("Sheet");
 
-                $apn = new ActionTreeNode(
-                    $action->getMachine(),
-                    $action->getPressSheet(),
-                    $action->getZone(),
-                    $gridFitting,
-                    []
-                );
+                    $apn = new ActionTreeNode(
+                        $action->getMachine(),
+                        $action->getPressSheet(),
+                        $action->getZone(),
+                        $gridFitting,
+                        []
+                    );
 
-                $apn->setPrevActions($this->calculate(
-                    $abstractActions,
-                    $pressSheet,
-                    $gridFitting->getCutSheet(),
-                    $prevNodes
-                ));
+                    $apn->setPrevActions($this->calculate(
+                        $abstractActions,
+                        $pressSheet,
+//                        $pressSheets,
+                        $gridFitting->getCutSheet(),
+                        $prevNodes
+                    ));
 
-                $actionPaths[] = $apn;
+                    $actionPaths[] = $apn;
+                }
             }
-        }
+//        }
 
         return $actionPaths;
     }
@@ -218,7 +226,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
     public function process(
         $abstractActions,
-        $pressSheet,
+        $pressSheets,
+//        $pressSheet,
         $zone,
         $openPoseDimensions,
         $numberOfCopies,
@@ -229,7 +238,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
     {
         return $this->extendPaths(
             $abstractActions,
-            $pressSheet,
+            $pressSheets,
+//            [$pressSheet],
             $zone,
             $openPoseDimensions,
             $numberOfCopies,
@@ -241,7 +251,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
     protected function extendPaths(
         $abstractActions,
-        $pressSheet,
+        $pressSheets,
+//        $pressSheet,
         $zone,
         $openPoseDimensions,
         $numberOfCopies,
@@ -256,13 +267,19 @@ class ActionTree implements Interfaces\ActionTreeInterface
         $this->setPaperWeight($paperWeight);
         $this->setInking($inking);
 
-        $this->calculateTree($abstractActions, $pressSheet, $zone);
-        $flatActionPaths = $this->flattenTree();
-
         $extendedFlatActionPaths = [];
-        foreach ($flatActionPaths as $flatActionPath) {
-            $extendedFlatActionPaths[] = $this->extend($flatActionPath);
+
+        foreach ($pressSheets as $pressSheet) {
+//        $this->calculateTree($abstractActions, $pressSheets[0], $zone);
+            $this->calculateTree($abstractActions, $pressSheet, $zone);
+            $flatActionPaths = $this->flattenTree();
+
+//        $extendedFlatActionPaths = [];
+            foreach ($flatActionPaths as $flatActionPath) {
+                $extendedFlatActionPaths[] = $this->extend($flatActionPath);
+            }
         }
+
         return $extendedFlatActionPaths;
     }
 

@@ -5,9 +5,14 @@ namespace App\Domain\Layout;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Geometry\AlignmentMode;
+use App\Domain\Geometry\Coordinate;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Direction;
+use App\Domain\Geometry\GeometryFactory;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Geometry\Position;
+use App\Domain\Geometry\Rectangle;
+use App\Domain\Geometry\RectangleId;
 use App\Domain\Layout\Interfaces\CalculatorInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Layout\Interfaces\PackerInterface;
@@ -21,6 +26,7 @@ class Calculator implements CalculatorInterface
     public function __construct(
         protected PackerInterface $packer,
         protected PrintFactory $printFactory,
+        protected GeometryFactory $geometryFactory,
     )
     {
     }
@@ -80,8 +86,14 @@ class Calculator implements CalculatorInterface
     ): array
     {
         $gridFittings = [];
+        $boundingArea = new Rectangle(
+            new Position(new Coordinate(0), new Coordinate(0)),
+            new Dimensions(min($maxSheet->getWidth(), $pressSheet->getWidth()), min($maxSheet->getHeight(), $pressSheet->getHeight())),
+            $this->geometryFactory,
+            new RectangleId(),
+        );
 
-        $exhaustiveGridFittings = $this->packer->calculateExhaustiveGridFitting($maxSheet, $zone, $rotated);
+        $exhaustiveGridFittings = $this->packer->calculateExhaustiveGridFitting($boundingArea, $zone, $rotated);
 
         foreach ($exhaustiveGridFittings as $layout) {
 
