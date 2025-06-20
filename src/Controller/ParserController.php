@@ -31,6 +31,7 @@ class ParserController extends AbstractController
     ): JsonResponse
     {
         $joblangScriptData = $this->processPayload($request);
+
         $requestModel = new JoblangScriptParseRequestModel($joblangScriptData);
         $responseModel = $this->useCase->execute($requestModel);
         $response = $this->responseTransformer->transform($responseModel);

@@ -15,7 +15,7 @@ class JoblangLine
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: JoblangScript::class, inversedBy: 'jobs')]
+    #[ORM\ManyToOne(targetEntity: JoblangScript::class, inversedBy: 'lines')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?JoblangScript $joblangScript = null;
 

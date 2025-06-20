@@ -19,15 +19,11 @@ class JoblangScript
     #[ORM\Column(type: Types::TEXT)]
     private ?string $script = null;
 
-    #[ORM\OneToMany(mappedBy: 'joblangScript', targetEntity: Job::class, cascade: ['remove'], orphanRemoval: true)]
-    private Collection $jobs;
-
     #[ORM\OneToMany(mappedBy: 'joblangScript', targetEntity: JoblangLine::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $lines;
 
     public function __construct()
     {
-        $this->jobs = new ArrayCollection();
         $this->lines = new ArrayCollection();
     }
 
@@ -44,33 +40,6 @@ class JoblangScript
     public function setScript(string $script): static
     {
         $this->script = $script;
-
-        return $this;
-    }
-
-    public function getJobs(): Collection
-    {
-        return $this->jobs;
-    }
-
-    public function addJob(Job $job): static
-    {
-        if (!$this->jobs->contains($job)) {
-            $this->jobs->add($job);
-            $job->setJoblangScript($this);
-        }
-
-        return $this;
-    }
-
-    public function removeJob(Job $job): static
-    {
-        if ($this->jobs->removeElement($job)) {
-            // Unset the owning side if needed
-            if ($job->getJoblangScript() === $this) {
-                $job->setJoblangScript(null);
-            }
-        }
 
         return $this;
     }

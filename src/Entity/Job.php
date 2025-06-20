@@ -15,7 +15,7 @@ class Job
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
-    #[ORM\OneToOne(targetEntity: JoblangLine::class, inversedBy: 'jobs')]
+    #[ORM\OneToOne(targetEntity: JoblangLine::class, inversedBy: 'job')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?JoblangLine $joblangLine = null;
 

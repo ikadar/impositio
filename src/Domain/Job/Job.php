@@ -4,14 +4,18 @@ namespace App\Domain\Job;
 
 use App\Domain\Job\Interfaces\JobInterface;
 use App\Domain\Part\Interfaces\PartFactoryInterface;
+use App\Domain\Part\Interfaces\PartInterface;
 
 class Job implements Interfaces\JobInterface
 {
     protected array $parsed;
+    protected array $parts;
+
     public function __construct(
         protected PartFactoryInterface $partFactory,
     )
     {
+        $this->parts = [];
     }
 
     public function getParsed(): array
@@ -27,16 +31,19 @@ class Job implements Interfaces\JobInterface
 
     public function getParts(): array
     {
-        $partsData = $this->flatten($this->parsed["jobData"]["parts"]);
+        return $this->parts;
+    }
 
-        $parts = [];
-        foreach ($partsData as $loop => $partData) {
-            $part = $this->partFactory->create($partData);
-            $part->setId(sprintf("PART%04d", $loop+1));
-            $parts[] = $part;
-        }
+    public function setParts(array $parts): Job
+    {
+        $this->parts = $parts;
+        return $this;
+    }
 
-        return $parts;
+    public function addPart(PartInterface $part): Job
+    {
+        $this->parts[] = $part;
+        return $this;
     }
 
     public function flatten(array $parts): array

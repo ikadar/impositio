@@ -905,6 +905,8 @@ const verticalTrimLine = (options) => {
 let calculatedData = null;
 const calc = (input, machineIndex, content) => {
 
+    console.log(input);
+
     if (machineIndex > 0) {
         input.cutSpacing = {
             horizontal: 0,
@@ -912,13 +914,13 @@ const calc = (input, machineIndex, content) => {
         };
     }
 
-    fetch('/test', {
-        method: 'POST',
+    fetch(`/test/${input.scriptId}`, {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: JSON.stringify(input)
+        // body: JSON.stringify(input)
     })
         .then(response => response.json())
         .then(data => {
@@ -929,6 +931,23 @@ const calc = (input, machineIndex, content) => {
         .catch(error => {
             console.error('Error loading JSON:', error);
         });
+    // fetch('/test', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Accept': 'application/json'
+    //     },
+    //     body: JSON.stringify(input)
+    // })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         // console.log(data);
+    //         calculatedData = data;
+    //         displayAllTextualExplanation(data, input.metaData.jobNumber, input.parts[0].partId);
+    //     })
+    //     .catch(error => {
+    //         console.error('Error loading JSON:', error);
+    //     });
 }
 
 

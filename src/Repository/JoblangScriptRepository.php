@@ -16,28 +16,23 @@ class JoblangScriptRepository extends ServiceEntityRepository
         parent::__construct($registry, JoblangScript::class);
     }
 
-    //    /**
-    //     * @return JoblangScript[] Returns an array of JoblangScript objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('j')
-    //            ->andWhere('j.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('j.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+        public function findWithParts($id): ?JoblangScript
+        {
+            $joblangScript = $this->createQueryBuilder('script')
+                ->leftJoin('script.lines', 'lines')
+                ->leftJoin('lines.job', 'jobs')
+                ->leftJoin('jobs.parts', 'parts')
+                ->addSelect('lines')
+                ->addSelect('jobs')
+                ->addSelect('parts')
+                ->where('script.id = :id')
+                ->setParameter('id', $id)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
 
-    //    public function findOneBySomeField($value): ?JoblangScript
-    //    {
-    //        return $this->createQueryBuilder('j')
-    //            ->andWhere('j.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+            return $joblangScript;
+
+        }
+
 }

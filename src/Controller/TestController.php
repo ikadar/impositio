@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Application\Joblang\ResponseTransformer\JoblangScriptParseResponseTransformer;
+use App\Application\Joblang\UseCase\ParseJoblangScript\JoblangScriptParseResponseModel;
 use App\Domain\Action\AbstractAction;
 use App\Domain\Action\ActionType;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
@@ -9,13 +11,14 @@ use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Geometry\Dimensions;
-use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Layout\Calculator;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
+use App\Entity\JoblangScript;
+use App\Infrastructure\Mapper\JobMapper;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
@@ -24,7 +27,6 @@ class TestController extends AbstractController
 {
     protected MachineInterface $machine;
     protected array $pressSheets;
-//    protected RectangleInterface $pressSheet;
     protected InputSheetInterface $zone;
     protected array $pose;
 
@@ -39,11 +41,39 @@ class TestController extends AbstractController
     {
     }
 
-    #[Route(path: '/test', requirements: [], methods: ['POST'])]
+    #[Route(path: '/test/{scriptId}', requirements: [], methods: ['GET'])]
     public function getTest(
+        string $scriptId,
+        EntityManagerInterface $em,
+        JobMapper $jobMapper,
+        JoblangScriptParseResponseTransformer $responseTransformer,
     ): JsonResponse
     {
         ini_set('memory_limit', '512M');
+
+
+        $repo = $em->getRepository(JoblangScript::class);
+        $joblangScript = $repo->findWithParts($scriptId);
+
+        $jobEntity = $joblangScript->getLines()[0]->getJob(); // Doctrine entity
+
+        $domainJob = $jobMapper->toDomain($jobEntity); // Convert to domain Job object
+        $parts = $domainJob->getParts();
+
+        $metaData = $jobEntity->getMetaData();
+
+        $responseModel = new JoblangScriptParseResponseModel(
+            $joblangScript->getId(),
+            $domainJob,
+            $parts,
+            $metaData
+        );
+
+        $response = $responseTransformer->transform($responseModel);
+
+
+
+
         // press sheet
         $this->pressSheets = [
             $this->printFactory->newPressSheet(
@@ -64,7 +94,7 @@ class TestController extends AbstractController
             )
         ];
 
-        $payload = $this->processPayload();
+        $payload = $this->processPayload($response);
 
         $parts = [];
         foreach ($payload["parts"] as $part) {
@@ -97,10 +127,10 @@ class TestController extends AbstractController
         return $response;
     }
 
-    protected function processPayload(): array
+    protected function processPayload($data): array
     {
-        $request = Request::createFromGlobals();
-        $data = json_decode($request->getContent(), true);
+//        $request = Request::createFromGlobals();
+//        $data = json_decode($request->getContent(), true);
 
         $this->metaData = $data["metaData"];
 
@@ -217,7 +247,6 @@ class TestController extends AbstractController
     {
         foreach ($actionPath as $action) {
             $actionArray = $action->toArray($action->getMachine(), $action->getPressSheet(), $this->pose);
-//            $actionArray = $action->toArray($action->getMachine(), $this->pressSheets[0], $this->pose);
             yield $actionArray;
         }
     }

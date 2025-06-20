@@ -7,6 +7,7 @@ use App\Domain\Job\Job;
 class JoblangScriptParseResponseModel
 {
     public function __construct(
+        public readonly int $scriptId,
         public readonly Job $job,
         public readonly array $parts,
         public readonly array $metaData

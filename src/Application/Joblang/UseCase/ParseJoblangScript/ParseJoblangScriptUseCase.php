@@ -24,6 +24,7 @@ class ParseJoblangScriptUseCase
         $metaData = $jobEntity->getMetaData();
 
         return new JoblangScriptParseResponseModel(
+            $joblangScript->getId(),
             $domainJob,
             $parts,
             $metaData

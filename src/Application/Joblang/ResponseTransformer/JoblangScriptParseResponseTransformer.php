@@ -23,6 +23,7 @@ class JoblangScriptParseResponseTransformer
         $numberOfCopies = $metadata['quantity'];
 
         return [
+            'scriptId' => $responseModel->scriptId,
             'metaData' => $metadata,
             'parts' => $this->partsToArray($parts, $numberOfCopies)
         ];
