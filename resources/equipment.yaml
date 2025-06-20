@@ -1,6 +1,10 @@
 Hohner:
   id: "Hohner"
+  designation: "Hohner"
   type: "stitching machine"
+  technic-designation: "stitching machine"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 0
   input-dimensions:
     min:
@@ -12,9 +16,16 @@ Hohner:
   base-setup-duration: 15
   documents-per-hour: 4000
   cost-per-hour: 60
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
 MBO XL:
   id: "MBO XL"
+  designation: "MBO XL"
   type: "folder"
+  technic-designation: "folder"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 0
   input-dimensions:
     min:
@@ -29,9 +40,16 @@ MBO XL:
   base-setup-duration: 20
   setup-duration-by-fold: 3.5
   cost-per-hour: 60
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
 Komori G40:
   id: "Komori G40"
+  designation: "Komori G40"
   type: "printing press"
+  technic-designation: "printing press"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 15
   input-dimensions:
     min:
@@ -48,9 +66,16 @@ Komori G40:
   max-input-stack-height: 120
   stack-replenishment-duration: 3
   cost-per-hour: 130
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
 Komori G50:
   id: "Komori G50"
+  designation: "Komori G50"
   type: "printing press"
+  technic-designation: "printing press"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 15
   input-dimensions:
     min:
@@ -67,9 +92,16 @@ Komori G50:
   max-input-stack-height: 120
   stack-replenishment-duration: 3
   cost-per-hour: 180
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
 cutting-machine:
   id: "cutting machine"
+  designation: "cutting machine"
   type: "cutting machine"
+  technic-designation: "cutting machine"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 15
   input-dimensions:
     min:
@@ -82,9 +114,16 @@ cutting-machine:
   paper-circuit-duration: 1.5
   cut-duration: 0.3333
   cost-per-hour: 130
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
 ctp-machine:
   id: "ctp machine"
+  designation: "ctp machine"
   type: "ctp machine"
+  technic-designation: "ctp machine"
+  capacity: 1
+  expiration-date-alignment: 999999
   gripMargin: 15
   input-dimensions:
     min:
@@ -95,6 +134,6 @@ ctp-machine:
       height: 750
   sqm-per-hour: 26
   cost-per-hour: 60
-
-
-
+  nominal-mode:
+    attention-required: 1
+    productivity: 1

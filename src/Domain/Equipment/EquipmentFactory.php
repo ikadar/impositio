@@ -77,6 +77,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new Folder(
             $id,
             MachineType::Folder,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
             $data["gripMargin"],
             new Dimensions(
                 $data["input-dimensions"]["min"]["width"],
@@ -96,6 +102,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new CuttingMachine(
             $id,
             MachineType::CuttingMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
             $data["gripMargin"],
             new Dimensions(
                 $data["input-dimensions"]["min"]["width"],
@@ -115,6 +127,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new CTPMachine(
             $id,
             MachineType::CTPMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
             $data["gripMargin"],
             new Dimensions(
                 $data["input-dimensions"]["min"]["width"],
@@ -134,6 +152,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new OffsetPrintingPress(
             $id,
             MachineType::PrintingPress,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
             $data["gripMargin"],
             new Dimensions(
                 $data["input-dimensions"]["min"]["width"],
@@ -158,6 +182,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new StitchingMachine(
             $id,
             MachineType::StitchingMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
             $data["gripMargin"],
             new Dimensions(
                 $data["input-dimensions"]["min"]["width"],
