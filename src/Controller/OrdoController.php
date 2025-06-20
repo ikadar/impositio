@@ -24,6 +24,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class OrdoController extends AbstractController
 {
@@ -31,6 +32,7 @@ class OrdoController extends AbstractController
 
     public function __construct(
         protected KernelInterface $kernel,
+        protected SluggerInterface $slugger,
         protected PropertyAccessorInterface $propertyAccessor,
         protected EquipmentFactoryInterface $equipmentFactory,
     )
@@ -646,107 +648,23 @@ class OrdoController extends AbstractController
             ])
         ));
 
-$machineJson = <<<JSON
-{
-  "id": "Komori G40",
-  "designation": "Komori G40",
-  "designation_technique": "Komori G40",
-  "type": "presse offset",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
+        $machineIds = [];
+        foreach ($job["parts"] as $part) {
+            foreach ($part["actions"] as $action) {
+                $machineIds[] = $action["machine"];
+            }
+        }
+        $machineIds = array_unique($machineIds);
 
-        $filesystem->write('machines/komori40.json', $machineJson);
+        $machines = [];
+        foreach ($machineIds as $machineId) {
+            $machines[] = $this->equipmentFactory->fromId($machineId);
+        }
 
-$machineJson = <<<JSON
-{
-  "id": "Komori G50",
-  "designation": "Komori G50",
-  "designation_technique": "Komori G50",
-  "type": "presse offset",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
-
-        $filesystem->write('machines/komori50.json', $machineJson);
-
-$machineJson = <<<JSON
-{
-  "id": "ctp-machine",
-  "designation": "ctp machine",
-  "designation_technique": "ctp-machine",
-  "type": "ctp machine",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
-
-        $filesystem->write('machines/ctp.json', $machineJson);
-
-$machineJson = <<<JSON
-{
-  "id": "cutting-machine",
-  "designation": "cutting machine",
-  "designation_technique": "cutting-machine",
-  "type": "cutting machine",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
-
-        $filesystem->write('machines/cutting.json', $machineJson);
-
-$machineJson = <<<JSON
-{
-  "id": "MBO XL",
-  "designation": "mbo xl",
-  "designation_technique": "MBO XL",
-  "type": "mbo xl",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
-
-        $filesystem->write('machines/mboxl.json', $machineJson);
-
-$machineJson = <<<JSON
-{
-  "id": "Hohner",
-  "designation": "hohner",
-  "designation_technique": "Hohner",
-  "type": "hohner",
-  "capacite": 1,
-  "peremption_calage": 999999,
-  "regime_nominal": {
-    "attention_requise": 1,
-    "productivite": 1
-  }
-}
-JSON;
-
-        $filesystem->write('machines/hohner.json', $machineJson);
+        foreach ($machines as $machine) {
+            $machineConfigurationFilePath = sprintf("machines/%s.json", $this->slugger->slug($machine->getId()));
+            $filesystem->write($machineConfigurationFilePath, json_encode($machine->getOrdoData(), JSON_PRETTY_PRINT));
+        }
 
         $filesystem->write('jobs/1.json', json_encode($job, JSON_PRETTY_PRINT));
 
