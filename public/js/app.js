@@ -905,8 +905,6 @@ const verticalTrimLine = (options) => {
 let calculatedData = null;
 const calc = (input, machineIndex, content) => {
 
-    console.log(input);
-
     if (machineIndex > 0) {
         input.cutSpacing = {
             horizontal: 0,
@@ -926,32 +924,15 @@ const calc = (input, machineIndex, content) => {
         .then(data => {
             // console.log(data);
             calculatedData = data;
-            displayAllTextualExplanation(data, input.metaData.jobNumber, input.parts[0].partId);
+            displayAllTextualExplanation(data, data.metaData.jobNumber);
         })
         .catch(error => {
             console.error('Error loading JSON:', error);
         });
-    // fetch('/test', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Accept': 'application/json'
-    //     },
-    //     body: JSON.stringify(input)
-    // })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         // console.log(data);
-    //         calculatedData = data;
-    //         displayAllTextualExplanation(data, input.metaData.jobNumber, input.parts[0].partId);
-    //     })
-    //     .catch(error => {
-    //         console.error('Error loading JSON:', error);
-    //     });
 }
 
 
-const displayAllTextualExplanation = (data, jobId, partId) => {
+const displayAllTextualExplanation = (data, jobId) => {
     const textualExplanation = document.getElementById("textual-explanation");
     textualExplanation.innerHTML = "";
 

@@ -58,11 +58,8 @@
     <script language="JavaScript">
 
       const parse = () => {
-        // console.log(document.getElementById('input').value);
-
           const textualExplanation = document.getElementById("textual-explanation");
           textualExplanation.innerHTML = "";
-
 
           fetch('/parse', {
             method: 'POST',
@@ -81,13 +78,6 @@
               return data;
           })
           .then(data => {
-            console.log(data);
-            const payload = {
-              metaData: data["metaData"],
-              // jobId: data["metaData"]["jobNumber"],
-              // jobId: "JOB03",
-              parts: data["parts"],
-            }
             calc(data, 0, null);
         })
         .catch(error => {
@@ -106,10 +96,6 @@
                 el.style.display = 'block';
             }
         };
-
-        // const doCalculations = () => {
-        //   calc(JSON.parse(document.getElementById('input').value), 0, null);
-        // }
     </script>
 </head>
 <body>

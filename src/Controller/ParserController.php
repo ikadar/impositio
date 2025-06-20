@@ -37,7 +37,7 @@ class ParserController extends AbstractController
         $response = $this->responseTransformer->transform($responseModel);
 
         return new JsonResponse(
-            $response,
+            ["scriptId" => $responseModel->scriptId],
             JsonResponse::HTTP_OK
         );
     }
