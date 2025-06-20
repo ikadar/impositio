@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\JoblangLineRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,6 +18,9 @@ class JoblangLine
     #[ORM\ManyToOne(targetEntity: JoblangScript::class, inversedBy: 'jobs')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?JoblangScript $joblangScript = null;
+
+    #[ORM\OneToOne(mappedBy: 'joblangLine', targetEntity: Job::class, cascade: ['remove'], orphanRemoval: true)]
+    private Job $job;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $source = null;
@@ -61,6 +65,17 @@ class JoblangLine
     public function setJoblangScript(?JoblangScript $script): self
     {
         $this->joblangScript = $script;
+        return $this;
+    }
+
+    public function getJob(): ?Job
+    {
+        return $this->job;
+    }
+
+    public function setJob(?Job $job): self
+    {
+        $this->job = $job;
         return $this;
     }
 

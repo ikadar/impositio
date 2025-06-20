@@ -130,5 +130,4 @@ class Part implements PartInterface
             $this->getClosedDimensions()->getHeight()
         );
     }
-
 }
