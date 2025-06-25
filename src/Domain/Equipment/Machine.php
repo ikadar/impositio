@@ -24,6 +24,7 @@ class Machine implements MachineInterface
         protected float $gripMarginSize,
         protected Dimensions $minSheetDimensions,
         protected Dimensions $maxSheetDimensions,
+        protected ?int $maxPoseCount,
         protected PrintFactory $printFactory,
         protected EquipmentServiceInterface $equipmentService,
     )
@@ -182,6 +183,17 @@ class Machine implements MachineInterface
                 "productivite" => $this->getNominalModeProductivity()
             ]
         ];
+    }
+
+    public function getMaxPoseCount(): ?int
+    {
+        return $this->maxPoseCount;
+    }
+
+    public function setMaxPoseCount(int $maxPoseCount): Machine
+    {
+        $this->maxPoseCount = $maxPoseCount;
+        return $this;
     }
 
 }

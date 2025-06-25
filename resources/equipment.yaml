@@ -19,6 +19,7 @@ Hohner:
   nominal-mode:
     attention-required: 1
     productivity: 1
+  maxPoseCount: 2
 MBO XL:
   id: "MBO XL"
   designation: "MBO XL"

@@ -29,6 +29,7 @@ class CuttingMachine extends Machine implements CuttingMachineInterface
         float $gripMarginSize,
         Dimensions $minSheetDimensions,
         Dimensions $maxSheetDimensions,
+        protected ?int $maxPoseCount,
         PrintFactory $printFactory,
         EquipmentServiceInterface $equipmentService,
     )
@@ -45,6 +46,7 @@ class CuttingMachine extends Machine implements CuttingMachineInterface
             $gripMarginSize,
             $minSheetDimensions,
             $maxSheetDimensions,
+            $maxPoseCount,
             $printFactory,
             $equipmentService
         );

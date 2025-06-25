@@ -34,6 +34,7 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         float $gripMarginSize,
         Dimensions $minSheetDimensions,
         Dimensions $maxSheetDimensions,
+        protected ?int $maxPoseCount,
         PrintFactory $printFactory,
         EquipmentServiceInterface $equipmentService,
     )
@@ -50,6 +51,7 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
             $gripMarginSize,
             $minSheetDimensions,
             $maxSheetDimensions,
+            $maxPoseCount,
             $printFactory,
             $equipmentService
         );

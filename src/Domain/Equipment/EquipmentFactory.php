@@ -92,6 +92,7 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 $data["input-dimensions"]["max"]["width"],
                 $data["input-dimensions"]["max"]["height"]
             ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
             $this->printFactory,
             $this->equipmentService
         );
@@ -117,6 +118,7 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 $data["input-dimensions"]["max"]["width"],
                 $data["input-dimensions"]["max"]["height"]
             ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
             $this->printFactory,
             $this->equipmentService
         );
@@ -142,6 +144,7 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 $data["input-dimensions"]["max"]["width"],
                 $data["input-dimensions"]["max"]["height"]
             ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
             $this->printFactory,
             $this->equipmentService
         );
@@ -172,6 +175,7 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
 //            $data["max-input-stack-height"],
 //            $data["stack-replenishment-duration"],
 //            $data["sheets-per-hour"],
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
             $this->printFactory,
             $this->equipmentService
         );
@@ -197,6 +201,7 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 $data["input-dimensions"]["max"]["width"],
                 $data["input-dimensions"]["max"]["height"]
             ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
             $this->printFactory,
             $this->equipmentService
         );

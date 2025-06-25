@@ -103,6 +103,10 @@ class Calculator implements CalculatorInterface
                 continue;
             }
 
+            if ($this->layoutExceedsMaxPoses($layout, $machine)) {
+                continue;
+            }
+
             $layout->setExplanation([
                 "machine" => [
                     "name" => $machine->getId(),
@@ -335,5 +339,16 @@ class Calculator implements CalculatorInterface
                 ($layout->getTotalHeight() + $layout->getCutSheet()->getChildById("gripMargin")->getHeight()  > ($maxSheet->getHeight()))
             );
     }
+
+    public function layoutExceedsMaxPoses(GridFittingInterface $layout, MachineInterface $machine): bool
+    {
+        $maxPoses = $machine->getMaxPoseCount();
+        if ($maxPoses === null) {
+            return false;
+        }
+
+        return ($layout->getCols() * $layout->getRows()) > $maxPoses;
+    }
+
 
 }

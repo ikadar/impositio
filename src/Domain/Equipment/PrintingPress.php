@@ -29,6 +29,7 @@ class PrintingPress extends Machine implements PrintingPressInterface
 //        $baseSetupDuration,
 //        $setupDurationPerColor,
 //        $maxInputStackHeight,
+        protected ?int $maxPoseCount,
         PrintFactory $printFactory,
         EquipmentServiceInterface $equipmentService,
     )
@@ -45,6 +46,7 @@ class PrintingPress extends Machine implements PrintingPressInterface
             $gripMarginSize,
             $minSheetDimensions,
             $maxSheetDimensions,
+            $maxPoseCount,
             $printFactory,
             $equipmentService
         );

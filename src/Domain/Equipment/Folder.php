@@ -31,6 +31,7 @@ class Folder extends Machine implements FolderInterface
         float $gripMarginSize,
         Dimensions $minSheetDimensions,
         Dimensions $maxSheetDimensions,
+        protected ?int $maxPoseCount,
         PrintFactory $printFactory,
         EquipmentServiceInterface $equipmentService,
     )
@@ -47,6 +48,7 @@ class Folder extends Machine implements FolderInterface
             $gripMarginSize,
             $minSheetDimensions,
             $maxSheetDimensions,
+            $maxPoseCount,
             $printFactory,
             $equipmentService
         );

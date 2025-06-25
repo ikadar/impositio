@@ -27,6 +27,7 @@ class CTPMachine extends Machine implements CTPMachineInterface
         float $gripMarginSize,
         Dimensions $minSheetDimensions,
         Dimensions $maxSheetDimensions,
+        protected ?int $maxPoseCount,
         PrintFactory $printFactory,
         EquipmentServiceInterface $equipmentService,
     )
@@ -43,6 +44,7 @@ class CTPMachine extends Machine implements CTPMachineInterface
             $gripMarginSize,
             $minSheetDimensions,
             $maxSheetDimensions,
+            $maxPoseCount,
             $printFactory,
             $equipmentService
         );
