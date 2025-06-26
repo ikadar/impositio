@@ -19,7 +19,7 @@ stage.add(baseLayer);
 
 const show = (sheetLayout, machineGroup, content, actionPath) => {
 
-    // console.log(content);
+    // console.log(machineGroup.attrs.id);
 
     let pressSheetGroup = machineGroup.findOne("#pressSheetGroup");
     if (pressSheetGroup) {
@@ -461,7 +461,7 @@ const showLayoutArea = (sheetLayout, machineGroup, content, actionPath) => {
 
 const showTiles = (sheetLayout, machineGroup, content, actionPath) => {
 
-    console.log(sheetLayout);
+    // console.log(sheetLayout);
 
     // const keys = Object.keys(actionPath);
     // const lastMachineKey = keys[keys.length - 1];
@@ -911,10 +911,9 @@ const calc = (input, machineIndex_, content) => {
     for (let i = 0; i < input.nodes.length; i++) {
 
         const machineId = input.nodes[i].machine;
-        console.log(machineId !== "ctp-machine" && machineId !== "cutting-machine");
         if (machineId !== "ctp-machine" && machineId !== "cutting-machine") {
 
-            const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
+            const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}-${i}`;
 
             let machineGroup = baseLayer.findOne(`#${machineGroupId}-${i}`);
 
@@ -932,70 +931,7 @@ const calc = (input, machineIndex_, content) => {
             machineIndex++;
 
         }
-
-
     }
-
-
-    // if (machineIndex < input.machines.length) {
-    //
-    //     input.machine = input.machines[machineIndex];
-    //
-    //     if (machineIndex > 0) {
-    //         input.cutSpacing = {
-    //             horizontal: 0,
-    //             vertical: 0,
-    //         };
-    //     }
-    //
-    //     fetch('/test', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'Accept': 'application/json'
-    //         },
-    //         body: JSON.stringify(input)
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             // console.log(data);
-    //             displayAllTextualExplanation(data);
-    //         })
-    //         .catch(error => {
-    //             console.error('Error loading JSON:', error);
-    //         });
-    // } else {
-    //
-    //     input.machines.map((item) => {
-    //         input["action-path"][item.id]["options"] = item;
-    //     });
-    //
-    //     // console.log(input.machines);
-    //     console.log(input["action-path"]);
-    //     const payload = {
-    //         "action-path": input["action-path"],
-    //         "config": JSON.parse(document.getElementById('input').value),
-    //     };
-    //
-    //     fetch('/explanation', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'Accept': 'application/json'
-    //         },
-    //         body: JSON.stringify(payload)
-    //         // body: JSON.stringify(input["action-path"])
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             // console.log(JSON.stringify(data, null, 2));
-    //             // document.getElementById("explanation").innerHTML = JSON.stringify(data, null, 2);
-    //             displayTextualExplanation(data);
-    //         })
-    //         .catch(error => {
-    //             console.error('Error loading JSON:', error);
-    //         });
-    // }
 }
 
 
@@ -1005,7 +941,7 @@ const displayAllTextualExplanation = (data) => {
     textualExplanation.innerHTML = "";
     data.map((path) => {
         const uuid = crypto.randomUUID();
-        console.log(uuid);
+        // console.log(uuid);
         // console.log(path.designation);
         const actionDiv = document.createElement("div");
 
@@ -1031,100 +967,6 @@ const displayAllTextualExplanation = (data) => {
 
         textualExplanation.appendChild(actionDiv);
     })
-
-    // const textualExplanation = document.getElementById("textual-explanation");
-    // textualExplanation.innerHTML = "";
-    // data.actions.map(item => {
-    //     if (item.actionType === "print" || item.actionType === "print" || item.actionType === "folding" || item.actionType === "stitching" || item.actionType === "ctp") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="title">${item.machine}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">min:</div> ${item.minSheet.width} x ${item.minSheet.height}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">max:</div> ${item.maxSheet.width} x ${item.maxSheet.height}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Input sheet:</div> ${item.inputSheet.width} x ${item.inputSheet.height}</div>`;
-    //
-    //         if (item.actionType === "print") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Products per sheet:</div> ${item.productsPerSheet}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Required sheet count:</div> ${item.printingSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Sheet price:</div> ${item.sheetPrice}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Paper cost per product:</div> ${item.paperCostPerProduct}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Printing paper cost:</div> ${item.printingPaperCost}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "folding") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "stitching") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "ctp") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "trim") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (trim)</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "cut") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (cut & trim)</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "rotation") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div style="padding-left: 5px"><i>Rotation</i></div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    // });
-    //
-    // const totalDiv = document.createElement("div");
-    // totalDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    // totalDiv.innerHTML += `<div class="title">Total</div>`;
-    // totalDiv.innerHTML += `<div><div class="label">Duration:</div> ${data.total.totalDuration} min</div>`;
-    // totalDiv.innerHTML += `<div><div class="label">Cost:</div> ${data.total.totalCost}€</div>`;
-    // totalDiv.innerHTML += `</div>`;
-    // textualExplanation.appendChild(totalDiv);
 
 }
 
@@ -1225,44 +1067,6 @@ const displayTextualExplanation = (data) => {
 
 }
 
-const displayMachineVariations = (data, input, machineIndex, content) => {
-
-    const machineId = input.machines[machineIndex].id;
-    const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
-
-    let machineGroup = baseLayer.findOne(`#${machineGroupId}`);
-
-    if (!machineGroup) {
-        machineGroup = new Konva.Group({
-            id: machineGroupId,
-            x: 0,
-            y: machineIndex * 1200,
-        });
-        baseLayer.add(machineGroup);
-    }
-
-    showControlPanel(input, data, machineIndex, machineGroup, content);
-
-    // if (data.length > 0) {
-    //     show(data[0], machineGroup);
-    // }
-}
-
-const showControlPanel = (input, data, machineIndex, machineGroup, content) => {
-    const controlPanelGroup = new Konva.Group({
-        id: "controlPanelGroup",
-        x: 0,
-        y: 0,
-        width: baseLayer.attrs.width,
-        height: 100,
-    });
-    machineGroup.add(controlPanelGroup);
-
-    showControlPanelNumbers(data, machineGroup);
-    showControlPanelSelectors(input, data, machineIndex, machineGroup, content);
-
-}
-
 const showControlPanelNumbers = (data, machineGroup) => {
 
     let maxSizes = {
@@ -1343,55 +1147,6 @@ const showVerticalSelectorNumber = (machineGroup, i, offset) => {
         verticalAlign: "middle"
     });
     controlPanelGroup.add(number);
-}
-
-const showControlPanelSelectors = (input, data, machineIndex, machineGroup, content) => {
-
-    const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
-
-    for (let i in data) {
-
-        const selector = new Konva.Rect({
-            x: (data[i].cols * 30) + (data[i].rotated ? 200 : 0),
-            y: (data[i].rows * 30),
-            width: 20,
-            height: 20,
-            // fill: "black",
-            stroke: "black",
-            strokeWidth: 1,
-        });
-
-        selector.on("click", function () {
-
-            input.zone = data[i].cutSheet;
-            // console.log(data[i]);
-
-            input["action-path"][input.machines[machineIndex].id] = data[i];
-
-            const newContent = show(data[i], machineGroup, content, input["action-path"]);
-
-            stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
-
-            // todo: delete machineGroups with higher indexes
-            for (let j = machineIndex + 1; j < input.machines.length; j++) {
-
-                const machineId = input.machines[j].id;
-                const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
-
-                const machineGroup = baseLayer.findOne(`#${machineGroupId}`);
-                if (machineGroup) {
-                    machineGroup.remove();
-                }
-            }
-
-            document.getElementById("textual-explanation").innerHTML = "";
-
-            // calculate next machine's data
-            calc(input, machineIndex + 1, newContent);
-        });
-        controlPanelGroup.add(selector);
-
-    }
 }
 
 // 👇 Expose it globally
