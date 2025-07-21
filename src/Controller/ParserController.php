@@ -48,9 +48,9 @@ class ParserController extends AbstractController
         return trim($data);
     }
 
-    protected function saveData($joblangScriptData): JoblangScript
-    {
-        return $this->joblangService->parseAndPersistScript($joblangScriptData);
-    }
+//    protected function saveData($joblangScriptData): JoblangScript
+//    {
+//        return $this->joblangService->parseAndPersistScript($joblangScriptData);
+//    }
 
 }

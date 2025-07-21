@@ -76,7 +76,7 @@ class OrdoController extends AbstractController
 
         foreach ($this->payload["paths"] as $partId => $path) {
             $mediumType = null;
-            $mediumProps = $this->propertyAccessor->getValue($path, "[medium][prop]");
+            $mediumProps = $this->propertyAccessor->getValue($path, "[medium][name]");
             if (is_array($mediumProps)) {
                 $mediumType = implode(" ", $mediumProps);
             }
@@ -108,7 +108,8 @@ class OrdoController extends AbstractController
                 if ($machine->getType() === MachineType::PrintingPress) {
                     $dryTimeBetweenSequences = $this->propertyAccessor->getValue($node, "[todo][dryTimeBetweenSequences]");
                     if ($dryTimeBetweenSequences !== null) {
-                        $part["actions"][count($part["actions"])-1]["sequences"] = 2;
+                        $part["actions"][count($part["actions"])-1]["sequences"] = ["recto", "verso"];
+//                        $part["actions"][count($part["actions"])-1]["sequences"] = 2;
                         $part["actions"][count($part["actions"])-1]["dry_time_between_sequences"] = $dryTimeBetweenSequences;
                         continue;
                     }
@@ -116,7 +117,8 @@ class OrdoController extends AbstractController
 
                 $action = [
                     "machine" => $node["machine"],
-                    "setup" => round($node["setupDuration"]),
+//                    "setup" => round($node["setupDuration"]),
+                    "setup_time" => round($node["setupDuration"]),
                     "run" => round($node["runDuration"]),
                 ];
                 $part["actions"][] = $action;
@@ -666,7 +668,247 @@ class OrdoController extends AbstractController
             $filesystem->write($machineConfigurationFilePath, json_encode($machine->getOrdoData(), JSON_PRETTY_PRINT));
         }
 
-        $filesystem->write('jobs/1.json', json_encode($job, JSON_PRETTY_PRINT));
+        $dryingMachine = <<<DRY
+{
+  "id": "sechage",
+  "designation": "séchage",
+  "designation_technique": "séchage",
+  "type": "temps incompressible",
+  "capacite": 9999,
+  "peremption_calage": 999999,
+  "regime_nominal": {
+    "attention_requise": 0,
+    "productivite": 1
+  }
+}
+DRY;
+
+        $filesystem->write('machines/sechage.json', $dryingMachine);
+
+
+        $alain = <<<ALAIN
+{
+  "identite": {
+    "trigramme": "alo",
+    "nom": "Louis",
+    "prenom": "Alain",
+    "poste": "conducteur offset"
+  },
+  "competences": {
+    "bordeuse": 0.9,
+    "conditionnement": 0.9,
+    "expedition": 0.9,
+    "gto": 0,
+    "komori": 1,
+    "mbo5070": 0,
+    "mbo6592": 0,
+    "mbo70100": 0,
+    "meche_creuse": 0.66,
+    "paqueteuse": 0.9,
+    "pelliculeuse": 0.9,
+    "piqueuse_manuelle": 0.66,
+    "polar": 0,
+    "raineuse_manuelle": 0.66,
+    "ryobi": 0,
+    "sbg": 0,
+    "wireo_perfo": 0.66,
+    "wireo_reliure": 0.66,
+    "wireo_serrage": 0.66,
+    "Hohner": 1,
+    "MBO XL": 1,
+    "Komori G40": 1,
+    "Komori G50": 1,
+    "cutting-machine": 1,
+    "ctp-machine": 1
+  },
+  "horaires": {
+    "semaine_debut": 33,
+    "services": [
+      {
+        "nom_du_service": "matin",
+        "lundi": [
+          "06:00-13:00"
+        ],
+        "mardi": [
+          "06:00-13:00"
+        ],
+        "mercredi": [
+          "06:00-13:00"
+        ],
+        "jeudi": [
+          "06:00-13:00"
+        ],
+        "vendredi": [
+          "06:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "après-midi",
+        "lundi": [
+          "13:00-20h00"
+        ],
+        "mardi": [
+          "13:00-20h00"
+        ],
+        "mercredi": [
+          "13:00-20h00"
+        ],
+        "jeudi": [
+          "13:00-20h00"
+        ],
+        "vendredi": [
+          "13:00-20h00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "soir",
+        "lundi": [
+          "20:00-03:00"
+        ],
+        "mardi": [
+          "20:00-03:00"
+        ],
+        "mercredi": [
+          "20:00-03:00"
+        ],
+        "jeudi": [
+          "20:00-03:00"
+        ],
+        "vendredi": [
+          "20:00-03:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      }
+    ]
+  },
+  "conges": [
+    {
+      "debut": "2025-12-24 00:00",
+      "fin": "2025-12-30 23:59"
+    }
+  ]
+}
+ALAIN;
+
+
+        $pierre = <<<PIERRE
+{
+  "identite": {
+    "trigramme": "pid",
+    "nom": "Pierre",
+    "prenom": "Dubois",
+    "poste": "conducteur offset"
+  },
+  "competences": {
+    "bordeuse": 0.9,
+    "conditionnement": 0.9,
+    "expedition": 0.9,
+    "gto": 0,
+    "komori": 1,
+    "mbo5070": 0,
+    "mbo6592": 0,
+    "mbo70100": 0,
+    "meche_creuse": 0.66,
+    "paqueteuse": 0.9,
+    "pelliculeuse": 0.9,
+    "piqueuse_manuelle": 0.66,
+    "polar": 0,
+    "raineuse_manuelle": 0.66,
+    "ryobi": 0,
+    "sbg": 0,
+    "wireo_perfo": 0.66,
+    "wireo_reliure": 0.66,
+    "wireo_serrage": 0.66,
+    "Hohner": 1,
+    "MBO XL": 1,
+    "Komori G40": 1,
+    "Komori G50": 1,
+    "cutting-machine": 1,
+    "ctp-machine": 1
+  },
+  "horaires": {
+    "semaine_debut": 32,
+    "services": [
+      {
+        "nom_du_service": "matin",
+        "lundi": [
+          "06:00-13:00"
+        ],
+        "mardi": [
+          "06:00-13:00"
+        ],
+        "mercredi": [
+          "06:00-13:00"
+        ],
+        "jeudi": [
+          "06:00-13:00"
+        ],
+        "vendredi": [
+          "06:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "après-midi",
+        "lundi": [
+          "13:00-20h00"
+        ],
+        "mardi": [
+          "13:00-20h00"
+        ],
+        "mercredi": [
+          "13:00-20h00"
+        ],
+        "jeudi": [
+          "13:00-20h00"
+        ],
+        "vendredi": [
+          "13:00-20h00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "soir",
+        "lundi": [
+          "20:00-03:00"
+        ],
+        "mardi": [
+          "20:00-03:00"
+        ],
+        "mercredi": [
+          "20:00-03:00"
+        ],
+        "jeudi": [
+          "20:00-03:00"
+        ],
+        "vendredi": [
+          "20:00-03:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      }
+    ]
+  },
+  "conges": [
+    {
+      "debut": "2025-12-24 00:00",
+      "fin": "2025-12-30 23:59"
+    }
+  ]
+}
+PIERRE;
+
+        $filesystem->write('rh/alain.json', $alain);
+        $filesystem->write('rh/pierre.json', $pierre);
+
+        $filesystem->write(sprintf('jobs/%s.json', $job["id"]), json_encode($job, JSON_PRETTY_PRINT));
 
     }
 

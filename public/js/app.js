@@ -924,7 +924,14 @@ const calc = (input, machineIndex, content) => {
         .then(data => {
             // console.log(data);
             calculatedData = data;
-            displayAllTextualExplanation(data, data.metaData.jobNumber);
+            // console.log(calculatedData);
+
+            const textualExplanation = document.getElementById("textual-explanation");
+            textualExplanation.innerHTML = "";
+
+            for (let i = 0; i < data.length; i++) {
+                displayAllTextualExplanation(data[i], data[i].metaData.jobNumber);
+            }
         })
         .catch(error => {
             console.error('Error loading JSON:', error);
@@ -934,7 +941,7 @@ const calc = (input, machineIndex, content) => {
 
 const displayAllTextualExplanation = (data, jobId) => {
     const textualExplanation = document.getElementById("textual-explanation");
-    textualExplanation.innerHTML = "";
+    // textualExplanation.innerHTML = "";
 
     let ctr = 0;
 
@@ -942,7 +949,8 @@ const displayAllTextualExplanation = (data, jobId) => {
 
         const partDiv = document.createElement("div");
 
-        const partTitleContent = `<div>${partId}</div>`;
+        let partTitleContent = `<div>${jobId}</div>`;
+        partTitleContent += `<div>${partId}</div>`;
         partDiv.innerHTML = partTitleContent;
 
 
@@ -953,7 +961,7 @@ const displayAllTextualExplanation = (data, jobId) => {
             let divContent = "";
 
             divContent += `<div style="margin-bottom: 20px">`;
-            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">show impositions</a><div class="title"><input type="radio" name="${partId}" value="${path.id}"><div style="display: inline-block"><span class="show-details" onclick="toggleDetails('${uuid}')">&#9660;</span>${path.designation}</div></div>`;
+            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">show impositions</a><div class="title"><input type="radio" name="${jobId}-${partId}" value="${path.id}"><div style="display: inline-block"><span class="show-details" onclick="toggleDetails('${uuid}')">&#9660;</span>${path.designation}</div></div>`;
             divContent += `<div class = "details" id="${uuid}" >`;
             path.nodes.map((node) => {
 
@@ -1295,91 +1303,94 @@ const showVerticalSelectorNumber = (machineGroup, i, offset) => {
     controlPanelGroup.add(number);
 }
 
-const showControlPanelSelectors = (input, data, machineIndex, machineGroup, content) => {
-
-    const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
-
-    for (let i in data) {
-
-        const selector = new Konva.Rect({
-            x: (data[i].cols * 30) + (data[i].rotated ? 200 : 0),
-            y: (data[i].rows * 30),
-            width: 20,
-            height: 20,
-            // fill: "black",
-            stroke: "black",
-            strokeWidth: 1,
-        });
-
-        selector.on("click", function () {
-
-            input.zone = data[i].cutSheet;
-            // console.log(data[i]);
-
-            input["action-path"][input.machines[machineIndex].id] = data[i];
-
-            const newContent = show(data[i], machineGroup, content, input["action-path"]);
-
-            stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
-
-            // todo: delete machineGroups with higher indexes
-            for (let j = machineIndex + 1; j < input.machines.length; j++) {
-
-                const machineId = input.machines[j].id;
-                const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
-
-                const machineGroup = baseLayer.findOne(`#${machineGroupId}`);
-                if (machineGroup) {
-                    machineGroup.remove();
-                }
-            }
-
-            document.getElementById("textual-explanation").innerHTML = "";
-
-            // calculate next machine's data
-            calc(input, machineIndex + 1, newContent);
-        });
-        controlPanelGroup.add(selector);
-
-    }
-}
+// const showControlPanelSelectors = (input, data, machineIndex, machineGroup, content) => {
+//
+//     const controlPanelGroup = machineGroup.findOne("#controlPanelGroup");
+//
+//     for (let i in data) {
+//
+//         const selector = new Konva.Rect({
+//             x: (data[i].cols * 30) + (data[i].rotated ? 200 : 0),
+//             y: (data[i].rows * 30),
+//             width: 20,
+//             height: 20,
+//             // fill: "black",
+//             stroke: "black",
+//             strokeWidth: 1,
+//         });
+//
+//         selector.on("click", function () {
+//
+//             input.zone = data[i].cutSheet;
+//             // console.log(data[i]);
+//
+//             input["action-path"][input.machines[machineIndex].id] = data[i];
+//
+//             const newContent = show(data[i], machineGroup, content, input["action-path"]);
+//
+//             stage.height(machineGroup.getClientRect().height * (machineIndex + 1) + 400);
+//
+//             // todo: delete machineGroups with higher indexes
+//             for (let j = machineIndex + 1; j < input.machines.length; j++) {
+//
+//                 const machineId = input.machines[j].id;
+//                 const machineGroupId = `machineGroup-${machineId.replace(/\s+/g, '')}`;
+//
+//                 const machineGroup = baseLayer.findOne(`#${machineGroupId}`);
+//                 if (machineGroup) {
+//                     machineGroup.remove();
+//                 }
+//             }
+//
+//             document.getElementById("textual-explanation").innerHTML = "";
+//
+//             // calculate next machine's data
+//             calc(input, machineIndex + 1, newContent);
+//         });
+//         controlPanelGroup.add(selector);
+//
+//     }
+// }
 
 const sendToOrdo = () => {
 
-    let isAllSelected = true;
-    let selectedUuids = Object.keys(calculatedData.parts).map((partId) => {
-        const selectedValue = document.querySelector(`input[name="${partId}"]:checked`)?.value;
-        console.log(partId);
-        console.log(selectedValue);
-        isAllSelected = isAllSelected && !!selectedValue;
-        return {partId: partId, value: selectedValue}
-    });
+    for (let i in calculatedData) {
 
-    if (isAllSelected) {
-        const payload = {
-            jobId: calculatedData.metaData.jobNumber,
-            selectedUuids: selectedUuids
+        let isAllSelected = true;
+        let selectedUuids = Object.keys(calculatedData[i].parts).map((partId) => {
+            const selectedValue = document.querySelector(`input[name="${calculatedData[i].metaData.jobNumber}-${partId}"]:checked`)?.value;
+            console.log(partId);
+            console.log(selectedValue);
+            isAllSelected = isAllSelected && !!selectedValue;
+            return {partId: partId, value: selectedValue}
+        });
+
+        if (isAllSelected) {
+            const payload = {
+                jobId: calculatedData[i].metaData.jobNumber,
+                selectedUuids: selectedUuids
+            }
+
+            fetch('/ordo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error loading JSON:', error);
+                });
+
+
         }
 
-        fetch('/ordo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                console.error('Error loading JSON:', error);
-            });
-
-
     }
-
 }
 
 // 👇 Expose it globally

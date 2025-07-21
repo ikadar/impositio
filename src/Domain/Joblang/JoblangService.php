@@ -27,6 +27,7 @@ class JoblangService implements JoblangServiceInterface
         $script = new JoblangScript();
         $script->setScript($scriptText);
         $lines = $this->explodeScript($script);
+
         foreach ($lines as $line) {
             $this->em->persist($line);
             $job = new Job();
@@ -51,14 +52,26 @@ class JoblangService implements JoblangServiceInterface
 
     public function explodeScript(JoblangScript $script): array
     {
+
+        $sourceLines = array_filter(explode("[", $script->getScript()), function ($item) {
+            return trim($item) !== "";
+        });
+
+        $sourceLines = array_map(function ($item) {
+            return "[" . trim($item);
+        }, $sourceLines);
+
         $lines = [];
 
-        $line = new JoblangLine();
-        $line->setJoblangScript($script);
-        $line->setSource($script->getScript());
-        $line->setParsed($this->parseJobLine($line->getSource()));
+        foreach ($sourceLines as $sourceLine) {
+            $line = new JoblangLine();
+            $line->setJoblangScript($script);
+            $line->setSource($sourceLine);
+//            $line->setSource($script->getScript());
+            $line->setParsed($this->parseJobLine($line->getSource()));
 
-        $lines[] = $line;
+            $lines[] = $line;
+        }
         return $lines;
     }
 

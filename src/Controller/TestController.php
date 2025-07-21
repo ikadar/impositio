@@ -55,76 +55,84 @@ class TestController extends AbstractController
         $repo = $em->getRepository(JoblangScript::class);
         $joblangScript = $repo->findWithParts($scriptId);
 
-        $jobEntity = $joblangScript->getLines()[0]->getJob(); // Doctrine entity
+        $responses = [];
 
-        $domainJob = $jobMapper->toDomain($jobEntity); // Convert to domain Job object
-        $parts = $domainJob->getParts();
+        foreach ($joblangScript->getLines() as $line) {
+            $jobEntity = $line->getJob(); // Doctrine entity
 
-        $metaData = $jobEntity->getMetaData();
+            $domainJob = $jobMapper->toDomain($jobEntity); // Convert to domain Job object
+            $parts = $domainJob->getParts();
 
-        $responseModel = new JoblangScriptParseResponseModel(
-            $joblangScript->getId(),
-            $domainJob,
-            $parts,
-            $metaData
-        );
+            $metaData = $jobEntity->getMetaData();
 
-        $response = $responseTransformer->transform($responseModel);
-
-
-
-
-        // press sheet
-        $this->pressSheets = [
-            $this->printFactory->newPressSheet(
-                "pressSheet",
-                0,
-                0,
-                1020,
-                700,
-                1
-            ),
-            $this->printFactory->newPressSheet(
-                "pressSheet",
-                0,
-                0,
-                1000,
-                700,
-                1
-            )
-        ];
-
-        $payload = $this->processPayload($response);
-
-        $parts = [];
-        foreach ($payload["parts"] as $part) {
-
-            $actionPaths = $this->actionTree->process(
-                $part["abstractActions"],
-                $part["pressSheets"],
-//                $part["pressSheet"],
-                $part["zone"],
-                $part["openPoseDimensions"],
-                $part["numberOfCopies"],
-                $part["numberOfColors"],
-                $part["paperWeight"],
-                $part["medium"]["inking"],
+            $responseModel = new JoblangScriptParseResponseModel(
+                $joblangScript->getId(),
+                $domainJob,
+                $parts,
+                $metaData
             );
 
-            $parts[] = [
-                "partId" => $part["partId"],
-                "medium" => $part["medium"],
-                "openPoseDimensions" => $part["openPoseDimensions"],
-                "closedPoseDimensions" => $part["closedPoseDimensions"],
-                "actionPaths" => $actionPaths
+            $response = $responseTransformer->transform($responseModel);
+
+            // press sheet
+            $this->pressSheets = [
+                $this->printFactory->newPressSheet(
+                    "pressSheet",
+                    0,
+                    0,
+                    1020,
+                    700,
+                    1
+                ),
+                $this->printFactory->newPressSheet(
+                    "pressSheet",
+                    0,
+                    0,
+                    1000,
+                    700,
+                    1
+                )
             ];
+
+            $payload = $this->processPayload($response);
+
+            $parts = [];
+            foreach ($payload["parts"] as $part) {
+
+                $actionPaths = $this->actionTree->process(
+                    $part["abstractActions"],
+                    $part["pressSheets"],
+//                $part["pressSheet"],
+                    $part["zone"],
+                    $part["openPoseDimensions"],
+                    $part["numberOfCopies"],
+                    $part["numberOfColors"],
+                    $part["paperWeight"],
+                    $part["medium"]["inking"],
+                );
+
+                $parts[] = [
+                    "partId" => $part["partId"],
+                    "medium" => $part["medium"],
+                    "openPoseDimensions" => $part["openPoseDimensions"],
+                    "closedPoseDimensions" => $part["closedPoseDimensions"],
+                    "actionPaths" => $actionPaths
+                ];
+            }
+
+            $responses[] = $this->createResponse($parts);
+//        $response = $this->createResponse($parts);
+
+            $this->writeMetaData();
         }
 
-        $response = $this->createResponse($parts);
+        return new JsonResponse(
+            $responses,
+            JsonResponse::HTTP_OK
+        );
 
-        $this->writeMetaData();
-
-        return $response;
+//        return $responses;
+//        return $response;
     }
 
     protected function processPayload($data): array
@@ -224,7 +232,7 @@ class TestController extends AbstractController
 
     }
 
-    protected function createResponse($parts): JsonResponse
+    protected function createResponse($parts): array
     {
         $responseData = [
             "metaData" => $this->metaData,
@@ -233,14 +241,10 @@ class TestController extends AbstractController
 
         foreach ($this->getActionPaths($parts) as $loop => $actionPaths) {
             $partId = $parts[$loop]["partId"];
-            $responseData["parts"][$partId]["actionPaths"] = $actionPaths;
+            $responseData["parts"][$partId]["actionPaths"] = [$actionPaths[0]];
         }
 
-        return new JsonResponse(
-            $responseData,
-            JsonResponse::HTTP_OK
-        );
-
+        return $responseData;
     }
 
     public function getActionPathNodes($actionPath)
