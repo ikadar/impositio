@@ -282,8 +282,8 @@ class TestController extends AbstractController
 
             $path["designation"] = implode(" > ", $path["designation"]);
             $path["designation"] .= sprintf(" Cost: %s€; Duration: %smin", $cost, $duration);
-            $pressSheetText = sprintf("(%dx%d)", $path["nodes"][0]["pressSheet"]["width"], $path["nodes"][0]["pressSheet"]["height"]);
-            $path["designation"] = sprintf("%s %s", $pressSheetText, $path["designation"]);
+            $pressSheetText = sprintf("%dx%d", $path["nodes"][0]["pressSheet"]["width"], $path["nodes"][0]["pressSheet"]["height"]);
+            $path["designation"] = sprintf("(%s) %s", $pressSheetText, $path["designation"]);
 
 
 
@@ -300,6 +300,7 @@ class TestController extends AbstractController
             );
             $path["cost"] = $cost;
             $path["duration"] = $duration;
+            $path["pressSheet"] = sprintf("%smm", $pressSheetText);
             $path["md5"] = md5(serialize($path));
             $path["id"] = Uuid::v4()->toString();
             yield $path;

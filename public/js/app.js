@@ -1,21 +1,21 @@
-const stage = new Konva.Stage({
-    container: 'konva-container', // id of container <div>
-    width: window.innerWidth,
-    height: 0
-    // height: 400
-    // height: window.innerHeight
-});
-
-const scale = 0.8;
-
-let baseLayer = new Konva.Layer({
-    x: 0,
-    y: 0,
-    id: "base",
-    scaleX: scale,
-    scaleY: scale,
-});
-stage.add(baseLayer);
+// const stage = new Konva.Stage({
+//     container: 'konva-container', // id of container <div>
+//     width: window.innerWidth,
+//     height: 0
+//     // height: 400
+//     // height: window.innerHeight
+// });
+//
+// const scale = 0.8;
+//
+// let baseLayer = new Konva.Layer({
+//     x: 0,
+//     y: 0,
+//     id: "base",
+//     scaleX: scale,
+//     scaleY: scale,
+// });
+// stage.add(baseLayer);
 
 const show = (sheetLayout, machineGroup, content, actionPath) => {
 
@@ -948,11 +948,9 @@ const displayAllTextualExplanation = (data, jobId) => {
     Object.keys(data.parts).map((partId) => {
 
         const partDiv = document.createElement("div");
+        partDiv.className = "border border-[#16161d] rounded-md overflow-hidden mb-4";
 
-        let partTitleContent = `<div>${jobId}</div>`;
-        partTitleContent += `<div>${partId}</div>`;
-        partDiv.innerHTML = partTitleContent;
-
+        partDiv.innerHTML = "";
 
         data.parts[partId].actionPaths.map((path) => {
             const uuid = crypto.randomUUID();
@@ -960,22 +958,70 @@ const displayAllTextualExplanation = (data, jobId) => {
 
             let divContent = "";
 
-            divContent += `<div style="margin-bottom: 20px">`;
-            divContent += `<a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank">show impositions</a><div class="title"><input type="radio" name="${jobId}-${partId}" value="${path.id}"><div style="display: inline-block"><span class="show-details" onclick="toggleDetails('${uuid}')">&#9660;</span>${path.designation}</div></div>`;
-            divContent += `<div class = "details" id="${uuid}" >`;
+            divContent += `<div>`;
+
+            divContent += `<div class="p-0">`;
+
+            divContent += `<div class="title flex flex-row justify-between pb-2 border-b border-gray-400 p-2">
+              <div class="flex flex-row gap-2 items-center">
+                <div>
+                  <input type="radio" name="${jobId}-${partId}" value="${path.id}">
+                </div>
+                <div class="font-mono text-red-600 bg-gray-100 rounded px-2 py-1 shadow-md text-xs">
+                  ${path.pressSheet}
+                </div>
+                <div class="font-mono text-indigo-600 bg-gray-100 rounded px-2 py-1 shadow-md text-xs">
+                  ${Math.round(path.cost*100)/100}€
+                </div>
+                <div class="font-mono text-green-600 bg-gray-100 rounded px-2 py-1 shadow-md text-xs">
+                  ${Math.round(path.duration*100)/100}min
+                </div>
+              </div>
+              <div>
+                <a href="#" class="text-xs font-mono text-blue-500 hover:text-blue-700/100 hover:underline show-details text-blue-500 hover:text-blue-700/100 cursor-pointer hover:underline" onclick="toggleDetails('${uuid}')">show breakdown</a>
+              </div>
+            </div>`;
+
+
+
+            divContent += `
+<div class="text-xs text-uppercase text-white bg-[#16161d] p-1 px-2 font-mono flex flex-row justify-between">
+    <div>${jobId} - ${partId}</div>
+    <div>
+        <a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank" class="text-yellow-300 hover:text-yellow-300/80 hover:underline">show imposition</a>
+    </div>
+</div>`;
+
+
+            divContent += `<div class="hidden details text-xs font-mono p-2 pt-0 bg-gray-100 " id="${uuid}">`;
+
+            divContent += `
+              <div class="machine-header flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0 font-semibold">
+                <div class="w-[150px]">Machine</div>
+                <div class="w-[120px]">Zone</div>
+                <div class="w-[120px]">Sheets</div>
+                <div class="w-[100px]">Imposition</div>
+                <div class="w-[100px]">Setup</div>
+                <div class="w-[100px]">Run</div>
+                <div class="w-[100px]">Cost</div>
+              </div>`;
+
+
             path.nodes.map((node) => {
 
-                divContent += `<div class="machine">`;
-                divContent += `<div class="sub-title">${node.machine}</div>`;
-                divContent += `<div><div class="label">Zone:</div> ${node.zone.width}x${node.zone.height}mm</div>`;
-                divContent += `<div><div class="label">Number of input sheets:</div> ${node.todo.cutSheetCount}</div>`;
-                divContent += `<div><div class="label">Imposition:</div> ${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
-                divContent += `<div><div class="label">Setup duration:</div> ${node.setupDuration} min</div>`;
-                divContent += `<div><div class="label">Run duration:</div> ${node.runDuration} min</div>`;
-                divContent += `<div><div class="label">Cost:</div> ${node.cost}€</div>`;
+                divContent += `<div class="machine flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0">`;
+                divContent += `<div class="w-[150px]">${node.machine}</div>`;
+                divContent += `<div class="w-[150px]">${node.zone.width}x${node.zone.height}mm</div>`;
+                divContent += `<div class="w-[150px]">${node.todo.cutSheetCount}</div>`;
+                divContent += `<div class="w-[150px]">${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
+                divContent += `<div class="w-[150px]">${node.setupDuration} min</div>`;
+                divContent += `<div class="w-[150px]">${node.runDuration} min</div>`;
+                divContent += `<div class="w-[150px]">${node.cost}€</div>`;
                 divContent += `</div>`;
                 // console.log(node);
             })
+            divContent += `</div>`;
+
             divContent += `</div>`;
             divContent += `</div>`;
 
@@ -990,99 +1036,7 @@ const displayAllTextualExplanation = (data, jobId) => {
 
 
 
-    // const textualExplanation = document.getElementById("textual-explanation");
-    // textualExplanation.innerHTML = "";
-    // data.actions.map(item => {
-    //     if (item.actionType === "print" || item.actionType === "print" || item.actionType === "folding" || item.actionType === "stitching" || item.actionType === "ctp") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="title">${item.machine}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">min:</div> ${item.minSheet.width} x ${item.minSheet.height}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">max:</div> ${item.maxSheet.width} x ${item.maxSheet.height}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Input sheet:</div> ${item.inputSheet.width} x ${item.inputSheet.height}</div>`;
-    //
-    //         if (item.actionType === "print") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Products per sheet:</div> ${item.productsPerSheet}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Required sheet count:</div> ${item.printingSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Sheet price:</div> ${item.sheetPrice}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Paper cost per product:</div> ${item.paperCostPerProduct}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Printing paper cost:</div> ${item.printingPaperCost}€</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "folding") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "stitching") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         if (item.actionType === "ctp") {
-    //             actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //             actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         }
-    //
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "trim") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (trim)</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "cut") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div class="sub-title">Polar 115 (cut & trim)</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of handfuls:</div> ${item.numberOfHandfuls}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of sheets:</div> ${item.numberOfSheets}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Number of cuts:</div> ${item.numberOfCuts}</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Setup duration:</div> ${item.setupDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Run duration:</div> ${item.runDuration} min</div>`;
-    //         actionDiv.innerHTML += `<div><div class="label">Cost:</div> ${item.cost}€</div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    //     if (item.actionType === "rotation") {
-    //         const actionDiv = document.createElement("div");
-    //         actionDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    //         actionDiv.innerHTML += `<div style="padding-left: 5px"><i>Rotation</i></div>`;
-    //         actionDiv.innerHTML += `</div>`;
-    //         textualExplanation.appendChild(actionDiv);
-    //     }
-    //
-    // });
-    //
-    // const totalDiv = document.createElement("div");
-    // totalDiv.innerHTML = `<div style="margin-bottom: 20px">`;
-    // totalDiv.innerHTML += `<div class="title">Total</div>`;
-    // totalDiv.innerHTML += `<div><div class="label">Duration:</div> ${data.total.totalDuration} min</div>`;
-    // totalDiv.innerHTML += `<div><div class="label">Cost:</div> ${data.total.totalCost}€</div>`;
-    // totalDiv.innerHTML += `</div>`;
-    // textualExplanation.appendChild(totalDiv);
+
 
 }
 
