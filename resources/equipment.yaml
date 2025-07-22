@@ -1,45 +1,19 @@
-Hohner:
-  id: "Hohner"
-  designation: "Hohner"
-  type: "stitching machine"
-  technic-designation: "stitching machine"
+ctp-machine:
+  id: "ctp machine"
+  designation: "ctp machine"
+  type: "ctp machine"
+  technic-designation: "ctp machine"
   capacity: 1
   expiration-date-alignment: 999999
-  gripMargin: 0
+  gripMargin: 15
   input-dimensions:
     min:
-      width: 105
-      height: 105
-    max:
-      width: 360
-      height: 350
-  base-setup-duration: 15
-  documents-per-hour: 4000
-  cost-per-hour: 60
-  nominal-mode:
-    attention-required: 1
-    productivity: 1
-  maxPoseCount: 2
-MBO XL:
-  id: "MBO XL"
-  designation: "MBO XL"
-  type: "folder"
-  technic-designation: "folder"
-  capacity: 1
-  expiration-date-alignment: 999999
-  gripMargin: 0
-  input-dimensions:
-    min:
-      width: 300
-      height: 210
+      width: 520
+      height: 360
     max:
       width: 1050
       height: 750
-  number-of-folds: 2
-  document-spacing: 0.05
-  meters-per-hour: 1500
-  base-setup-duration: 20
-  setup-duration-by-fold: 3.5
+  sqm-per-hour: 26
   cost-per-hour: 60
   nominal-mode:
     attention-required: 1
@@ -118,23 +92,49 @@ cutting-machine:
   nominal-mode:
     attention-required: 1
     productivity: 1
-ctp-machine:
-  id: "ctp machine"
-  designation: "ctp machine"
-  type: "ctp machine"
-  technic-designation: "ctp machine"
+MBO XL:
+  id: "MBO XL"
+  designation: "MBO XL"
+  type: "folder"
+  technic-designation: "folder"
   capacity: 1
   expiration-date-alignment: 999999
-  gripMargin: 15
+  gripMargin: 0
   input-dimensions:
     min:
-      width: 520
-      height: 360
+      width: 300
+      height: 210
     max:
       width: 1050
       height: 750
-  sqm-per-hour: 26
+  number-of-folds: 2
+  document-spacing: 0.05
+  meters-per-hour: 1500
+  base-setup-duration: 20
+  setup-duration-by-fold: 3.5
   cost-per-hour: 60
   nominal-mode:
     attention-required: 1
     productivity: 1
+Hohner:
+  id: "Hohner"
+  designation: "Hohner"
+  type: "stitching machine"
+  technic-designation: "stitching machine"
+  capacity: 1
+  expiration-date-alignment: 999999
+  gripMargin: 0
+  input-dimensions:
+    min:
+      width: 105
+      height: 105
+    max:
+      width: 360
+      height: 350
+  base-setup-duration: 15
+  documents-per-hour: 4000
+  cost-per-hour: 60
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
+  maxPoseCount: 2
