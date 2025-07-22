@@ -1035,15 +1035,18 @@ const displayAllTextualExplanation = (data, jobId) => {
 
             path.nodes.map((node) => {
 
-                divContent += `<div class="machine flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0">`;
-                divContent += `<div class="w-[150px]">${node.machine}</div>`;
-                divContent += `<div class="w-[150px]">${node.zone.width}x${node.zone.height}mm</div>`;
-                divContent += `<div class="w-[150px]">${node.todo.cutSheetCount}</div>`;
-                divContent += `<div class="w-[150px]">${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
-                divContent += `<div class="w-[150px]">${node.setupDuration} min</div>`;
-                divContent += `<div class="w-[150px]">${node.runDuration} min</div>`;
-                divContent += `<div class="w-[150px]">${node.cost}€</div>`;
-                divContent += `</div>`;
+                if (node.cost > 0) {
+                    divContent += `<div class="machine flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0">`;
+                    divContent += `<div class="w-[150px]">${node.machine}</div>`;
+                    divContent += `<div class="w-[150px]">${node.zone.width}x${node.zone.height}mm</div>`;
+                    divContent += `<div class="w-[150px]">${node.todo.cutSheetCount}</div>`;
+                    divContent += `<div class="w-[150px]">${node.gridFitting.cols} x ${node.gridFitting.rows} ${node.gridFitting.rotated ? "R" : "U"}</div>`;
+                    divContent += `<div class="w-[150px]">${node.setupDuration} min</div>`;
+                    divContent += `<div class="w-[150px]">${node.runDuration} min</div>`;
+                    divContent += `<div class="w-[150px]">${node.cost}€</div>`;
+                    divContent += `</div>`;
+                }
+
                 // console.log(node);
             })
             divContent += `</div>`;

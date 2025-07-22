@@ -132,11 +132,19 @@ class Folder extends Machine implements FolderInterface
 
     public function calculateCost(ActionPathNodeInterface $action): float
     {
+        $widthFolds = ceil($action->getTodo()["openPoseDimensions"]["width"] / $action->getTodo()["closedPoseDimensions"]["width"]) - 1;
+        $heightFolds = ceil($action->getTodo()["openPoseDimensions"]["height"] / $action->getTodo()["closedPoseDimensions"]["height"]) - 1;
+        $numberOfFolds = $widthFolds + $heightFolds;
+
+        if ($numberOfFolds == 0) {
+            return 0;
+        }
+
         $setupDuration = $this->calculateSetupDuration($action);
         $runDuration = $this->calculateRunDuration($action);
 
         $duration = $setupDuration + $runDuration;
-        $cost = ($duration / 60) * $this->getCostPerHour();
+        $cost = round(($duration / 60) * $this->getCostPerHour(), 2);
 
 //        $actionData["numberOfSheets"] = $action->getTodo()["numberOfCopies"];
 //        $actionData["setupDuration"] = round($setupDuration, 2);
@@ -152,10 +160,20 @@ class Folder extends Machine implements FolderInterface
 
     public function calculateSetupDuration(ActionTreeNodeInterface $action): float
     {
+
+        $widthFolds = ceil($action->getTodo()["openPoseDimensions"]["width"] / $action->getTodo()["closedPoseDimensions"]["width"]) - 1;
+        $heightFolds = ceil($action->getTodo()["openPoseDimensions"]["height"] / $action->getTodo()["closedPoseDimensions"]["height"]) - 1;
+        $numberOfFolds = $widthFolds + $heightFolds;
+
+        if ($numberOfFolds == 0) {
+            return 0;
+        }
+
         return $this->getBaseSetupDuration()
             +
             (
-                $this->getNumberOfFolds()      // ez a valódi hajtások száma
+                $numberOfFolds
+//                $this->getNumberOfFolds()      // ez a valódi hajtások száma
                 *
                 $this->getSetupDurationByFold()
             )
@@ -164,6 +182,14 @@ class Folder extends Machine implements FolderInterface
 
     public function calculateRunDuration(ActionPathNodeInterface $action): float
     {
+        $widthFolds = ceil($action->getTodo()["openPoseDimensions"]["width"] / $action->getTodo()["closedPoseDimensions"]["width"]) - 1;
+        $heightFolds = ceil($action->getTodo()["openPoseDimensions"]["height"] / $action->getTodo()["closedPoseDimensions"]["height"]) - 1;
+        $numberOfFolds = $widthFolds + $heightFolds;
+
+        if ($numberOfFolds == 0) {
+            return 0;
+        }
+
         return
             (
                 (

@@ -142,6 +142,7 @@ class TestController extends AbstractController
 //                $part["pressSheet"],
                     $part["zone"],
                     $part["openPoseDimensions"],
+                    $part["closedPoseDimensions"],
                     $part["numberOfCopies"],
                     $part["numberOfColors"],
                     $part["paperWeight"],

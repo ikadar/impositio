@@ -17,6 +17,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
     protected array $root;
 
     protected DimensionsInterface $openPoseDimensions;
+    protected DimensionsInterface $closedPoseDimensions;
     protected float $numberOfCopies;
     protected float $numberOfColors;
     protected float $paperWeight;
@@ -52,6 +53,17 @@ class ActionTree implements Interfaces\ActionTreeInterface
     public function setOpenPoseDimensions(DimensionsInterface $openPoseDimensions): ActionTree
     {
         $this->openPoseDimensions = $openPoseDimensions;
+        return $this;
+    }
+
+    public function getClosedPoseDimensions(): DimensionsInterface
+    {
+        return $this->closedPoseDimensions;
+    }
+
+    public function setClosedPoseDimensions(DimensionsInterface $closedPoseDimensions): ActionTree
+    {
+        $this->closedPoseDimensions = $closedPoseDimensions;
         return $this;
     }
 
@@ -236,6 +248,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
 //        $pressSheet,
         $zone,
         $openPoseDimensions,
+        $closedPoseDimensions,
         $numberOfCopies,
         $numberOfColors,
         $paperWeight,
@@ -248,6 +261,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
 //            [$pressSheet],
             $zone,
             $openPoseDimensions,
+            $closedPoseDimensions,
             $numberOfCopies,
             $numberOfColors,
             $paperWeight,
@@ -261,6 +275,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
 //        $pressSheet,
         $zone,
         $openPoseDimensions,
+        $closedPoseDimensions,
         $numberOfCopies,
         $numberOfColors,
         $paperWeight,
@@ -268,6 +283,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
     ) {
 
         $this->setOpenPoseDimensions($openPoseDimensions);
+        $this->setClosedPoseDimensions($closedPoseDimensions);
         $this->setNumberOfCopies($numberOfCopies);
         $this->setNumberOfColors($numberOfColors);
         $this->setPaperWeight($paperWeight);
@@ -349,7 +365,16 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
             if ($node->getMachine()->getType()->value === "folder") {
                 $inputSheetLength = $this->openPoseDimensions->getHeight() / 1000;
+
                 $node->setTodo([
+                    "openPoseDimensions" => [
+                        "width" => $this->openPoseDimensions->getWidth(),
+                        "height" => $this->openPoseDimensions->getHeight(),
+                    ],
+                    "closedPoseDimensions" => [
+                        "width" => $this->closedPoseDimensions->getWidth(),
+                        "height" => $this->closedPoseDimensions->getHeight(),
+                    ],
                     "inputSheetLength" => $inputSheetLength,
                     "cutSheetCount" => $cutSheetCount,
                     "numberOfCopies" => $this->numberOfCopies,
