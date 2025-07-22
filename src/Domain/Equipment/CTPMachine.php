@@ -79,9 +79,16 @@ class CTPMachine extends Machine implements CTPMachineInterface
     }
 
 
-    public function calculateCost(ActionPathNodeInterface $action): float
+    public function calculateCost(ActionPathNodeInterface $action): float | array
     {
+        $pressSheetSqm = ($action->getPressSheet()->getWidth() * $action->getPressSheet()->getHeight()) / 1000000;
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($action->getTodo()["inking"]));
+        $inkCount = iterator_count($iterator);
+
         $duration = $this->calculateDuration($action);
+
+        $plakettPrice = round(11.42 * $pressSheetSqm * $inkCount, 2); // € per sqm ; egész sheet méret * color per side
 
         $cost =
             (
@@ -93,7 +100,10 @@ class CTPMachine extends Machine implements CTPMachineInterface
             $this->getCostPerHour()
         ;
 
-        return $cost;
+        return [
+            "cost" => $cost,
+            "aluSheetsCost" => $plakettPrice,
+        ];
     }
 
     public function calculateDuration(ActionPathNodeInterface $action): float

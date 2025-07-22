@@ -164,7 +164,7 @@ class Machine implements MachineInterface
     public function setOpenPoseDimensions(Dimensions $dimensions): void
     {}
 
-    public function calculateCost(ActionPathNodeInterface $action): float
+    public function calculateCost(ActionPathNodeInterface $action): float | array
     {
         return 999;
     }

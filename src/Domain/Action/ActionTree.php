@@ -123,6 +123,9 @@ class ActionTree implements Interfaces\ActionTreeInterface
     ): array
     {
 
+        /**
+         * @var AbstractAction $abstractAction
+         */
         $abstractAction = array_shift($abstractActions);
 
         if ($abstractAction === null) {
@@ -130,6 +133,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
         }
 
         $availableMachines = $abstractAction->getAvailableMachines();
+
+        // Todo: filter available machines based on the part's coating and input sheet size (auto?), color count
 //        $machine = $availableMachines[0];
 
         // array of actionPathNodes
@@ -146,6 +151,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
                 );
 
                 if ($action->getMachine()->getType()->value === "folder") {
+//                if ($action->getMachine()->getType()->value === "folder" && false) {
                     $zone->setDimensions($this->getOpenPoseDimensions());
                     $machine->setOpenPoseDimensions($this->getOpenPoseDimensions());
 

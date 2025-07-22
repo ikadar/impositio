@@ -157,17 +157,13 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         return $this;
     }
 
-    public function calculateCost(ActionPathNodeInterface $action): float
+    public function calculateCost(ActionPathNodeInterface $action): float | array
     {
         // paper cost calculation
         $productsPerSheet = count($action->getGridFitting()->getTiles());
-        $paperCostPerProduct = round($action->getPressSheet()->getPrice() / $productsPerSheet, 2);
-//        $actionData["numberOfSheets"] = $cutSheetCount;
-//        $actionData["sheetPrice"] = $action["pressSheet"]["price"];
-//        $actionData["productsPerSheet"] = $productsPerSheet;
-//        $actionData["printingSheets"] = ceil($this->config["number-of-copies"] / $productsPerSheet);
-//        $actionData["paperCostPerProduct"] = $paperCostPerProduct;
-        $paperCost = $action->getTodo()["numberOfCopies"] * $paperCostPerProduct;
+        $paperCostPerProduct = $action->getPressSheet()->getPrice() / $productsPerSheet;
+
+        $paperCost = round($action->getTodo()["numberOfCopies"] * $paperCostPerProduct, 2);
 
         // setup duration calculation
         $setupDuration = $this->calculateSetupDuration($action);
@@ -190,7 +186,10 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         ;
         $cost = round($cost, 2);
 
-        return $cost;
+        return [
+            "cost" => $cost,
+            "paperCost" => $paperCost,
+        ];
     }
 
     public function calculateSetupDuration(ActionPathNodeInterface $action): float

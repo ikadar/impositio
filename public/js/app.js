@@ -962,6 +962,16 @@ const displayAllTextualExplanation = (data, jobId) => {
 
             divContent += `<div class="p-0">`;
 
+
+            divContent += `
+<div class="text-xs text-uppercase text-white bg-[#16161d] p-1 px-2 font-mono flex flex-row justify-between">
+    <div>${jobId} - ${partId}</div>
+    <div>
+        <a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank" class="text-yellow-300 hover:text-yellow-300/80 hover:underline">show imposition</a>
+    </div>
+</div>`;
+
+
             divContent += `<div class="title flex flex-row justify-between pb-2 border-b border-gray-400 p-2">
               <div class="flex flex-row gap-2 items-center">
                 <div>
@@ -984,14 +994,6 @@ const displayAllTextualExplanation = (data, jobId) => {
 
 
 
-            divContent += `
-<div class="text-xs text-uppercase text-white bg-[#16161d] p-1 px-2 font-mono flex flex-row justify-between">
-    <div>${jobId} - ${partId}</div>
-    <div>
-        <a href="/display.html?jobId=${jobId}&partId=${partId}&impId=${path.id}" target="_blank" class="text-yellow-300 hover:text-yellow-300/80 hover:underline">show imposition</a>
-    </div>
-</div>`;
-
 
             divContent += `<div class="hidden details text-xs font-mono p-2 pt-0 bg-gray-100 " id="${uuid}">`;
 
@@ -1006,6 +1008,30 @@ const displayAllTextualExplanation = (data, jobId) => {
                 <div class="w-[100px]">Cost</div>
               </div>`;
 
+
+            if (typeof path.aluSheetsCost !== "undefined") {
+                divContent += `<div class="machine flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0">`;
+                divContent += `<div class="w-[150px]">alu. sheets</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">${path.aluSheetsCost}€</div>`;
+                divContent += `</div>`;
+            }
+
+            if (typeof path.paperCost !== "undefined") {
+                divContent += `<div class="machine flex flex-row gap-4 py-2 border-b border-gray-400 last:border-b-0">`;
+                divContent += `<div class="w-[150px]">paper</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">-</div>`;
+                divContent += `<div class="w-[150px]">${path.paperCost}€</div>`;
+                divContent += `</div>`;
+            }
 
             path.nodes.map((node) => {
 

@@ -76,23 +76,60 @@ class TestController extends AbstractController
 
             // press sheet
             $this->pressSheets = [
+//                $this->printFactory->newPressSheet(
+//                    "pressSheet",
+//                    0,
+//                    0,
+//                    1020,
+//                    700,
+//                    2
+//                ),
+//                $this->printFactory->newPressSheet(
+//                    "pressSheet",
+//                    0,
+//                    0,
+//                    1000,
+//                    700,
+//                    2
+//                )
+
+//                1020x720 -> 202.69€
+//                450x320 -> 198.72
+
                 $this->printFactory->newPressSheet(
                     "pressSheet",
                     0,
                     0,
                     1020,
-                    700,
-                    1
+                    720,
+                    $this->calculateSheetPrice(1150, 120, 720, 1020)
                 ),
                 $this->printFactory->newPressSheet(
                     "pressSheet",
                     0,
                     0,
-                    1000,
-                    700,
-                    1
-                )
+                    880,
+                    640,
+                    $this->calculateSheetPrice(1150, 120, 640, 880)
+                ),
+                $this->printFactory->newPressSheet(
+                    "pressSheet",
+                    0,
+                    0,
+                    740,
+                    540,
+                    $this->calculateSheetPrice(1150, 120, 540, 740)
+                ),
+                $this->printFactory->newPressSheet(
+                    "pressSheet",
+                    0,
+                    0,
+                    450,
+                    320,
+                    $this->calculateSheetPrice(1150, 120, 320, 450)
+                ),
             ];
+
 
             $payload = $this->processPayload($response);
 
@@ -218,6 +255,7 @@ class TestController extends AbstractController
 
         return [
             "abstractActions" => $abstractActions,
+//            "pressSheets" => $pressSheets,
             "pressSheets" => $this->pressSheets,
 //            "pressSheet" => $this->pressSheets[0],
             "zone" => $zone,
@@ -241,7 +279,21 @@ class TestController extends AbstractController
 
         foreach ($this->getActionPaths($parts) as $loop => $actionPaths) {
             $partId = $parts[$loop]["partId"];
-            $responseData["parts"][$partId]["actionPaths"] = [$actionPaths[0]];
+            $responseData["parts"][$partId]["actionPaths"] = [];
+            $usedCosts = [];
+            foreach ($actionPaths as $loop2 => $actionPath) {
+                if (!in_array($actionPath["cost"], $usedCosts)) {
+                    $responseData["parts"][$partId]["actionPaths"][] = $actionPath;
+                    $usedCosts[] = $actionPath["cost"];
+                    $usedCosts = array_values(array_unique($usedCosts));
+                }
+
+                if (count($usedCosts) >= 10) {
+                    break;
+                }
+
+            }
+
         }
 
         return $responseData;
@@ -255,16 +307,22 @@ class TestController extends AbstractController
         }
     }
 
-    public function getActionPath($part, $maxTileCount)
+    public function getActionPath($part, $maxTileCountPerSqm)
+//    public function getActionPath($part, $maxTileCount)
     {
 
         foreach ($part["actionPaths"] as $actionPath) {
 
+            $sheetSqm = ($actionPath[0]->getPressSheet()->getWidth() * $actionPath[0]->getPressSheet()->getHeight()) / 1000000;
             $tileCount = $actionPath[0]->getGridFitting()->getCols() * $actionPath[0]->getGridFitting()->getRows();
+            $tileCountPerSqm = $tileCount / $sheetSqm;
 
-            if ($tileCount < $maxTileCount) {
+            if ($tileCountPerSqm < $maxTileCountPerSqm -2) {
                 continue;
             }
+//            if ($tileCount < $maxTileCount) {
+//                continue;
+//            }
 
             $path = [
                 "designation" => [],
@@ -274,10 +332,30 @@ class TestController extends AbstractController
             $duration = 0;
 
             foreach ($this->getActionPathNodes($actionPath) as $node) {
+                $x = 0;
+                if (is_array($node["cost"])) {
+                    foreach ($node["cost"] as $costName => $additionalCost) {
+                        if ($costName === "cost") {
+                            continue;
+                        }
+                        $x += $additionalCost;
+                        $path[$costName] = $node["cost"][$costName];
+
+                    }
+                    $node["cost"] = $node["cost"]["cost"];
+                }
                 $cost += $node["cost"];
+
                 $duration += ($node["setupDuration"] + $node["runDuration"]);
                 $path["designation"][] = $node["machine"];
                 $path["nodes"][] = $node;
+            }
+
+            if (array_key_exists("paperCost", $path)) {
+                $cost += $path["paperCost"];
+            }
+            if (array_key_exists("aluSheetsCost", $path)) {
+                $cost += $path["aluSheetsCost"];
             }
 
             $path["designation"] = implode(" > ", $path["designation"]);
@@ -314,15 +392,26 @@ class TestController extends AbstractController
 
             $actionPathArray = [];
 
+            $maxTileCountPerSqm = 0;
             $maxTileCount = 0;
             foreach ($part["actionPaths"] as $actionPath) {
+
                 $tileCount = $actionPath[0]->getGridFitting()->getCols() * $actionPath[0]->getGridFitting()->getRows();
+                $sheetSqm = ($actionPath[0]->getPressSheet()->getWidth() * $actionPath[0]->getPressSheet()->getHeight()) / 1000000;
+
+                $tileCountPerSqm = $tileCount / $sheetSqm;
+
                 if ($tileCount > $maxTileCount) {
                     $maxTileCount = $tileCount;
                 }
+
+                if ($tileCountPerSqm > $maxTileCountPerSqm) {
+                    $maxTileCountPerSqm = $tileCountPerSqm;
+                }
             }
 
-            foreach ($this->getActionPath($part, $maxTileCount) as $actionPath) {
+
+            foreach ($this->getActionPath($part, $maxTileCountPerSqm) as $actionPath) {
                 $actionPathArray[] = $actionPath;
             }
 
@@ -361,5 +450,15 @@ class TestController extends AbstractController
 
     }
 
+    protected function calculateSheetPrice($mediumPricePerTon, $mediumWeightPerSqm, $mediumHeight, $mediumWidth)
+    {
+        $mediumPricePerGram = $mediumPricePerTon / (1000 * 1000);
+        $mediumSqm = ($mediumHeight * $mediumWidth) / 1000000;
+        $mediumWeight = $mediumWeightPerSqm * $mediumSqm;
+        $mediumPricePerSheet = $mediumWeight * $mediumPricePerGram;
+
+        return $mediumPricePerSheet;
+
+    }
 
 }

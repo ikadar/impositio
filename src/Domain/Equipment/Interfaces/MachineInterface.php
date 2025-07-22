@@ -15,7 +15,7 @@ interface MachineInterface
     public function getMinSheetRectangle(): RectangleInterface;
     public function getMaxSheetRectangle(): RectangleInterface;
     public function setOpenPoseDimensions(Dimensions $dimensions): void;
-    public function calculateCost(ActionPathNodeInterface $action): float;
+    public function calculateCost(ActionPathNodeInterface $action): float | array;
     public function getMaxPoseCount(): ?int;
 
 }

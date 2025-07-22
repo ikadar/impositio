@@ -12,7 +12,7 @@ class Feuillet extends Part implements Interfaces\FeuilletInterface
     {
         self::$type = PartType::Feuillet;
         $this->actions = [
-            ["type" =>  "stitching"],
+//            ["type" =>  "stitching"],
             ["type" =>  "folding"],
             ["type" =>  "printing"]
         ];
