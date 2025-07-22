@@ -55,7 +55,7 @@ class Folder extends Machine implements FolderInterface
 
         $options = $equipmentService->loadById($id);
 
-        $this->setNumberOfFolds($options["number-of-folds"]);
+        $this->setNumberOfFolds($options["number-of-folds"][0]);
         $this->setDocumentSpacing($options["document-spacing"]);
         $this->setMetersPerHour($options["meters-per-hour"]);
         $this->setBaseSetupDuration($options["base-setup-duration"]);
@@ -155,7 +155,7 @@ class Folder extends Machine implements FolderInterface
         return $this->getBaseSetupDuration()
             +
             (
-                $this->getNumberOfFolds()
+                $this->getNumberOfFolds()      // ez a valódi hajtások száma
                 *
                 $this->getSetupDurationByFold()
             )

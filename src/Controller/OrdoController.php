@@ -685,6 +685,113 @@ DRY;
 
         $filesystem->write('machines/sechage.json', $dryingMachine);
 
+        $anthony = <<<ANTHONY
+{
+  "identite": {
+    "trigramme": "alo",
+    "nom": "Louis",
+    "prenom": "Alain",
+    "poste": "conducteur offset"
+  },
+  "competences": {
+    "bordeuse": 0.9,
+    "conditionnement": 0.9,
+    "expedition": 0.9,
+    "gto": 0,
+    "komori": 1,
+    "mbo5070": 0,
+    "mbo6592": 0,
+    "mbo70100": 0,
+    "meche_creuse": 0.66,
+    "paqueteuse": 0.9,
+    "pelliculeuse": 0.9,
+    "piqueuse_manuelle": 0.66,
+    "polar": 0,
+    "raineuse_manuelle": 0.66,
+    "ryobi": 0,
+    "sbg": 0,
+    "wireo_perfo": 0.66,
+    "wireo_reliure": 0.66,
+    "wireo_serrage": 0.66,
+    "Hohner": 1,
+    "Komori G50": 1,
+    
+    "ctp-machine": 1,
+    "Komori G40": 0,
+    "Heidelberg GTO": 0,
+    "cutting-machine": 0,
+    "MBO XL": 0
+  },
+  "horaires": {
+    "semaine_debut": 33,
+    "services": [
+      {
+        "nom_du_service": "matin",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "après-midi",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "soir",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      }
+    ]
+  },
+  "conges": [
+  ]
+}
+ANTHONY;
+
 
         $alain = <<<ALAIN
 {
@@ -715,11 +822,13 @@ DRY;
     "wireo_reliure": 0.66,
     "wireo_serrage": 0.66,
     "Hohner": 1,
-    "MBO XL": 1,
-    "Komori G40": 1,
     "Komori G50": 1,
-    "cutting-machine": 1,
-    "ctp-machine": 1
+    
+    "ctp-machine": 0,
+    "Komori G40": 1,
+    "Heidelberg GTO": 0.5,
+    "cutting-machine": 0,
+    "MBO XL": 0
   },
   "horaires": {
     "semaine_debut": 33,
@@ -727,19 +836,19 @@ DRY;
       {
         "nom_du_service": "matin",
         "lundi": [
-          "06:00-13:00"
+          "07:00-13:00"
         ],
         "mardi": [
-          "06:00-13:00"
+          "07:00-13:00"
         ],
         "mercredi": [
-          "06:00-13:00"
+          "07:00-13:00"
         ],
         "jeudi": [
-          "06:00-13:00"
+          "07:00-13:00"
         ],
         "vendredi": [
-          "06:00-13:00"
+          "07:00-13:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -747,19 +856,19 @@ DRY;
       {
         "nom_du_service": "après-midi",
         "lundi": [
-          "13:00-20h00"
+          "07:00-13:00"
         ],
         "mardi": [
-          "13:00-20h00"
+          "07:00-13:00"
         ],
         "mercredi": [
-          "13:00-20h00"
+          "07:00-13:00"
         ],
         "jeudi": [
-          "13:00-20h00"
+          "07:00-13:00"
         ],
         "vendredi": [
-          "13:00-20h00"
+          "07:00-13:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -767,19 +876,19 @@ DRY;
       {
         "nom_du_service": "soir",
         "lundi": [
-          "20:00-03:00"
+          "07:00-13:00"
         ],
         "mardi": [
-          "20:00-03:00"
+          "07:00-13:00"
         ],
         "mercredi": [
-          "20:00-03:00"
+          "07:00-13:00"
         ],
         "jeudi": [
-          "20:00-03:00"
+          "07:00-13:00"
         ],
         "vendredi": [
-          "20:00-03:00"
+          "07:00-13:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -787,20 +896,18 @@ DRY;
     ]
   },
   "conges": [
-    {
-      "debut": "2025-12-24 00:00",
-      "fin": "2025-12-30 23:59"
-    }
   ]
 }
 ALAIN;
 
 
-        $pierre = <<<PIERRE
+
+
+$bertrand = <<<BERTRAND
 {
   "identite": {
-    "trigramme": "pid",
-    "nom": "Pierre",
+    "trigramme": "bdb",
+    "nom": "Bertrand",
     "prenom": "Dubois",
     "poste": "conducteur offset"
   },
@@ -825,11 +932,13 @@ ALAIN;
     "wireo_reliure": 0.66,
     "wireo_serrage": 0.66,
     "Hohner": 1,
-    "MBO XL": 1,
-    "Komori G40": 1,
     "Komori G50": 1,
-    "cutting-machine": 1,
-    "ctp-machine": 1
+    
+    "ctp-machine": 0,
+    "Komori G40": 0.25,
+    "Heidelberg GTO": 1,
+    "cutting-machine": 0,
+    "MBO XL": 0
   },
   "horaires": {
     "semaine_debut": 32,
@@ -837,19 +946,19 @@ ALAIN;
       {
         "nom_du_service": "matin",
         "lundi": [
-          "06:00-13:00"
+          "13:00-20:00"
         ],
         "mardi": [
-          "06:00-13:00"
+          "13:00-20:00"
         ],
         "mercredi": [
-          "06:00-13:00"
+          "13:00-20:00"
         ],
         "jeudi": [
-          "06:00-13:00"
+          "13:00-20:00"
         ],
         "vendredi": [
-          "06:00-13:00"
+          "13:00-20:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -857,19 +966,19 @@ ALAIN;
       {
         "nom_du_service": "après-midi",
         "lundi": [
-          "13:00-20h00"
+          "13:00-20:00"
         ],
         "mardi": [
-          "13:00-20h00"
+          "13:00-20:00"
         ],
         "mercredi": [
-          "13:00-20h00"
+          "13:00-20:00"
         ],
         "jeudi": [
-          "13:00-20h00"
+          "13:00-20:00"
         ],
         "vendredi": [
-          "13:00-20h00"
+          "13:00-20:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -877,19 +986,19 @@ ALAIN;
       {
         "nom_du_service": "soir",
         "lundi": [
-          "20:00-03:00"
+          "13:00-20:00"
         ],
         "mardi": [
-          "20:00-03:00"
+          "13:00-20:00"
         ],
         "mercredi": [
-          "20:00-03:00"
+          "13:00-20:00"
         ],
         "jeudi": [
-          "20:00-03:00"
+          "13:00-20:00"
         ],
         "vendredi": [
-          "20:00-03:00"
+          "13:00-20:00"
         ],
         "samedi": [],
         "dimanche": []
@@ -897,16 +1006,231 @@ ALAIN;
     ]
   },
   "conges": [
-    {
-      "debut": "2025-12-24 00:00",
-      "fin": "2025-12-30 23:59"
-    }
   ]
 }
-PIERRE;
+BERTRAND;
 
+
+$stephane = <<<STEPHANE
+{
+  "identite": {
+    "trigramme": "sdp",
+    "nom": "Stéphane",
+    "prenom": "Dupont",
+    "poste": "conducteur offset"
+  },
+  "competences": {
+    "bordeuse": 0.9,
+    "conditionnement": 0.9,
+    "expedition": 0.9,
+    "gto": 0,
+    "komori": 1,
+    "mbo5070": 0,
+    "mbo6592": 0,
+    "mbo70100": 0,
+    "meche_creuse": 0.66,
+    "paqueteuse": 0.9,
+    "pelliculeuse": 0.9,
+    "piqueuse_manuelle": 0.66,
+    "polar": 0,
+    "raineuse_manuelle": 0.66,
+    "ryobi": 0,
+    "sbg": 0,
+    "wireo_perfo": 0.66,
+    "wireo_reliure": 0.66,
+    "wireo_serrage": 0.66,
+    "Hohner": 1,
+    "Komori G50": 1,
+    
+    "ctp-machine": 0,
+    "Komori G40": 0,
+    "Heidelberg GTO": 0,
+    "cutting-machine": 1,
+    "MBO XL": 0
+  },
+  "horaires": {
+    "semaine_debut": 32,
+    "services": [
+      {
+        "nom_du_service": "matin",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "après-midi",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "soir",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      }
+    ]
+  },
+  "conges": [
+  ]
+}
+STEPHANE;
+
+
+        $halim = <<<HALIM
+{
+  "identite": {
+    "trigramme": "hrc",
+    "nom": "Halim",
+    "prenom": "Richard",
+    "poste": "conducteur offset"
+  },
+  "competences": {
+    "bordeuse": 0.9,
+    "conditionnement": 0.9,
+    "expedition": 0.9,
+    "gto": 0,
+    "komori": 1,
+    "mbo5070": 0,
+    "mbo6592": 0,
+    "mbo70100": 0,
+    "meche_creuse": 0.66,
+    "paqueteuse": 0.9,
+    "pelliculeuse": 0.9,
+    "piqueuse_manuelle": 0.66,
+    "polar": 0,
+    "raineuse_manuelle": 0.66,
+    "ryobi": 0,
+    "sbg": 0,
+    "wireo_perfo": 0.66,
+    "wireo_reliure": 0.66,
+    "wireo_serrage": 0.66,
+    "Hohner": 1,
+    "Komori G50": 1,
+    
+    "ctp-machine": 0,
+    "Komori G40": 0,
+    "Heidelberg GTO": 0,
+    "cutting-machine": 0,
+    "MBO XL": 1
+  },
+  "horaires": {
+    "semaine_debut": 32,
+    "services": [
+      {
+        "nom_du_service": "matin",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "après-midi",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      },
+      {
+        "nom_du_service": "soir",
+        "lundi": [
+          "07:00-13:00"
+        ],
+        "mardi": [
+          "07:00-13:00"
+        ],
+        "mercredi": [
+          "07:00-13:00"
+        ],
+        "jeudi": [
+          "07:00-13:00"
+        ],
+        "vendredi": [
+          "07:00-13:00"
+        ],
+        "samedi": [],
+        "dimanche": []
+      }
+    ]
+  },
+  "conges": [
+  ]
+}
+HALIM;
+
+        $filesystem->write('rh/anthony.json', $anthony);
         $filesystem->write('rh/alain.json', $alain);
-        $filesystem->write('rh/pierre.json', $pierre);
+        $filesystem->write('rh/bertrand.json', $bertrand);
+        $filesystem->write('rh/stephane.json', $stephane);
+        $filesystem->write('rh/halim.json', $halim);
 
         $filesystem->write(sprintf('jobs/%s.json', $job["id"]), json_encode($job, JSON_PRETTY_PRINT));
 

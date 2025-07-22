@@ -1,6 +1,6 @@
 ctp-machine:
-  id: "ctp machine"
-  designation: "ctp machine"
+  id: "ctp"
+  designation: "CTP Screen"
   type: "ctp machine"
   technic-designation: "ctp machine"
   capacity: 1
@@ -14,7 +14,7 @@ ctp-machine:
       width: 1050
       height: 750
   sqm-per-hour: 26
-  cost-per-hour: 60
+  cost-per-hour: 52
   nominal-mode:
     attention-required: 1
     productivity: 1
@@ -24,8 +24,10 @@ Komori G40:
   type: "printing press"
   technic-designation: "printing press"
   capacity: 1
-  expiration-date-alignment: 999999
+  expiration-date-alignment: 1440
   gripMargin: 15
+  colors: 4
+  varnish: true
   input-dimensions:
     min:
       width: 520
@@ -40,55 +42,57 @@ Komori G40:
   sheets-per-hour: 8000
   max-input-stack-height: 120
   stack-replenishment-duration: 3
-  cost-per-hour: 130
+  cost-per-hour: 150
   nominal-mode:
     attention-required: 1
     productivity: 1
-Komori G50:
-  id: "Komori G50"
-  designation: "Komori G50"
+Heidelberg GTO:
+  id: "Heidelberg GTO"
+  designation: "Heidelberg GTO"
   type: "printing press"
   technic-designation: "printing press"
   capacity: 1
-  expiration-date-alignment: 999999
+  expiration-date-alignment: 1440
   gripMargin: 15
+  colors: 2
+  varnish: true
   input-dimensions:
     min:
+      width: 180
+      height: 105
+    max:
       width: 520
       height: 360
-    max:
-      width: 1050
-      height: 750
-  base-setup-duration: 6.6666
-  setup-duration-per-color: 3.3333
+  base-setup-duration: 5
+  setup-duration-per-color: 5
   two-pass: false
-  pass-per-color: 75
-  sheets-per-hour: 8000
+  pass-per-color: 100
+  sheets-per-hour: 4000
   max-input-stack-height: 120
   stack-replenishment-duration: 3
-  cost-per-hour: 180
+  cost-per-hour: 35
   nominal-mode:
     attention-required: 1
     productivity: 1
 cutting-machine:
-  id: "cutting machine"
-  designation: "cutting machine"
+  id: "Polar 137"
+  designation: "Polar 137"
   type: "cutting machine"
   technic-designation: "cutting machine"
   capacity: 1
   expiration-date-alignment: 999999
-  gripMargin: 15
+  gripMargin: 0
   input-dimensions:
     min:
-      width: 520
-      height: 360
+      width: 50
+      height: 50
     max:
       width: 1050
       height: 750
   setup-duration: 3
   paper-circuit-duration: 1.5
   cut-duration: 0.3333
-  cost-per-hour: 130
+  cost-per-hour: 27
   nominal-mode:
     attention-required: 1
     productivity: 1
@@ -107,34 +111,12 @@ MBO XL:
     max:
       width: 1050
       height: 750
-  number-of-folds: 2
+  number-of-folds: [6,4]
   document-spacing: 0.05
   meters-per-hour: 1500
   base-setup-duration: 20
   setup-duration-by-fold: 3.5
-  cost-per-hour: 60
+  cost-per-hour: 35
   nominal-mode:
     attention-required: 1
     productivity: 1
-Hohner:
-  id: "Hohner"
-  designation: "Hohner"
-  type: "stitching machine"
-  technic-designation: "stitching machine"
-  capacity: 1
-  expiration-date-alignment: 999999
-  gripMargin: 0
-  input-dimensions:
-    min:
-      width: 105
-      height: 105
-    max:
-      width: 360
-      height: 350
-  base-setup-duration: 15
-  documents-per-hour: 4000
-  cost-per-hour: 60
-  nominal-mode:
-    attention-required: 1
-    productivity: 1
-  maxPoseCount: 2

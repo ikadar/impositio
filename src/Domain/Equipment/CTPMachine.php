@@ -100,6 +100,8 @@ class CTPMachine extends Machine implements CTPMachineInterface
             $this->getCostPerHour()
         ;
 
+        $cost = round($cost, 2);
+
         return [
             "cost" => $cost,
             "aluSheetsCost" => $plakettPrice,
