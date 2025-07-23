@@ -154,7 +154,8 @@ class TestController extends AbstractController
                     "medium" => $part["medium"],
                     "openPoseDimensions" => $part["openPoseDimensions"],
                     "closedPoseDimensions" => $part["closedPoseDimensions"],
-                    "actionPaths" => $actionPaths
+                    "actionPaths" => $actionPaths,
+                    "requiredParts" => $part["requiredParts"],
                 ];
             }
 
@@ -266,6 +267,7 @@ class TestController extends AbstractController
             "numberOfColors" => $numberOfColors,
             "paperWeight" => $paperWeight,
             "partId" => $partId,
+            "requiredParts" => $partPayload["requiredParts"],
             "medium" => $partPayload["medium"]
         ];
 
@@ -381,6 +383,7 @@ class TestController extends AbstractController
             $path["duration"] = $duration;
             $path["pressSheet"] = sprintf("%smm", $pressSheetText);
             $path["md5"] = md5(serialize($path));
+            $path["requiredParts"] = $part["requiredParts"];
             $path["id"] = Uuid::v4()->toString();
             yield $path;
         }

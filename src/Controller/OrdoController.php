@@ -98,7 +98,8 @@ class OrdoController extends AbstractController
                     "format_fermé"  => $path["closedPoseDimensions"], // "A5",
                     "pagination/volets"  => 96
                 ],
-                "actions" => []
+                "actions" => [],
+                "required_parts" => $path["requiredParts"],
             ];
 
             foreach ($path["nodes"] as $loop => $node) {
@@ -688,9 +689,9 @@ DRY;
         $anthony = <<<ANTHONY
 {
   "identite": {
-    "trigramme": "alo",
-    "nom": "Louis",
-    "prenom": "Alain",
+    "trigramme": "ant",
+    "nom": "Anthony",
+    "prenom": "Marceau",
     "poste": "conducteur offset"
   },
   "competences": {

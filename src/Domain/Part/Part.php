@@ -10,6 +10,7 @@ class Part implements PartInterface
 {
     static protected PartType $type;
     protected string $id;
+    protected string $uuid;
 
     protected Dimensions $openDimensions;
     protected Dimensions $closedDimensions;
@@ -18,11 +19,15 @@ class Part implements PartInterface
 
     protected array $actions;
 
+    protected array $requiredParts;
+
     public function __construct($partData)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
+        $this->setUuid($accessor->getValue($partData, "[uuid]"));
         $this->setDimensions($accessor->getValue($partData["properties"], "[dimensions]"));
         $this->setMediumData($accessor->getValue($partData["properties"], "[medium]"));
+        $this->setRequiredParts($accessor->getValue($partData, "[required_parts]") ?: []);
     }
 
     public static function getType(): PartType
@@ -77,6 +82,18 @@ class Part implements PartInterface
         return $this;
     }
 
+    public function getUuid(): string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): Part
+    {
+        $this->uuid = $uuid;
+        return $this;
+    }
+
+
     public function getActions(): array
     {
         return $this->actions;
@@ -87,6 +104,18 @@ class Part implements PartInterface
         $this->actions = $actions;
         return $this;
     }
+
+    public function getRequiredParts(): array
+    {
+        return $this->requiredParts;
+    }
+
+    public function setRequiredParts(array $requiredParts): Part
+    {
+        $this->requiredParts = $requiredParts;
+        return $this;
+    }
+
 
 
     protected function setDimensions(?string $dimensionString): void

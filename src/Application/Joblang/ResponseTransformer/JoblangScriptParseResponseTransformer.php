@@ -59,6 +59,7 @@ class JoblangScriptParseResponseTransformer
 
         return [
             "partId" => $part->getId(),
+            "requiredParts" => $part->getRequiredParts(),
             "actions" => $part->getActions(),
             "size" => $part->getDimensions(),
             "medium" => $part->getMediumData(),
