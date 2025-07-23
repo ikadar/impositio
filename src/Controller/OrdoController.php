@@ -109,9 +109,17 @@ class OrdoController extends AbstractController
                 if ($machine->getType() === MachineType::PrintingPress) {
                     $dryTimeBetweenSequences = $this->propertyAccessor->getValue($node, "[todo][dryTimeBetweenSequences]");
                     if ($dryTimeBetweenSequences !== null) {
-                        $part["actions"][count($part["actions"])-1]["sequences"] = ["recto", "verso"];
+                        $part["actions"][count($part["actions"])-1]["sequences"] = ["recto", "verso"]; // what is there is only recto?
 //                        $part["actions"][count($part["actions"])-1]["sequences"] = 2;
                         $part["actions"][count($part["actions"])-1]["dry_time_between_sequences"] = $dryTimeBetweenSequences;
+
+                        $action = [
+                            "machine" => "sechage",
+                            "setup_time" => 0,
+                            "run" => 240,
+                        ];
+                        $part["actions"][] = $action;
+
                         continue;
                     }
                 }
@@ -398,6 +406,13 @@ class OrdoController extends AbstractController
                 $totalDuration += $duration;
                 $totalCost += $printCost;
 
+                $responseData[] = [
+                    "actionType" => "sechange",
+                    "machine" => "sechage",
+                    "setupDuration" => 0,
+                    "runDuration" => 240,
+                    "cost" => 0
+                ];
 
             } elseif ($actionType === "folding") {
                 $actionData["inputSheet"] = $action["cutSheet"];
