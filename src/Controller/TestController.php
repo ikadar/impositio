@@ -208,7 +208,10 @@ class TestController extends AbstractController
 
         $numberOfCopies = $partPayload['numberOfCopies'];
         $paperWeight = floatval($partPayload["medium"]["weight"]);
-        $numberOfColors = count($partPayload["medium"]["inking"]["recto"]);
+
+//        $numberOfColors = count($partPayload["medium"]["inking"]["recto"]);
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($partPayload["medium"]["inking"]));
+        $numberOfColors = iterator_count($iterator);
 
         [$open, $closed] = explode('/', $partPayload["size"]);
         [$closedWidth, $closedHeight] = explode('x', $closed);
@@ -268,7 +271,7 @@ class TestController extends AbstractController
             "paperWeight" => $paperWeight,
             "partId" => $partId,
             "requiredParts" => $partPayload["requiredParts"],
-            "medium" => $partPayload["medium"]
+            "medium" => $partPayload["medium"],
         ];
 
     }

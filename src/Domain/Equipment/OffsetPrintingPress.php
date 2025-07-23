@@ -17,6 +17,7 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
     protected bool $twoPass;
     protected int $passPerColor;
     protected int $sheetsPerHour;
+    protected int $numberOfColors;
     protected float $maxInputStackHeight;
     protected float $stackReplenishmentDuration;
 
@@ -66,6 +67,7 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         $this->setMaxInputStackHeight($options["max-input-stack-height"]);
         $this->setStackReplenishmentDuration($options["stack-replenishment-duration"]);
         $this->setCostPerHour($options["cost-per-hour"]);
+        $this->setNumberOfColors($options["colors"]);
 
     }
 
@@ -156,6 +158,18 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         $this->costPerHour = $costPerHour;
         return $this;
     }
+
+    public function getNumberOfColors(): int
+    {
+        return $this->numberOfColors;
+    }
+
+    public function setNumberOfColors(int $numberOfColors): OffsetPrintingPress
+    {
+        $this->numberOfColors = $numberOfColors;
+        return $this;
+    }
+
 
     public function calculateCost(ActionPathNodeInterface $action): float | array
     {

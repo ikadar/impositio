@@ -5,6 +5,7 @@ namespace App\Domain\Action;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Folder;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
 use App\Domain\Layout\Calculator;
@@ -118,11 +119,12 @@ class ActionTree implements Interfaces\ActionTreeInterface
 //        array $pressSheets,
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
-        array $prevNodes = []
+        array $prevNodes = [],
+        array $inking = [],
     )
     {
 //        $this->setRoot($this->calculate($abstractActions, $pressSheets, $zone, $prevNodes));
-        $this->setRoot($this->calculate($abstractActions, $pressSheet, $zone, $prevNodes));
+        $this->setRoot($this->calculate($abstractActions, $pressSheet, $zone, $prevNodes, $inking));
         return $this->getRoot();
     }
 
@@ -131,7 +133,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
 //        array $pressSheets,
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
-        array $prevNodes = []
+        array $prevNodes = [],
+        array $inking = [],
     ): array
     {
 
@@ -145,6 +148,20 @@ class ActionTree implements Interfaces\ActionTreeInterface
         }
 
         $availableMachines = $abstractAction->getAvailableMachines();
+
+        // check if inking is OK
+        // todo: bascule
+        if ($abstractAction->getMachineType()->value == "printing press") {
+            $capableMachines = [];
+            foreach ($availableMachines as $machineLoop => $machine) {
+                $versoInking = $this->propertyAccessor->getValue($this->getInking(), "[verso]") ?: [];
+                $maxColorsPerSide = max(count($inking["recto"]), count($versoInking));
+                if ($machine->getNumberOfColors() >= $maxColorsPerSide) {
+                    $capableMachines[] = $machine;
+                }
+            }
+            $availableMachines = $capableMachines;
+        }
 
         // Todo: filter available machines based on the part's coating and input sheet size (auto?), color count
 //        $machine = $availableMachines[0];
@@ -195,7 +212,8 @@ class ActionTree implements Interfaces\ActionTreeInterface
                         $pressSheet,
 //                        $pressSheets,
                         $gridFitting->getCutSheet(),
-                        $prevNodes
+                        $prevNodes,
+                        $inking
                     ));
 
                     $actionPaths[] = $apn;
@@ -293,7 +311,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
 
         foreach ($pressSheets as $pressSheet) {
 //        $this->calculateTree($abstractActions, $pressSheets[0], $zone);
-            $this->calculateTree($abstractActions, $pressSheet, $zone);
+            $this->calculateTree($abstractActions, $pressSheet, $zone, [], $inking);
             $flatActionPaths = $this->flattenTree();
 
 //        $extendedFlatActionPaths = [];
