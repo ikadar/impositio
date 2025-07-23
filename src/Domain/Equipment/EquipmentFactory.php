@@ -37,6 +37,8 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 return $this->createCuttingMachine($id, $machineData);
             case MachineType::CTPMachine:
                 return $this->createCTPMachine($id, $machineData);
+            case MachineType::Sechage:
+                return $this->createSechage($id, $machineData);
         }
 
         throw new BadRequestHttpException();
@@ -65,6 +67,8 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 return $this->createStitchingMachine($data["id"], $data);
             case MachineType::Folder:
                 return $this->createFolder($data["id"], $data);
+            case MachineType::Sechage:
+                return $this->createSechage($data["id"], $data);
             case "cutting machine":
             case "ctp machine":
                 break;
@@ -129,6 +133,32 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new CTPMachine(
             $id,
             MachineType::CTPMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
+            $data["gripMargin"],
+            new Dimensions(
+                $data["input-dimensions"]["min"]["width"],
+                $data["input-dimensions"]["min"]["height"]
+            ),
+            new Dimensions(
+                $data["input-dimensions"]["max"]["width"],
+                $data["input-dimensions"]["max"]["height"]
+            ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
+            $this->printFactory,
+            $this->equipmentService
+        );
+    }
+
+    protected function createSechage($id, $data)
+    {
+        return new Sechage(
+            $id,
+            MachineType::Sechage,
             $data["designation"],
             $data["technic-designation"],
             $data["capacity"],

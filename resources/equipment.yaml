@@ -120,3 +120,25 @@ MBO XL:
   nominal-mode:
     attention-required: 1
     productivity: 1
+sechage:
+  id: "sechage"
+  designation: "sechage"
+  type: "sechage"
+  technic-designation: "sechage"
+  capacity: 1
+  expiration-date-alignment: 999999
+  gripMargin: 0
+  input-dimensions:
+    min:
+      width: 300
+      height: 210
+    max:
+      width: 1050
+      height: 750
+  document-spacing: 0.05
+  meters-per-hour: 1500
+  base-setup-duration: 20
+  cost-per-hour: 0
+  nominal-mode:
+    attention-required: 1
+    productivity: 1
