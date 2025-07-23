@@ -413,7 +413,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
                         "numberOfColors" => $this->numberOfColors,
                         "paperWeight" => $this->paperWeight,
                         "cutSheetCount" => $cutSheetCount,
-                        "dryTimeBetweenSequences" => 100
+                        "dryTimeBetweenSequences" => 0
                     ]);
 
                     $extendedActionPath[] = $versoPrintingAction;
