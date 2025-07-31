@@ -14,7 +14,10 @@ use App\Domain\Geometry\Dimensions;
 use App\Domain\Layout\Calculator;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\PrintFactory;
+use App\Entity\ActionPath;
+use App\Entity\Job;
 use App\Entity\JoblangScript;
+use App\Entity\Part;
 use App\Infrastructure\Mapper\JobMapper;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +32,7 @@ class TestController extends AbstractController
     protected array $pressSheets;
     protected InputSheetInterface $zone;
     protected array $pose;
+    protected array $metaData;
 
     public function __construct(
         protected Calculator $layoutCalculator,
@@ -37,6 +41,7 @@ class TestController extends AbstractController
         protected EquipmentFactoryInterface $equipmentFactory,
         protected ActionTreeInterface $actionTree,
         protected KernelInterface $kernel,
+        protected EntityManagerInterface $em,
     )
     {
     }
@@ -44,21 +49,20 @@ class TestController extends AbstractController
     #[Route(path: '/test/{scriptId}', requirements: [], methods: ['GET'])]
     public function getTest(
         string $scriptId,
-        EntityManagerInterface $em,
+//        EntityManagerInterface $em,
         JobMapper $jobMapper,
         JoblangScriptParseResponseTransformer $responseTransformer,
     ): JsonResponse
     {
         ini_set('memory_limit', '512M');
 
-
-        $repo = $em->getRepository(JoblangScript::class);
+        $repo = $this->em->getRepository(JoblangScript::class);
+        $jobRepo = $this->em->getRepository(Job::class);
         $joblangScript = $repo->findWithParts($scriptId);
 
-        $responses = [];
-
         foreach ($joblangScript->getLines() as $line) {
-            $jobEntity = $line->getJob(); // Doctrine entity
+
+            $jobEntity = $jobRepo->findWithParts($line->getJob()->getId());
 
             $domainJob = $jobMapper->toDomain($jobEntity); // Convert to domain Job object
             $parts = $domainJob->getParts();
@@ -124,12 +128,11 @@ class TestController extends AbstractController
                     "pressSheet",
                     0,
                     0,
-                    450,
-                    320,
+                    520,
+                    360,
                     $this->calculateSheetPrice(1150, 120, 320, 450)
                 ),
             ];
-
 
             $payload = $this->processPayload($response);
 
@@ -139,7 +142,6 @@ class TestController extends AbstractController
                 $actionPaths = $this->actionTree->process(
                     $part["abstractActions"],
                     $part["pressSheets"],
-//                $part["pressSheet"],
                     $part["zone"],
                     $part["openPoseDimensions"],
                     $part["closedPoseDimensions"],
@@ -150,6 +152,7 @@ class TestController extends AbstractController
                 );
 
                 $parts[] = [
+                    "id" => $part["id"],
                     "partId" => $part["partId"],
                     "medium" => $part["medium"],
                     "openPoseDimensions" => $part["openPoseDimensions"],
@@ -159,25 +162,21 @@ class TestController extends AbstractController
                 ];
             }
 
-            $responses[] = $this->createResponse($parts);
-//        $response = $this->createResponse($parts);
+            $this->createActionPaths($parts);
 
-            $this->writeMetaData();
         }
 
+        $response = $this->createResponse2($scriptId);
+
         return new JsonResponse(
-            $responses,
+            $response,
             JsonResponse::HTTP_OK
         );
 
-//        return $responses;
-//        return $response;
     }
 
     protected function processPayload($data): array
     {
-//        $request = Request::createFromGlobals();
-//        $data = json_decode($request->getContent(), true);
 
         $this->metaData = $data["metaData"];
 
@@ -195,6 +194,7 @@ class TestController extends AbstractController
     protected function processPartPayload($partPayload): array
     {
 
+        $id = $partPayload["id"];
         $partId = $partPayload["partId"];
 
         $abstractActionData = $partPayload['actions'];
@@ -259,10 +259,9 @@ class TestController extends AbstractController
         $zone->setContentType($partPayload["zone"]["type"]); // todo: make it better
 
         return [
+            "id" => $id,
             "abstractActions" => $abstractActions,
-//            "pressSheets" => $pressSheets,
             "pressSheets" => $this->pressSheets,
-//            "pressSheet" => $this->pressSheets[0],
             "zone" => $zone,
             "openPoseDimensions" => $openPoseDimensions,
             "closedPoseDimensions" => $closedPoseDimensions,
@@ -276,20 +275,13 @@ class TestController extends AbstractController
 
     }
 
-    protected function createResponse($parts): array
+    protected function createActionPaths($parts): void
     {
-        $responseData = [
-            "metaData" => $this->metaData,
-            "parts" => []
-        ];
-
         foreach ($this->getActionPaths($parts) as $loop => $actionPaths) {
-            $partId = $parts[$loop]["partId"];
-            $responseData["parts"][$partId]["actionPaths"] = [];
+
             $usedCosts = [];
             foreach ($actionPaths as $loop2 => $actionPath) {
                 if (!in_array($actionPath["cost"], $usedCosts)) {
-                    $responseData["parts"][$partId]["actionPaths"][] = $actionPath;
                     $usedCosts[] = $actionPath["cost"];
                     $usedCosts = array_values(array_unique($usedCosts));
                 }
@@ -301,8 +293,6 @@ class TestController extends AbstractController
             }
 
         }
-
-        return $responseData;
     }
 
     public function getActionPathNodes($actionPath)
@@ -314,7 +304,6 @@ class TestController extends AbstractController
     }
 
     public function getActionPath($part, $maxTileCountPerSqm)
-//    public function getActionPath($part, $maxTileCount)
     {
 
         foreach ($part["actionPaths"] as $actionPath) {
@@ -370,7 +359,6 @@ class TestController extends AbstractController
             $path["designation"] = sprintf("(%s) %s", $pressSheetText, $path["designation"]);
 
 
-
             $path["medium"] = $part["medium"];
             $path["openPoseDimensions"] = sprintf(
                 "%dx%d",
@@ -385,9 +373,20 @@ class TestController extends AbstractController
             $path["cost"] = $cost;
             $path["duration"] = $duration;
             $path["pressSheet"] = sprintf("%smm", $pressSheetText);
-            $path["md5"] = md5(serialize($path));
             $path["requiredParts"] = $part["requiredParts"];
             $path["id"] = Uuid::v4()->toString();
+
+
+            $partRepo = $this->em->getRepository(Part::class);
+            $partEntity = $partRepo->find($part["id"]);
+
+            $actionPathEntity = new ActionPath();
+            $actionPathEntity->setPart($partEntity);
+            $actionPathEntity->setJson($path);
+
+            $this->em->persist($actionPathEntity);
+            $this->em->flush();
+
             yield $path;
         }
 
@@ -430,30 +429,8 @@ class TestController extends AbstractController
                 }
             });
 
-            $directoryPath = sprintf("%s/data/%s", realpath($this->kernel->getProjectDir()), $this->metaData["jobNumber"]);
-            if (!is_dir($directoryPath)) {
-                mkdir($directoryPath, 0755, true);
-                mkdir(sprintf("%s/parts", $directoryPath), 0755, true);
-                mkdir(sprintf("%s/meta", $directoryPath), 0755, true);
-            }
-
-            $filePath = sprintf("%s/parts/%s.json", $directoryPath, $part["partId"]);
-            file_put_contents($filePath, json_encode($actionPathArray, JSON_PRETTY_PRINT));
-
             yield $actionPathArray;
         }
-
-    }
-
-    public function writeMetaData()
-    {
-        $filePath = sprintf(
-            "%s/data/%s/meta/metaData.json",
-            realpath($this->kernel->getProjectDir()),
-            $this->metaData["jobNumber"]
-        );
-
-        file_put_contents($filePath, json_encode($this->metaData, JSON_PRETTY_PRINT));
 
     }
 
@@ -466,6 +443,37 @@ class TestController extends AbstractController
 
         return $mediumPricePerSheet;
 
+    }
+
+    protected function createResponse2($scriptId)
+    {
+        $joblangScriptEntity = $this->em->getRepository(JoblangScript::class)->findWithParts($scriptId);
+
+        $jobs = [];
+        foreach ($joblangScriptEntity->getLines() as $joblangLine) {
+            $job = [];
+            $metaData = $joblangLine->getParsed()["metaData"];
+            $metaData["jobId"] = $joblangLine->getJob()->getId();
+            $job["metaData"] = $metaData;
+
+            $parts = [];
+            foreach ($joblangLine->getJob()->getParts() as $part) {
+                $actionsPaths = [];
+                foreach ($part->getActionPaths() as $actionPath) {
+                    $actionPathJson = $actionPath->getJson();
+                    $actionPathJson["id"] = $actionPath->getId();
+                    $actionsPaths[] = $actionPathJson;
+                }
+                $parts[$part->getPartId()] = [
+                    "actionPaths" => $actionsPaths,
+                ];
+            }
+
+            $job["parts"] = $parts;
+            $jobs[] = $job;
+        }
+
+        return $jobs;
     }
 
 }

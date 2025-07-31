@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Repository\JobRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: JobRepository::class)]
 #[ORM\Table(name: 'jobs')]
 class Job
 {
@@ -21,6 +22,7 @@ class Job
 
     #[ORM\Column(type: 'string', length: 40)]
     private string $code;
+
 
     /**
      * @var Collection<int, Part>
@@ -64,7 +66,9 @@ class Job
     public function getMetaData(): array
     {
         $parsed = $this->getJoblangLine()->getParsed();
-        return $parsed["metaData"];
+        $metaData = $parsed["metaData"];
+        $metaData["jobId"] = $this->getId();
+        return $metaData;
     }
 
     /**

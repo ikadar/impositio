@@ -6,7 +6,6 @@ use App\Application\Joblang\ResponseTransformer\JoblangScriptParseResponseTransf
 use App\Application\Joblang\UseCase\ParseJoblangScript\JoblangScriptParseRequestModel;
 use App\Application\Joblang\UseCase\ParseJoblangScript\ParseJoblangScriptUseCase;
 use App\Domain\Joblang\Interfaces\JoblangServiceInterface;
-use App\Entity\JoblangScript;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +33,7 @@ class ParserController extends AbstractController
 
         $requestModel = new JoblangScriptParseRequestModel($joblangScriptData);
         $responseModel = $this->useCase->execute($requestModel);
-        $response = $this->responseTransformer->transform($responseModel);
+//        $response = $this->responseTransformer->transform($responseModel);
 
         return new JsonResponse(
             ["scriptId" => $responseModel->scriptId],
@@ -47,10 +46,5 @@ class ParserController extends AbstractController
         $data = $request->getContent();
         return trim($data);
     }
-
-//    protected function saveData($joblangScriptData): JoblangScript
-//    {
-//        return $this->joblangService->parseAndPersistScript($joblangScriptData);
-//    }
 
 }

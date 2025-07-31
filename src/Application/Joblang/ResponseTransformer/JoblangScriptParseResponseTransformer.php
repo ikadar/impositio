@@ -4,20 +4,15 @@ namespace App\Application\Joblang\ResponseTransformer;
 
 use App\Application\Joblang\UseCase\ParseJoblangScript\JoblangScriptParseResponseModel;
 use App\Domain\Part\Interfaces\PartInterface;
-use App\Entity\JoblangScript;
-use App\Infrastructure\Mapper\JobMapper;
 
 class JoblangScriptParseResponseTransformer
 {
     public function __construct(
-        private JobMapper $jobMapper
     ) {
-
     }
 
     public function transform(JoblangScriptParseResponseModel $responseModel): array
     {
-
         $metadata = $responseModel->metaData;
         $parts = $responseModel->parts;
         $numberOfCopies = $metadata['quantity'];
@@ -58,6 +53,7 @@ class JoblangScriptParseResponseTransformer
         ];
 
         return [
+            "id" => $part->getEntityId(),
             "partId" => $part->getId(),
             "requiredParts" => $part->getRequiredParts(),
             "actions" => $part->getActions(),
@@ -66,6 +62,4 @@ class JoblangScriptParseResponseTransformer
             "zone" => $zone
         ];
     }
-
-
 }

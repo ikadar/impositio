@@ -120,8 +120,10 @@ class PrintFactory extends GeometryFactory // implements PrintFactoryInterface
     {
         // todo: move to config
         return  new CutSpacing(
-            10,
-            10,
+            0,
+            0,
+//            10,
+//            10,
         );
     }
 }
