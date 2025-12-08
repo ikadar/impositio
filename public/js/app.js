@@ -1,4 +1,9 @@
 let calculatedData = null;
+
+/**
+ * @deprecated Legacy 2-round flow function. Still used by some legacy HTML files.
+ * New flow (index.html) uses /process endpoint directly without this function.
+ */
 const calc = (input, machineIndex) => {
 
     if (machineIndex > 0) {
@@ -196,3 +201,4 @@ const sendToOrdo = () => {
 // 👇 Expose it globally
 window.calc = calc;
 window.sendToOrdo = sendToOrdo;
+window.displayAllTextualExplanation = displayAllTextualExplanation;

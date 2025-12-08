@@ -63,30 +63,47 @@
           const textualExplanation = document.getElementById("textual-explanation");
           textualExplanation.innerHTML = "";
 
-          fetch('/parse', {
+          // Parse JSON payload from textarea
+          let payload;
+          try {
+              payload = JSON.parse(document.getElementById('input').value);
+          } catch (e) {
+              textualExplanation.innerHTML = "Invalid JSON: " + e.message;
+              console.error('Invalid JSON:', e);
+              return;
+          }
+
+          // Send directly to /process endpoint (1-round flow)
+          fetch('/process', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: document.getElementById('input').value.replace(/[\r\n]+/g, "")
+            body: JSON.stringify(payload)
           })
           .then(async response => {
               const data = await response.json();
               if (!response.ok) {
                   // Server returned 4xx or 5xx status
-                  throw new Error(data.detail);
+                  throw new Error(data.error || data.detail || 'Unknown error');
               }
               return data;
           })
           .then(data => {
-            calc(data, 0, null);
-        })
-        .catch(error => {
-          console.error('Error loading JSON or server error:');
-          console.log(error.message);
-          textualExplanation.innerHTML = error.message;
-        });
+              // data is now the full response (array of jobs with parts and actionPaths)
+              calculatedData = data;
+
+              // Display results
+              for (let i = 0; i < data.length; i++) {
+                  displayAllTextualExplanation(data[i], data[i].metaData.jobNumber);
+              }
+          })
+          .catch(error => {
+              console.error('Error loading JSON or server error:');
+              console.log(error.message);
+              textualExplanation.innerHTML = error.message;
+          });
       }
 
 
@@ -108,27 +125,48 @@
 
 
 <div class="w-[50vw] h-[100vh] bg-[#16161d] flex flex-col">
-        <textarea id="input" class="w-full h-full resize-none p-4 outline-none font-mono text-green-500 bg-[#16161d] text-xs" spellcheck="false">
-        [0013/Johson and Johnson/Pinkslip/ 20000ex]
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g pelli R{brillant}
-        >
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g
-        @31/08/2025 15:00 D+4
-
-
-        [0014/Johson and Johnson/Pinkslip/ 20000ex]
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g pelli R{brillant}
-        >
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g
-        @31/08/2025 15:00 D+4
-
-
-        [0015/Johson and Johnson/Pinkslip/ 20000ex]
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g pelli R{brillant}
-        >
-        feuillet 200x300/100x300 70x102 RV{pantone_1,pantone_2/pantone_3,pantone_4} old mill bianco 115g
-        @31/08/2025 15:00 D+4
-        </textarea>
+        <textarea id="input" class="w-full h-full resize-none p-4 outline-none font-mono text-green-500 bg-[#16161d] text-xs" spellcheck="false">{
+  "parts": [
+    {
+      "partId": "PART0001",
+      "properties": {},
+      "actions": [
+        {
+          "name": "print",
+          "params": {
+            "dimensions": {
+              "open": {
+                "width": 420,
+                "height": 296
+              },
+              "closed": {
+                "width": 210,
+                "height": 148
+              }
+            },
+            "paper": {
+              "weight": 120
+            },
+            "inking": {
+              "recto": ["cyan", "magenta", "yellow", "black"],
+              "verso": ["cyan", "magenta"]
+            },
+            "zone": {
+              "width": 210,
+              "height": 148,
+              "gripMargin": 10
+            }
+          }
+        },
+        {
+          "name": "cut",
+          "params": {}
+        }
+      ],
+      "required_parts": []
+    }
+  ]
+}</textarea>
     <div class="flex gap-2 p-4 border-t border-gray-700 justify-end">
         <button onclick="parse()" class="px-2 py-1 border border-yellow-500 bg-black text-yellow-500 rounded hover:bg-yellow-500 hover:bg-opacity-50 hover:text-black text-sm uppercase">Parse</button>
     </div>
