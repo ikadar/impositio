@@ -26,14 +26,15 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
         foreach ($context->nodes as $node) {
             /** @var ActionPathNodeInterface $node */
 
+            $newNodes[] = $node;
+
             // Check if this is a printing press action
+            // Note: The path is in reverse order (backtrace), so we insert CTP AFTER print in the array,
+            // which means it will be BEFORE print in the actual production flow.
             if ($node->getMachine()->getType()->value === 'printing press') {
-                // Insert CTP action before printing press
                 $ctpAction = $this->createCtpAction($node, $context);
                 $newNodes[] = $ctpAction;
             }
-
-            $newNodes[] = $node;
         }
 
         return new ActionPathContext(

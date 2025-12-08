@@ -30,8 +30,17 @@ class CuttingInsertionProcessor implements ActionPathProcessorInterface
             $currentNode = $context->nodes[$i];
             $newNodes[] = $currentNode;
 
-            // Get next node if exists
+            // Get next node if exists (in backtrace order, "next" is actually "previous" in production)
             $nextNode = ($i + 1 < $nodeCount) ? $context->nodes[$i + 1] : null;
+
+            // Skip cutting insertion for CTP machine - CTP doesn't process physical sheets
+            // Neither before nor after CTP should have cutting based on CTP dimensions
+            if ($currentNode->getMachine()->getType()->value === 'ctp machine') {
+                continue;
+            }
+            if ($nextNode !== null && $nextNode->getMachine()->getType()->value === 'ctp machine') {
+                continue;
+            }
 
             // Calculate cutting requirements
             $cuttingInfo = $this->calculateCuttingInfo($currentNode, $nextNode);

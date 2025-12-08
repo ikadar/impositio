@@ -207,4 +207,30 @@ class Machine implements MachineInterface
             'cutSheetCount' => $context->cutSheetCount,
         ];
     }
+
+    /**
+     * Default implementation for setup duration.
+     * Override in subclasses for machine-specific calculations.
+     */
+    public function calculateSetupDuration(\App\Domain\Action\Interfaces\ActionPathNodeInterface $action): float
+    {
+        $config = $this->equipmentService->loadById($this->getId());
+        return $config['setup-duration'] ?? 0;
+    }
+
+    /**
+     * Default implementation for run duration.
+     * Override in subclasses for machine-specific calculations.
+     */
+    public function calculateRunDuration(\App\Domain\Action\Interfaces\ActionPathNodeInterface $action): float
+    {
+        $config = $this->equipmentService->loadById($this->getId());
+        $piecesPerHour = $config['pieces-per-hour'] ?? 1000;
+
+        $todo = $action->getTodo();
+        $numberOfCopies = $todo['numberOfCopies'] ?? 0;
+
+        // Calculate run duration based on pieces per hour (in minutes)
+        return ($numberOfCopies / $piecesPerHour) * 60;
+    }
 }

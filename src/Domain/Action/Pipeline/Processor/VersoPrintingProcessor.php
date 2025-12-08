@@ -24,15 +24,18 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
 
         foreach ($context->nodes as $node) {
             /** @var ActionPathNodeInterface $node */
-            $newNodes[] = $node;
 
             // Check if this is a printing press action with verso inking
+            // Note: The path is in reverse order (backtrace), so we insert verso BEFORE recto in the array,
+            // which means verso will be AFTER recto in the actual production flow.
             if ($node->getMachine()->getType()->value === 'printing press') {
                 $versoAction = $this->createVersoActionIfNeeded($node, $context);
                 if ($versoAction !== null) {
                     $newNodes[] = $versoAction;
                 }
             }
+
+            $newNodes[] = $node;
         }
 
         return new ActionPathContext(
