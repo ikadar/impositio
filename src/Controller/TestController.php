@@ -46,7 +46,7 @@ class TestController extends AbstractController
     {
     }
 
-    #[Route(path: '/test/{scriptId}', requirements: [], methods: ['GET'])]
+    #[Route(path: '/test_old/{scriptId}', requirements: [], methods: ['GET'])]
     public function getTest(
         string $scriptId,
 //        EntityManagerInterface $em,
@@ -167,6 +167,389 @@ class TestController extends AbstractController
         }
 
         $response = $this->createResponse2($scriptId);
+
+        return new JsonResponse(
+            $response,
+            JsonResponse::HTTP_OK
+        );
+
+    }
+
+    #[Route(path: '/test/{scriptId}', requirements: [], methods: ['GET'])]
+    public function getTest2(
+        string $scriptId,
+//        EntityManagerInterface $em,
+        JobMapper $jobMapper,
+        JoblangScriptParseResponseTransformer $responseTransformer,
+    ): JsonResponse
+    {
+
+        $response = json_decode('[
+    {
+        "metaData": {
+            "jobNumber": "PROCESS-001",
+            "quantity": 0,
+            "jobId": 8
+        },
+        "parts": {
+            "PART0009": {
+                "actionPaths": [
+                    {
+                        "id": "4e0881b9-f843-40bb-9902-202eb802f997",
+                        "designation": "(1020x720) ctp-machine > Komori G40 Cost: 16.8€; Duration: 6.68min",
+                        "nodes": [
+                            {
+                                "machine": "ctp-machine",
+                                "zone": {
+                                    "width": 200,
+                                    "height": 200
+                                },
+                                "pressSheet": {
+                                    "width": 1020,
+                                    "height": 720
+                                },
+                                "gridFitting": {
+                                    "cols": 1,
+                                    "rows": 1,
+                                    "rotated": false,
+                                    "data": {
+                                        "cols": 1,
+                                        "rows": 1,
+                                        "cutSheet": {
+                                            "gripMargin": {
+                                                "size": 15,
+                                                "position": "top",
+                                                "x": 250,
+                                                "y": 180,
+                                                "width": 520,
+                                                "height": 15
+                                            },
+                                            "usableArea": {
+                                                "x": 250,
+                                                "y": 195,
+                                                "width": 520,
+                                                "height": 345
+                                            },
+                                            "x": 250,
+                                            "y": 180,
+                                            "width": 520,
+                                            "height": 360,
+                                            "type": "Sheet"
+                                        },
+                                        "firstTile": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "firstTileWithCutBuffer": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "layoutArea": {
+                                            "x": 410,
+                                            "y": 267.5,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "rotated": false,
+                                        "totalWidth": 200,
+                                        "totalHeight": 200,
+                                        "trimLines": {
+                                            "top": {
+                                                "x": 0,
+                                                "y": 180,
+                                                "length": 1020
+                                            },
+                                            "bottom": {
+                                                "x": 0,
+                                                "y": 540,
+                                                "length": 1020
+                                            },
+                                            "left": {
+                                                "x": 250,
+                                                "y": 0,
+                                                "length": 720
+                                            },
+                                            "right": {
+                                                "x": 770,
+                                                "y": 0,
+                                                "length": 720
+                                            }
+                                        },
+                                        "maxSheet": {
+                                            "x": -15,
+                                            "y": -15,
+                                            "width": 1050,
+                                            "height": 750
+                                        },
+                                        "minSheet": {
+                                            "x": 250,
+                                            "y": 180,
+                                            "width": 520,
+                                            "height": 360
+                                        },
+                                        "pressSheet": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 1020,
+                                            "height": 720,
+                                            "price": 0.1013472
+                                        },
+                                        "pose": {
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "explanation": {
+                                            "machine": {
+                                                "name": "ctp-machine",
+                                                "minSheet": {
+                                                    "width": 520,
+                                                    "height": 360
+                                                },
+                                                "maxSheet": {
+                                                    "width": 1050,
+                                                    "height": 750
+                                                }
+                                            }
+                                        },
+                                        "tiles": [
+                                            {
+                                                "mmPositions": {
+                                                    "x": 0,
+                                                    "y": 0,
+                                                    "width": 200,
+                                                    "height": 200
+                                                },
+                                                "mmCutBufferPositions": {
+                                                    "x": 0,
+                                                    "y": 0,
+                                                    "width": 200,
+                                                    "height": 200
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "trimLines": {
+                                    "top": {
+                                        "x": 0,
+                                        "y": 180,
+                                        "length": 1020
+                                    },
+                                    "bottom": {
+                                        "x": 0,
+                                        "y": 540,
+                                        "length": 1020
+                                    },
+                                    "left": {
+                                        "x": 250,
+                                        "y": 0,
+                                        "length": 720
+                                    },
+                                    "right": {
+                                        "x": 770,
+                                        "y": 0,
+                                        "length": 720
+                                    }
+                                },
+                                "setupDuration": 0,
+                                "runDuration": 0,
+                                "cost": 0,
+                                "todo": {
+                                    "numberOfCopies": 1,
+                                    "numberOfColors": 0,
+                                    "cutSheetCount": 1,
+                                    "inking": {
+                                        "recto": [],
+                                        "verso": []
+                                    }
+                                }
+                            },
+                            {
+                                "machine": "Komori G40",
+                                "zone": {
+                                    "width": 200,
+                                    "height": 200
+                                },
+                                "pressSheet": {
+                                    "width": 1020,
+                                    "height": 720
+                                },
+                                "gridFitting": {
+                                    "cols": 1,
+                                    "rows": 1,
+                                    "rotated": false,
+                                    "data": {
+                                        "cols": 1,
+                                        "rows": 1,
+                                        "cutSheet": {
+                                            "gripMargin": {
+                                                "size": 15,
+                                                "position": "top",
+                                                "x": 250,
+                                                "y": 180,
+                                                "width": 520,
+                                                "height": 15
+                                            },
+                                            "usableArea": {
+                                                "x": 250,
+                                                "y": 195,
+                                                "width": 520,
+                                                "height": 345
+                                            },
+                                            "x": 250,
+                                            "y": 180,
+                                            "width": 520,
+                                            "height": 360,
+                                            "type": "Sheet"
+                                        },
+                                        "firstTile": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "firstTileWithCutBuffer": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "layoutArea": {
+                                            "x": 410,
+                                            "y": 267.5,
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "rotated": false,
+                                        "totalWidth": 200,
+                                        "totalHeight": 200,
+                                        "trimLines": {
+                                            "top": {
+                                                "x": 0,
+                                                "y": 180,
+                                                "length": 1020
+                                            },
+                                            "bottom": {
+                                                "x": 0,
+                                                "y": 540,
+                                                "length": 1020
+                                            },
+                                            "left": {
+                                                "x": 250,
+                                                "y": 0,
+                                                "length": 720
+                                            },
+                                            "right": {
+                                                "x": 770,
+                                                "y": 0,
+                                                "length": 720
+                                            }
+                                        },
+                                        "maxSheet": {
+                                            "x": -15,
+                                            "y": -15,
+                                            "width": 1050,
+                                            "height": 750
+                                        },
+                                        "minSheet": {
+                                            "x": 250,
+                                            "y": 180,
+                                            "width": 520,
+                                            "height": 360
+                                        },
+                                        "pressSheet": {
+                                            "x": 0,
+                                            "y": 0,
+                                            "width": 1020,
+                                            "height": 720,
+                                            "price": 0.1013472
+                                        },
+                                        "pose": {
+                                            "width": 200,
+                                            "height": 200
+                                        },
+                                        "explanation": {
+                                            "machine": {
+                                                "name": "Komori G40",
+                                                "minSheet": {
+                                                    "width": 520,
+                                                    "height": 360
+                                                },
+                                                "maxSheet": {
+                                                    "width": 1050,
+                                                    "height": 750
+                                                }
+                                            }
+                                        },
+                                        "tiles": [
+                                            {
+                                                "mmPositions": {
+                                                    "x": 0,
+                                                    "y": 0,
+                                                    "width": 200,
+                                                    "height": 200
+                                                },
+                                                "mmCutBufferPositions": {
+                                                    "x": 0,
+                                                    "y": 0,
+                                                    "width": 200,
+                                                    "height": 200
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                "trimLines": {
+                                    "top": {
+                                        "x": 0,
+                                        "y": 180,
+                                        "length": 1020
+                                    },
+                                    "bottom": {
+                                        "x": 0,
+                                        "y": 540,
+                                        "length": 1020
+                                    },
+                                    "left": {
+                                        "x": 250,
+                                        "y": 0,
+                                        "length": 720
+                                    },
+                                    "right": {
+                                        "x": 770,
+                                        "y": 0,
+                                        "length": 720
+                                    }
+                                },
+                                "setupDuration": 6.67,
+                                "runDuration": 0.01,
+                                "cost": 16.7,
+                                "todo": {
+                                    "numberOfCopies": 1,
+                                    "numberOfColors": 0,
+                                    "paperWeight": 0,
+                                    "cutSheetCount": 1
+                                }
+                            }
+                        ],
+                        "cost": 16.8,
+                        "duration": 6.68,
+                        "pressSheet": "1020x720mm",
+                        "openPoseDimensions": "200x200",
+                        "closedPoseDimensions": "200x200",
+                        "requiredParts": []
+                    }
+                ]
+            }
+        }
+    }
+]');
+
+
 
         return new JsonResponse(
             $response,

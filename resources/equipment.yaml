@@ -1,5 +1,5 @@
 ctp-machine:
-  id: "ctp"
+  id: "ctp-machine"
   designation: "CTP Screen"
   type: "ctp machine"
   technic-designation: "ctp machine"
@@ -75,7 +75,7 @@ Heidelberg GTO:
     attention-required: 1
     productivity: 1
 cutting-machine:
-  id: "Polar 137"
+  id: "cutting-machine"
   designation: "Polar 137"
   type: "cutting machine"
   technic-designation: "cutting machine"

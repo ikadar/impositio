@@ -9,5 +9,7 @@ readonly class ProcessResponseModel
 {
     public function __construct(
         public int|string $id,
+        public array $metaData = [],
+        public array $parts = [],
     ) {}
 }

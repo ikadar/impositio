@@ -30,6 +30,12 @@ class ProcessAbstractAction implements AbstractActionInterface
 
     public function getAvailableMachines(): array
     {
+        // Cut action is handled automatically by ActionTree::extend() after print
+        // So we return empty array to prevent duplicate processing
+        if ($this->actionName === ActionName::Cut) {
+            return [];
+        }
+
         return $this->equipmentFactory->fromType($this->getMachineType());
     }
 }

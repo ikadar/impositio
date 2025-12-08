@@ -20,7 +20,12 @@ class ProcessControllerTest extends WebTestCase
                     'partId' => 'PART0001',
                     'properties' => [],
                     'actions' => [
-                        ['name' => 'print', 'params' => []],
+                        ['name' => 'print', 'params' => [
+                            "dimensions" => [
+                                "open" => ["width" => 200, "height" => 200],
+                                "closed" => ["width" => 200, "height" => 200]
+                            ]
+                        ]],
                         ['name' => 'cut', 'params' => []],
                     ],
                     'required_parts' => [],
@@ -38,11 +43,24 @@ class ProcessControllerTest extends WebTestCase
         );
 
         $response = $client->getResponse();
+
+        // Debug: show error content if not 200
+        if ($response->getStatusCode() !== Response::HTTP_OK) {
+            fwrite(STDERR, "\n\nResponse content: " . $response->getContent() . "\n\n");
+        }
+
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $data);
-        $this->assertIsInt($data['id']);
+
+        // Response is an array of jobs (TestController::getTest() compatible format)
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('metaData', $data[0]);
+        $this->assertArrayHasKey('parts', $data[0]);
+        $this->assertArrayHasKey('jobId', $data[0]['metaData']);
+        $this->assertArrayHasKey('PART0001', $data[0]['parts']);
+        $this->assertArrayHasKey('actionPaths', $data[0]['parts']['PART0001']);
     }
 
     /**
@@ -198,7 +216,10 @@ class ProcessControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $data);
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('metaData', $data[0]);
+        $this->assertArrayHasKey('parts', $data[0]);
     }
 
     /**
@@ -238,7 +259,11 @@ class ProcessControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $data);
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('metaData', $data[0]);
+        $this->assertArrayHasKey('parts', $data[0]);
+        $this->assertArrayHasKey('PART0001', $data[0]['parts']);
     }
 
     /**
@@ -305,6 +330,11 @@ class ProcessControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $data = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $data);
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertArrayHasKey('metaData', $data[0]);
+        $this->assertArrayHasKey('parts', $data[0]);
+        $this->assertArrayHasKey('PART0001', $data[0]['parts']);
+        $this->assertArrayHasKey('PART0002', $data[0]['parts']);
     }
 }

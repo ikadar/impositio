@@ -30,6 +30,7 @@ class ActionParamsExtractor implements ActionParamsExtractorInterface
     {
         // Find print action to extract dimensions and other params
         $printAction = $this->findPrintAction($part->actions);
+
         if ($printAction === null) {
             return null;
         }
@@ -39,6 +40,7 @@ class ActionParamsExtractor implements ActionParamsExtractorInterface
         // Extract dimensions
         $openDimensions = $this->extractOpenDimensions($params);
         $closedDimensions = $this->extractClosedDimensions($params);
+
         if ($openDimensions === null || $closedDimensions === null) {
             return null;
         }

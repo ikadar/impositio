@@ -73,8 +73,14 @@ class ProcessController extends AbstractController
         $requestModel = new ProcessRequestModel($partPayloads);
         $responseModel = $this->processUseCase->execute($requestModel);
 
+        // Return response in TestController::getTest() compatible format
         return new JsonResponse(
-            ['id' => $responseModel->id],
+            [
+                [
+                    'metaData' => $responseModel->metaData,
+                    'parts' => $responseModel->parts,
+                ]
+            ],
             JsonResponse::HTTP_OK
         );
     }

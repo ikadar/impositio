@@ -82,10 +82,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
             case MachineType::Assembler:
                 return $this->createAssembler($data["id"], $data);
             case MachineType::CuttingMachine:
+                return $this->createCuttingMachine($data["id"], $data);
             case MachineType::CTPMachine:
-                break;
+                return $this->createCTPMachine($data["id"], $data);
         }
 
+        throw new BadRequestHttpException("Unsupported machine type: " . $data["type"]);
     }
 
     protected function createFolder($id, $data)

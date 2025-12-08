@@ -29,6 +29,9 @@ class ProcessUseCase
         $processRequest = new ProcessRequest();
         $processRequest->setPayload($this->buildPayloadArray($request));
 
+        // Collect response data for each part
+        $partsResponse = [];
+
         // Create ProcessPart entities and process ActionTree
         foreach ($request->parts as $partPayload) {
             $processPart = $this->createProcessPart($partPayload);
@@ -36,13 +39,36 @@ class ProcessUseCase
 
             // Process ActionTree for this part
             $this->processActionTree($processPart, $partPayload);
+
+            // Collect ActionPaths for response
+            $actionPathsData = [];
+            foreach ($processPart->getActionPaths() as $actionPath) {
+                $pathJson = $actionPath->getJson();
+                $pathJson['id'] = $actionPath->getId() ?? $pathJson['id'];
+                $actionPathsData[] = $pathJson;
+            }
+
+            $partsResponse[$partPayload->partId] = [
+                'actionPaths' => $actionPathsData,
+            ];
         }
 
         // Persist
         $this->em->persist($processRequest);
         $this->em->flush();
 
-        return new ProcessResponseModel($processRequest->getId());
+        // Build hardcoded metaData (to be implemented later)
+        $metaData = [
+            'jobNumber' => 'PROCESS-001',
+            'quantity' => 0,
+            'jobId' => $processRequest->getId(),
+        ];
+
+        return new ProcessResponseModel(
+            $processRequest->getId(),
+            $metaData,
+            $partsResponse
+        );
     }
 
     /**
@@ -62,21 +88,27 @@ class ProcessUseCase
             return;
         }
 
-        // Process ActionTree
-        $actionPaths = $this->actionTree->process(
-            $actionTreeInput->abstractActions,
-            $actionTreeInput->pressSheets,
-            $actionTreeInput->zone,
-            $actionTreeInput->openPoseDimensions,
-            $actionTreeInput->closedPoseDimensions,
-            $actionTreeInput->numberOfCopies,
-            $actionTreeInput->numberOfColors,
-            $actionTreeInput->paperWeight,
-            $actionTreeInput->inking,
-        );
+        try {
+            // Process ActionTree
+            $actionPaths = $this->actionTree->process(
+                $actionTreeInput->abstractActions,
+                $actionTreeInput->pressSheets,
+                $actionTreeInput->zone,
+                $actionTreeInput->openPoseDimensions,
+                $actionTreeInput->closedPoseDimensions,
+                $actionTreeInput->numberOfCopies,
+                $actionTreeInput->numberOfColors,
+                $actionTreeInput->paperWeight,
+                $actionTreeInput->inking,
+            );
 
-        // Create ActionPath entities from results
-        $this->createActionPathEntities($processPart, $actionPaths, $partPayload, $actionTreeInput);
+            // Create ActionPath entities from results
+            $this->createActionPathEntities($processPart, $actionPaths, $partPayload, $actionTreeInput);
+        } catch (\Throwable $e) {
+            // Log error but don't fail the request - ActionTree processing is optional
+            // ActionPaths will just be empty for this part
+            error_log("ActionTree processing failed: " . $e->getMessage());
+        }
     }
 
     /**
