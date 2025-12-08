@@ -39,6 +39,12 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 return $this->createCTPMachine($id, $machineData);
             case MachineType::Sechage:
                 return $this->createSechage($id, $machineData);
+            case MachineType::CutoutMachine:
+                return $this->createCutoutMachine($id, $machineData);
+            case MachineType::Splitter:
+                return $this->createSplitter($id, $machineData);
+            case MachineType::Assembler:
+                return $this->createAssembler($id, $machineData);
         }
 
         throw new BadRequestHttpException();
@@ -69,8 +75,14 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
                 return $this->createFolder($data["id"], $data);
             case MachineType::Sechage:
                 return $this->createSechage($data["id"], $data);
-            case "cutting machine":
-            case "ctp machine":
+            case MachineType::CutoutMachine:
+                return $this->createCutoutMachine($data["id"], $data);
+            case MachineType::Splitter:
+                return $this->createSplitter($data["id"], $data);
+            case MachineType::Assembler:
+                return $this->createAssembler($data["id"], $data);
+            case MachineType::CuttingMachine:
+            case MachineType::CTPMachine:
                 break;
         }
 
@@ -216,6 +228,84 @@ class EquipmentFactory implements Interfaces\EquipmentFactoryInterface
         return new StitchingMachine(
             $id,
             MachineType::StitchingMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
+            $data["gripMargin"],
+            new Dimensions(
+                $data["input-dimensions"]["min"]["width"],
+                $data["input-dimensions"]["min"]["height"]
+            ),
+            new Dimensions(
+                $data["input-dimensions"]["max"]["width"],
+                $data["input-dimensions"]["max"]["height"]
+            ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
+            $this->printFactory,
+            $this->equipmentService
+        );
+    }
+
+    protected function createCutoutMachine($id, $data)
+    {
+        return new CutoutMachine(
+            $id,
+            MachineType::CutoutMachine,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
+            $data["gripMargin"],
+            new Dimensions(
+                $data["input-dimensions"]["min"]["width"],
+                $data["input-dimensions"]["min"]["height"]
+            ),
+            new Dimensions(
+                $data["input-dimensions"]["max"]["width"],
+                $data["input-dimensions"]["max"]["height"]
+            ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
+            $this->printFactory,
+            $this->equipmentService
+        );
+    }
+
+    protected function createSplitter($id, $data)
+    {
+        return new Splitter(
+            $id,
+            MachineType::Splitter,
+            $data["designation"],
+            $data["technic-designation"],
+            $data["capacity"],
+            $data["expiration-date-alignment"],
+            $data["nominal-mode"]["attention-required"],
+            $data["nominal-mode"]["productivity"],
+            $data["gripMargin"],
+            new Dimensions(
+                $data["input-dimensions"]["min"]["width"],
+                $data["input-dimensions"]["min"]["height"]
+            ),
+            new Dimensions(
+                $data["input-dimensions"]["max"]["width"],
+                $data["input-dimensions"]["max"]["height"]
+            ),
+            array_key_exists("maxPoseCount", $data) ? $data["maxPoseCount"] : null,
+            $this->printFactory,
+            $this->equipmentService
+        );
+    }
+
+    protected function createAssembler($id, $data)
+    {
+        return new Assembler(
+            $id,
+            MachineType::Assembler,
             $data["designation"],
             $data["technic-designation"],
             $data["capacity"],

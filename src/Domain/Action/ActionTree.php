@@ -406,6 +406,36 @@ class ActionTree implements Interfaces\ActionTreeInterface
                 ]);
             }
 
+            // New action types for /process endpoint
+            if ($node->getMachine()->getType()->value === "cutout machine") {
+                $node->setTodo([
+                    "numberOfCopies" => $this->numberOfCopies,
+                    "cutSheetCount" => $cutSheetCount,
+                    "openPoseDimensions" => [
+                        "width" => $this->openPoseDimensions->getWidth(),
+                        "height" => $this->openPoseDimensions->getHeight(),
+                    ],
+                    "closedPoseDimensions" => [
+                        "width" => $this->closedPoseDimensions->getWidth(),
+                        "height" => $this->closedPoseDimensions->getHeight(),
+                    ],
+                ]);
+            }
+
+            if ($node->getMachine()->getType()->value === "splitter") {
+                $node->setTodo([
+                    "numberOfCopies" => $this->numberOfCopies,
+                    "cutSheetCount" => $cutSheetCount,
+                ]);
+            }
+
+            if ($node->getMachine()->getType()->value === "assembler") {
+                $node->setTodo([
+                    "numberOfCopies" => $this->numberOfCopies,
+                    "cutSheetCount" => $cutSheetCount,
+                ]);
+            }
+
             $extendedActionPath[] = $node;
 
 

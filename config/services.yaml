@@ -26,3 +26,11 @@ services:
     # Bind ActionValidatorInterface to ActionValidator implementation
     App\Service\ActionValidatorInterface:
         class: App\Service\ActionValidator
+
+    # Bind ActionParamsExtractorInterface to ActionParamsExtractor implementation
+    App\Service\ActionParamsExtractorInterface:
+        class: App\Service\ActionParamsExtractor
+
+    # Bind PressSheetProviderInterface to PressSheetProvider implementation
+    App\Service\PressSheetProviderInterface:
+        class: App\Service\PressSheetProvider
