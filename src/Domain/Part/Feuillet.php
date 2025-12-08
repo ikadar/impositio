@@ -5,6 +5,10 @@ namespace App\Domain\Part;
 use App\Domain\Part\Interfaces\FeuilletInterface;
 use App\Domain\Part\Part;
 
+/**
+ * @deprecated Part type with hardcoded actions. Use explicit actions in /process endpoint instead.
+ * @see \App\Controller\ProcessController
+ */
 class Feuillet extends Part implements Interfaces\FeuilletInterface
 {
 

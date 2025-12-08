@@ -7,6 +7,10 @@ use App\Entity\Job;
 use App\Infrastructure\Mapper\JobMapper;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * @deprecated Use ProcessUseCase instead. This use case handles the legacy Joblang DSL flow.
+ * @see \App\Application\Process\UseCase\ProcessUseCase
+ */
 class ParseJoblangScriptUseCase
 {
     public function __construct(

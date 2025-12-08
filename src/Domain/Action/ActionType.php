@@ -4,6 +4,10 @@ namespace App\Domain\Action;
 
 use App\Domain\Equipment\MachineType;
 
+/**
+ * @deprecated Use ActionName enum instead for the new /process endpoint.
+ * @see \App\Domain\Action\ActionName
+ */
 enum ActionType: string
 {
     case Printing = "printing";

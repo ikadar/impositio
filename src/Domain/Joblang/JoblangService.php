@@ -13,6 +13,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @deprecated Joblang DSL parsing service. Use /process endpoint with explicit JSON payload instead.
+ * @see \App\Controller\ProcessController
+ */
 class JoblangService implements JoblangServiceInterface
 {
     protected $jisonParserPath;

@@ -4,6 +4,11 @@ namespace App\Domain\Part;
 
 use App\Domain\Part\Interfaces\PartFactoryInterface;
 
+/**
+ * @deprecated Creates Part objects with hardcoded actions based on part type.
+ *             Use explicit actions in /process endpoint instead.
+ * @see \App\Controller\ProcessController
+ */
 class PartFactory implements PartFactoryInterface
 {
     public function create($partData)

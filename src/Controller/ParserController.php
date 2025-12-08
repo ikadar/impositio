@@ -12,6 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @deprecated Use ProcessController instead. This controller uses the legacy Joblang DSL flow.
+ * @see \App\Controller\ProcessController
+ */
 class ParserController extends AbstractController
 {
 
