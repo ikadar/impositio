@@ -5,6 +5,9 @@ namespace App\Domain\Action;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Action\Pipeline\ActionPathContext;
+use App\Domain\Action\Pipeline\ActionPathPipeline;
+use App\Domain\Action\Pipeline\ExtensionParams;
 use App\Domain\Equipment\Folder;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
@@ -32,6 +35,7 @@ class ActionTree implements Interfaces\ActionTreeInterface
         protected Calculator $layoutCalculator,
         protected EquipmentFactoryInterface $equipmentFactory,
         protected PropertyAccessorInterface $propertyAccessor,
+        protected ?ActionPathPipeline $pipeline = null,
     )
     {}
 
@@ -323,7 +327,52 @@ class ActionTree implements Interfaces\ActionTreeInterface
         return $extendedFlatActionPaths;
     }
 
+    /**
+     * Extend a flat action path using the pipeline.
+     * Falls back to legacy implementation if pipeline is not available.
+     */
     public function extend($flatActionPath)
+    {
+        // Use pipeline if available
+        if ($this->pipeline !== null) {
+            return $this->extendWithPipeline($flatActionPath);
+        }
+
+        // Fallback to legacy implementation
+        return $this->extendLegacy($flatActionPath);
+    }
+
+    /**
+     * Extend using the new pipeline architecture.
+     */
+    protected function extendWithPipeline(array $flatActionPath): array
+    {
+        $params = new ExtensionParams(
+            numberOfCopies: $this->numberOfCopies,
+            numberOfColors: $this->numberOfColors,
+            paperWeight: $this->paperWeight,
+            inking: $this->inking,
+            openPoseDimensions: $this->openPoseDimensions,
+            closedPoseDimensions: $this->closedPoseDimensions,
+        );
+
+        $context = new ActionPathContext(
+            nodes: [],
+            cutSheetCount: $this->numberOfCopies,
+            params: $params,
+            originalPath: $flatActionPath,
+        );
+
+        $result = $this->pipeline->process($context);
+
+        return $result->nodes;
+    }
+
+    /**
+     * Legacy extend implementation.
+     * @deprecated Use pipeline-based extend() instead
+     */
+    public function extendLegacy($flatActionPath)
     {
         $cutSheetCount = $this->getNumberOfCopies();
 
@@ -365,10 +414,6 @@ class ActionTree implements Interfaces\ActionTreeInterface
                 ];
 
                 $ctpAction->getGridFitting()->setExplanation($explanation);
-//                dump($node->getGridFitting()->getExplanation());
-//                dump($node->getGridFitting()->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
-//                dump($cuts->toArray($this->equipmentFactory->fromId("ctp-machine"), $node->getPressSheet(), ["width" => 100, "height" => 100]));
-//                die();
 
                 $extendedActionPath[] = $ctpAction;
 

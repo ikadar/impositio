@@ -152,4 +152,17 @@ class CTPMachine extends Machine implements CTPMachineInterface
 
         return round($duration, 2);
     }
+
+    /**
+     * Prepare todo for CTP machine.
+     */
+    public function prepareTodo(TodoContext $context): array
+    {
+        return [
+            'numberOfCopies' => $context->numberOfCopies,
+            'numberOfColors' => $context->numberOfColors,
+            'cutSheetCount' => $context->cutSheetCount,
+            'inking' => $context->inking,
+        ];
+    }
 }

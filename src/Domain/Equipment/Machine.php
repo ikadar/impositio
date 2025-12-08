@@ -196,4 +196,15 @@ class Machine implements MachineInterface
         return $this;
     }
 
+    /**
+     * Default implementation - returns basic todo with numberOfCopies and cutSheetCount.
+     * Override in subclasses for machine-specific todo requirements.
+     */
+    public function prepareTodo(TodoContext $context): array
+    {
+        return [
+            'numberOfCopies' => $context->numberOfCopies,
+            'cutSheetCount' => $context->cutSheetCount,
+        ];
+    }
 }

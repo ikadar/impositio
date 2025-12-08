@@ -34,3 +34,24 @@ services:
     # Bind PressSheetProviderInterface to PressSheetProvider implementation
     App\Service\PressSheetProviderInterface:
         class: App\Service\PressSheetProvider
+
+    # ActionPath Pipeline processors (tagged for collection)
+    App\Domain\Action\Pipeline\Processor\TodoPreparationProcessor:
+        tags: ['app.action_path_processor']
+
+    App\Domain\Action\Pipeline\Processor\CtpInsertionProcessor:
+        tags: ['app.action_path_processor']
+
+    App\Domain\Action\Pipeline\Processor\VersoPrintingProcessor:
+        tags: ['app.action_path_processor']
+
+    App\Domain\Action\Pipeline\Processor\CuttingInsertionProcessor:
+        tags: ['app.action_path_processor']
+
+    App\Domain\Action\Pipeline\Processor\CutSheetCountProcessor:
+        tags: ['app.action_path_processor']
+
+    # ActionPath Pipeline (collects all processors)
+    App\Domain\Action\Pipeline\ActionPathPipeline:
+        arguments:
+            $processors: !tagged_iterator app.action_path_processor

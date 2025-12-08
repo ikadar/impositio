@@ -215,4 +215,26 @@ class Folder extends Machine implements FolderInterface
         $this->setMaxSheetDimensions($dimensions);
     }
 
+    /**
+     * Prepare todo for folder.
+     * Required by calculateCost/calculateSetupDuration/calculateRunDuration.
+     */
+    public function prepareTodo(TodoContext $context): array
+    {
+        $inputSheetLength = $context->openPoseDimensions->getHeight() / 1000;
+
+        return [
+            'openPoseDimensions' => [
+                'width' => $context->openPoseDimensions->getWidth(),
+                'height' => $context->openPoseDimensions->getHeight(),
+            ],
+            'closedPoseDimensions' => [
+                'width' => $context->closedPoseDimensions->getWidth(),
+                'height' => $context->closedPoseDimensions->getHeight(),
+            ],
+            'inputSheetLength' => $inputSheetLength,
+            'cutSheetCount' => $context->cutSheetCount,
+            'numberOfCopies' => $context->numberOfCopies,
+        ];
+    }
 }

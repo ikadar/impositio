@@ -135,4 +135,14 @@ class StitchingMachine extends Machine implements FolderInterface
         $this->setMaxSheetDimensions($dimensions);
     }
 
+    /**
+     * Prepare todo for stitching machine.
+     */
+    public function prepareTodo(TodoContext $context): array
+    {
+        return [
+            'numberOfCopies' => $context->numberOfCopies,
+            'cutSheetCount' => $context->cutSheetCount,
+        ];
+    }
 }
