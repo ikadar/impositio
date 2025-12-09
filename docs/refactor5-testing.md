@@ -863,70 +863,71 @@ class ResponseSnapshotTest extends TestCase
 
 ## 6. Teszt Mátrix
 
-### 6.1 Unit Tesztek Összefoglaló
+### 6.1 Unit Tesztek Összefoglaló (Implementált)
 
-| Osztály | Tesztek | Assertion típusok |
-|---------|---------|-------------------|
-| ActionPathRanker | 9 | assertEquals, assertCount, assertEmpty |
-| ActionPathTransformer | 8 | assertArrayHasKey, assertEquals, assertStringContainsString |
-| ProductionPlanningService | 6 | assertEmpty, assertInstanceOf, expects() |
-| ProcessPersistenceService | 6 | assertCount, expects() |
-| ProcessUseCase | 6 | assertArrayHasKey, assertEquals |
-| **Összesen** | **35** | |
+| Osztály | Tervezett | Implementált | Státusz |
+|---------|-----------|--------------|---------|
+| ActionPathRanker | 9 | 10 | ✅ Kész |
+| ActionPathTransformer | 8 | 10 | ✅ Kész |
+| ProductionPlanningService | 6 | 9 | ✅ Kész |
+| ProcessPersistenceService | 6 | 9 | ✅ Kész |
+| ProcessUseCase | 6 | 6 (skipped) | ⏳ Várakozik |
+| **Összesen** | **35** | **44** | |
 
-### 6.2 Teljes Teszt Összefoglaló
+### 6.2 Teljes Teszt Összefoglaló (Aktuális)
 
-| Kategória | Meglévő | Új | Összesen |
-|-----------|---------|-----|----------|
-| E2E (Controller) | 9 | 0 | 9 |
-| Integration | 8 | 3 | 11 |
-| Unit | 0 | 35 | 35 |
-| Snapshot | 0 | 1 | 1 |
-| **Összesen** | **17** | **39** | **56** |
+| Kategória | Meglévő | Új | Összesen | Státusz |
+|-----------|---------|-----|----------|---------|
+| E2E (Controller) | 9 | 0 | 9 | ✅ Mind zöld |
+| Integration | 8 | 0 | 8 | ✅ Mind zöld |
+| Unit (Process) | 0 | 38 | 38 | ✅ Mind zöld |
+| Unit (Skipped) | 0 | 6 | 6 | ⏳ Phase 7 után |
+| Unit (Egyéb) | 37 | 0 | 37 | ✅ Mind zöld |
+| **Összesen** | **54** | **44** | **98** | **92 zöld, 6 skipped** |
 
 ---
 
 ## 7. Tesztelési Fázisok
 
-### Phase 1: Előkészítés
-- [ ] Teszt directory struktúra létrehozása
-- [ ] Base test class-ok létrehozása (mock helpers)
-- [ ] Snapshot könyvtár létrehozása
+### Phase 1: Előkészítés ✅ KÉSZ
+- [x] Teszt directory struktúra létrehozása (`tests/Unit/Application/Process/`)
+- [x] Base test class létrehozása (`ProcessTestBase.php` - mock helpers)
+- [ ] Snapshot könyvtár létrehozása (opcionális)
 
-### Phase 2: Unit Tesztek - ActionPathRanker
-- [ ] ActionPathRankerTest.php létrehozása
-- [ ] 9 teszt implementálása
-- [ ] Coverage ellenőrzés (cél: 100%)
+### Phase 2: Unit Tesztek - ActionPathRanker ✅ KÉSZ
+- [x] ActionPathRankerTest.php létrehozása
+- [x] 10 teszt implementálása (tervezett 9 helyett)
+- [x] Coverage ellenőrzés
 
-### Phase 3: Unit Tesztek - ActionPathTransformer
-- [ ] ActionPathTransformerTest.php létrehozása
-- [ ] 8 teszt implementálása
-- [ ] Snapshot teszt implementálása
+### Phase 3: Unit Tesztek - ActionPathTransformer ✅ KÉSZ
+- [x] ActionPathTransformerTest.php létrehozása
+- [x] 10 teszt implementálása (tervezett 8 helyett)
+- [ ] Snapshot teszt implementálása (opcionális)
 
-### Phase 4: Unit Tesztek - ProductionPlanningService
-- [ ] ProductionPlanningServiceTest.php létrehozása
-- [ ] 6 teszt implementálása
-- [ ] Mock setup ellenőrzés
+### Phase 4: Unit Tesztek - ProductionPlanningService ✅ KÉSZ
+- [x] ProductionPlanningServiceTest.php létrehozása
+- [x] 9 teszt implementálása (tervezett 6 helyett)
+- [x] Mock setup ellenőrzés
 
-### Phase 5: Unit Tesztek - ProcessPersistenceService
-- [ ] ProcessPersistenceServiceTest.php létrehozása
-- [ ] 6 teszt implementálása
-- [ ] Entity creation tesztek
+### Phase 5: Unit Tesztek - ProcessPersistenceService ✅ KÉSZ
+- [x] ProcessPersistenceServiceTest.php létrehozása
+- [x] 9 teszt implementálása (tervezett 6 helyett)
+- [x] Entity creation tesztek
 
-### Phase 6: Unit Tesztek - ProcessUseCase
-- [ ] ProcessUseCaseTest.php létrehozása (új struktúra)
-- [ ] 6 teszt implementálása
-- [ ] Orchestration tesztek
+### Phase 6: Unit Tesztek - ProcessUseCase ⏳ VÁRAKOZIK
+- [x] ProcessUseCaseTest.php létrehozása (új struktúra)
+- [x] 6 teszt implementálása (skipped - Phase 7 után aktiválható)
+- [ ] Orchestration tesztek aktiválása
 
-### Phase 7: Integration Tesztek
+### Phase 7: Integration Tesztek ⏳ VÁRAKOZIK
 - [ ] ProcessUseCaseIntegrationTest.php létrehozása
 - [ ] 3 teszt implementálása
 - [ ] Database cleanup setup
 
-### Phase 8: Regresszió Ellenőrzés
-- [ ] Meglévő ProcessControllerTest futtatása
-- [ ] Meglévő ActionPathOrderTest futtatása
-- [ ] Response struktúra összehasonlítás
+### Phase 8: Regresszió Ellenőrzés ✅ KÉSZ
+- [x] Meglévő ProcessControllerTest futtatása (9 teszt zöld)
+- [x] Meglévő ActionPathOrderTest futtatása (8 teszt zöld)
+- [x] Response struktúra ellenőrzés
 
 ---
 
@@ -969,3 +970,43 @@ php bin/phpunit --coverage-html coverage/
 # Snapshot frissítés (ha szükséges)
 UPDATE_SNAPSHOTS=1 php bin/phpunit tests/Unit/Application/Process/ResponseSnapshotTest.php
 ```
+
+---
+
+## 11. Implementált Teszt Fájlok
+
+### Base Class
+- `tests/Unit/Application/Process/ProcessTestBase.php`
+  - Mock factory metódusok: `createNodeWithCost()`, `createPathWithCost()`, `createMachineMock()`, `createPressSheetMock()`, `createZoneMock()`, `createGridFittingMock()`
+  - Fixture factory metódusok: `createPartPayload()`, `createActionTreeInput()`
+
+### Unit Tesztek
+| Fájl | Tesztek | Leírás |
+|------|---------|--------|
+| `tests/Unit/Application/Process/Service/ActionPathRankerTest.php` | 10 | selectBest(), calculateCost() tesztek |
+| `tests/Unit/Application/Process/Service/ActionPathTransformerTest.php` | 10 | toResponseArray() tesztek |
+| `tests/Unit/Application/Process/Service/ProductionPlanningServiceTest.php` | 9 | plan(), getInput() tesztek |
+| `tests/Unit/Application/Process/Service/ProcessPersistenceServiceTest.php` | 9 | persist() tesztek |
+| `tests/Unit/Application/Process/UseCase/ProcessUseCaseTest.php` | 6 (skipped) | execute() orchestration tesztek |
+
+### Utolsó Teszt Futtatás
+```
+$ php bin/phpunit
+PHPUnit 9.6.22 by Sebastian Bergmann and contributors.
+
+Tests: 98, Assertions: 282, Skipped: 6.
+OK, but incomplete, skipped, or risky tests!
+```
+
+---
+
+## 12. Következő Lépések
+
+1. **Phase 7: ProcessUseCase Refaktorálás**
+   - ProcessUseCase átírása az új service-ek használatára
+   - Symfony service config frissítése
+   - ProcessUseCaseTest tesztek aktiválása (skip eltávolítása)
+
+2. **Integration Tesztek**
+   - ProcessUseCaseIntegrationTest implementálása
+   - Database cleanup setup

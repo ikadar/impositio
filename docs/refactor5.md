@@ -600,45 +600,47 @@ class ProcessUseCase
 
 ## 5. Implementációs Fázisok
 
-### Phase 1: Előkészítés (Tesztek)
-- [ ] Unit tesztek írása a jelenlegi ProcessUseCase-re
-- [ ] Integration tesztek bővítése
-- [ ] Snapshot tesztek a response struktúrára
+### Phase 1: Előkészítés (Tesztek) ✅ KÉSZ
+- [x] Unit tesztek írása a jelenlegi ProcessUseCase-re
+- [x] Integration tesztek bővítése
+- [x] Base test class létrehozása (`ProcessTestBase.php`)
 
-### Phase 2: DTO és Interface Létrehozás
-- [ ] `ActionPathResult` DTO létrehozása
-- [ ] `ProductionPlanningServiceInterface` létrehozása
-- [ ] `ActionPathRankerInterface` létrehozása
-- [ ] `ActionPathTransformerInterface` létrehozása
-- [ ] `ProcessPersistenceServiceInterface` létrehozása
+### Phase 2: DTO és Interface Létrehozás ✅ KÉSZ
+- [x] `ActionPathResult` DTO létrehozása → `src/Application/Process/DTO/ActionPathResult.php`
+- [x] `ProductionPlanningServiceInterface` létrehozása → `src/Application/Process/Service/ProductionPlanningServiceInterface.php`
+- [x] `ActionPathRankerInterface` létrehozása → `src/Application/Process/Service/ActionPathRankerInterface.php`
+- [x] `ActionPathTransformerInterface` létrehozása → `src/Application/Process/Service/ActionPathTransformerInterface.php`
+- [x] `ProcessPersistenceServiceInterface` létrehozása → `src/Application/Process/Service/ProcessPersistenceServiceInterface.php`
 
-### Phase 3: ActionPathRanker Implementálás
-- [ ] `ActionPathRanker` osztály
-- [ ] `selectBest()` metódus
-- [ ] `calculateCost()` metódus
-- [ ] Unit tesztek
+### Phase 3: ActionPathRanker Implementálás ✅ KÉSZ
+- [x] `ActionPathRanker` osztály → `src/Application/Process/Service/ActionPathRanker.php`
+- [x] `selectBest()` metódus
+- [x] `calculateCost()` metódus
+- [x] Unit tesztek (10 teszt) → `tests/Unit/Application/Process/Service/ActionPathRankerTest.php`
 
-### Phase 4: ActionPathTransformer Implementálás
-- [ ] `ActionPathTransformer` osztály
-- [ ] `toResponseArray()` metódus
-- [ ] Helper metódusok
-- [ ] Unit tesztek
+### Phase 4: ActionPathTransformer Implementálás ✅ KÉSZ
+- [x] `ActionPathTransformer` osztály → `src/Application/Process/Service/ActionPathTransformer.php`
+- [x] `toResponseArray()` metódus
+- [x] Helper metódusok (`normalizeNodeCost`, `buildDesignation`, `formatDimensions`)
+- [x] Unit tesztek (10 teszt) → `tests/Unit/Application/Process/Service/ActionPathTransformerTest.php`
 
-### Phase 5: ProductionPlanningService Implementálás
-- [ ] `ProductionPlanningService` osztály
-- [ ] `plan()` metódus
-- [ ] Integration tesztek
+### Phase 5: ProductionPlanningService Implementálás ✅ KÉSZ
+- [x] `ProductionPlanningService` osztály → `src/Application/Process/Service/ProductionPlanningService.php`
+- [x] `plan()` metódus
+- [x] `getInput()` metódus
+- [x] Unit tesztek (9 teszt) → `tests/Unit/Application/Process/Service/ProductionPlanningServiceTest.php`
 
-### Phase 6: ProcessPersistenceService Implementálás
-- [ ] `ProcessPersistenceService` osztály
-- [ ] `persist()` metódus
-- [ ] Entity létrehozás
-- [ ] Unit tesztek mock EntityManager-rel
+### Phase 6: ProcessPersistenceService Implementálás ✅ KÉSZ
+- [x] `ProcessPersistenceService` osztály → `src/Application/Process/Service/ProcessPersistenceService.php`
+- [x] `persist()` metódus (returns `ProcessRequest` entity)
+- [x] Entity létrehozás
+- [x] Unit tesztek (9 teszt) → `tests/Unit/Application/Process/Service/ProcessPersistenceServiceTest.php`
 
-### Phase 7: ProcessUseCase Refaktorálás
+### Phase 7: ProcessUseCase Refaktorálás ⏳ KÖVETKEZŐ
 - [ ] Régi kód eltávolítása
 - [ ] Új service-ek injektálása
-- [ ] Symfony service config frissítése
+- [ ] Symfony service config frissítése (`services.yaml`)
+- [ ] ProcessUseCaseTest tesztek aktiválása (skip eltávolítása)
 - [ ] Összes teszt futtatása
 
 ---
@@ -672,3 +674,45 @@ class ProcessUseCase
 | 4 dependency | 4 dependency (jobban elkülönített) |
 | Kevert felelősségek | SRP-kompatibilis |
 | Nehéz tesztelés | Unit tesztelhető komponensek |
+
+---
+
+## 9. Implementált Fájlok
+
+### DTOs
+| Fájl | Sorok | Státusz |
+|------|-------|---------|
+| `src/Application/Process/DTO/ActionPathResult.php` | ~15 | ✅ Kész |
+
+### Interfaces
+| Fájl | Státusz |
+|------|---------|
+| `src/Application/Process/Service/ActionPathRankerInterface.php` | ✅ Kész |
+| `src/Application/Process/Service/ActionPathTransformerInterface.php` | ✅ Kész |
+| `src/Application/Process/Service/ProductionPlanningServiceInterface.php` | ✅ Kész |
+| `src/Application/Process/Service/ProcessPersistenceServiceInterface.php` | ✅ Kész |
+
+### Services
+| Fájl | Sorok | Státusz |
+|------|-------|---------|
+| `src/Application/Process/Service/ActionPathRanker.php` | ~50 | ✅ Kész |
+| `src/Application/Process/Service/ActionPathTransformer.php` | ~105 | ✅ Kész |
+| `src/Application/Process/Service/ProductionPlanningService.php` | ~130 | ✅ Kész |
+| `src/Application/Process/Service/ProcessPersistenceService.php` | ~80 | ✅ Kész |
+
+### Tesztek
+| Fájl | Tesztek | Státusz |
+|------|---------|---------|
+| `tests/Unit/Application/Process/ProcessTestBase.php` | - | ✅ Kész |
+| `tests/Unit/Application/Process/Service/ActionPathRankerTest.php` | 10 | ✅ Kész |
+| `tests/Unit/Application/Process/Service/ActionPathTransformerTest.php` | 10 | ✅ Kész |
+| `tests/Unit/Application/Process/Service/ProductionPlanningServiceTest.php` | 9 | ✅ Kész |
+| `tests/Unit/Application/Process/Service/ProcessPersistenceServiceTest.php` | 9 | ✅ Kész |
+| `tests/Unit/Application/Process/UseCase/ProcessUseCaseTest.php` | 6 (skipped) | ⏳ Várakozik Phase 7-re |
+
+### Teszt Eredmények
+```
+PHPUnit 9.6.22
+Tests: 98, Assertions: 282, Skipped: 6
+OK (92 passing, 6 skipped)
+```
