@@ -145,13 +145,16 @@ A `flattenTree()` megfordítja a path-ot, de a processzorok fordított sorrendbe
 
 **Status**: Interface-ek feltöltve, típusbiztonság javult, tesztek továbbra is 100% pass
 
-### Phase 4: Felelősségek szétválasztása ⬜
+### Phase 4: Felelősségek szétválasztása ✅
 **Cél**: Single Responsibility Principle.
 
-- [ ] `ActionTreeBuilder` osztály kiemelése (`calculate`, `calculateTree`)
-- [ ] `ActionTreeFlattener` osztály kiemelése (`flatten`, `flattenTree`)
-- [ ] `ActionPathExtender` - ez már a Pipeline
-- [ ] `ActionTreeProcessor` orchestráció (`process`, `extendPaths`)
+- [x] `ActionTreeBuilder` osztály kiemelése (`calculate`, `calculateTree`)
+- [x] `ActionTreeFlattener` osztály kiemelése (`flatten`, `flattenTree`)
+- [x] `ActionPathExtender` - ez már a Pipeline
+- [x] `ActionTreeProcessor` orchestráció (`process`, `extendPaths`)
+- [x] `TreeBuildContext` immutable DTO létrehozása
+
+**Status**: Felelősségek szétválasztva, tesztek továbbra is 100% pass (54 teszt, 1 skipped)
 
 ### Phase 5: Mutable state eliminálása ⬜
 **Cél**: Tisztább adatáramlás.
@@ -244,8 +247,9 @@ A `Calculator` osztály jól strukturált, de:
 1. ✅ **Befejezve**: Unit és integration tesztek írása a jelenlegi működésre
 2. ✅ **Befejezve**: Magic string-ek és típusok javítása (alacsony kockázat)
 3. ✅ **Befejezve**: Phase 3 - Interface-ek feltöltése
-4. ⬜ **Következik**: Phase 4-5 - Strukturális refaktorálás (felelősségek szétválasztása)
-5. ⬜ **Majd**: Phase 6 - Legacy kód eltávolítása
+4. ✅ **Befejezve**: Phase 4 - Felelősségek szétválasztása (ActionTreeBuilder, ActionTreeFlattener, ActionTreeProcessor, TreeBuildContext)
+5. ⬜ **Következik**: Phase 5 - Mutable state eliminálása
+6. ⬜ **Majd**: Phase 6 - Legacy kód eltávolítása
 
 ---
 
