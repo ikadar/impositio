@@ -59,7 +59,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
             ->willReturn($mockContext);
 
         // Execute
-        $actionTree = $this->createConfiguredActionTree(withPipeline: true);
+        $actionTree = $this->createConfiguredActionTree();
         $result = $actionTree->process(
             [$printAction],
             [$this->pressSheet],
@@ -117,7 +117,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
             ));
 
         // Execute
-        $actionTree = $this->createConfiguredActionTree(withPipeline: true);
+        $actionTree = $this->createConfiguredActionTree();
         $result = $actionTree->process(
             [$printAction],
             [$pressSheet1, $pressSheet2],
@@ -170,7 +170,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
             });
 
         // Execute
-        $actionTree = $this->createConfiguredActionTree(withPipeline: true);
+        $actionTree = $this->createConfiguredActionTree();
         $actionTree->process(
             [$printAction],
             [$this->pressSheet],
@@ -215,7 +215,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
                 []
             ));
 
-        $actionTree = $this->createActionTree(withPipeline: true);
+        $actionTree = $this->createActionTree();
 
         // Execute
         $actionTree->process(
@@ -253,7 +253,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
                 []
             ));
 
-        $actionTree = $this->createConfiguredActionTree(withPipeline: true);
+        $actionTree = $this->createConfiguredActionTree();
         $result = $actionTree->process(
             [],
             [$this->pressSheet],
@@ -333,7 +333,7 @@ class ActionTreeWorkflowTest extends ActionTreeTestBase
                 return $context;
             });
 
-        $actionTree = $this->createActionTree(withPipeline: true);
+        $actionTree = $this->createActionTree();
         $actionTree->process(
             [$printAction],
             [$this->pressSheet],

@@ -6,7 +6,6 @@ use App\Domain\Action\Interfaces\AbstractActionInterface;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
-use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
 use App\Domain\Layout\Calculator;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
@@ -28,8 +27,7 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  * - ActionTreeFlattener: Tree flattening
  * - ActionTreeProcessor: Workflow orchestration
  *
- * Phase 5: Mutable state has been minimized. The process() method now uses
- * TreeBuildContext for all parameters. Setters are deprecated.
+ * Phase 6: Legacy code removed. Pipeline is now required.
  */
 class ActionTree implements ActionTreeInterface
 {
@@ -46,9 +44,8 @@ class ActionTree implements ActionTreeInterface
 
     public function __construct(
         protected Calculator $layoutCalculator,
-        protected EquipmentFactoryInterface $equipmentFactory,
         protected PropertyAccessorInterface $propertyAccessor,
-        protected ?ActionPathPipeline $pipeline = null,
+        protected ActionPathPipeline $pipeline,
     ) {
         $this->builder = new ActionTreeBuilder($layoutCalculator, $propertyAccessor);
         $this->flattener = new ActionTreeFlattener();
@@ -56,8 +53,6 @@ class ActionTree implements ActionTreeInterface
             $this->builder,
             $this->flattener,
             $pipeline,
-            $equipmentFactory,
-            $propertyAccessor
         );
     }
 
@@ -303,7 +298,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Extend a flat action path with additional actions (CTP, cutting, verso).
      *
-     * Uses the pipeline if available, otherwise falls back to legacy implementation.
+     * Uses the pipeline architecture for path extension.
      *
      * @param ActionTreeNodeInterface[] $flatActionPath The flattened action path
      * @return ActionPathNode[] Extended action path with inserted actions
@@ -311,16 +306,6 @@ class ActionTree implements ActionTreeInterface
     public function extend(array $flatActionPath): array
     {
         return $this->processor->extend($flatActionPath, $this->context);
-    }
-
-    /**
-     * Legacy extend implementation.
-     *
-     * @deprecated Will be removed in Phase 6. Use pipeline-based extend() instead.
-     */
-    public function extendLegacy(array $flatActionPath): array
-    {
-        return $this->processor->extendLegacy($flatActionPath, $this->context);
     }
 
     /**

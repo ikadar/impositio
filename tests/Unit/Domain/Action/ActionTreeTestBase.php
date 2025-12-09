@@ -8,7 +8,6 @@ use App\Domain\Action\ActionTreeNode;
 use App\Domain\Action\Interfaces\AbstractActionInterface;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
 use App\Domain\Action\ProcessAbstractAction;
-use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\Machine;
 use App\Domain\Equipment\MachineType;
@@ -30,7 +29,6 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 abstract class ActionTreeTestBase extends TestCase
 {
     protected Calculator|MockObject $mockCalculator;
-    protected EquipmentFactoryInterface|MockObject $mockEquipmentFactory;
     protected PropertyAccessorInterface|MockObject $mockPropertyAccessor;
     protected ActionPathPipeline|MockObject $mockPipeline;
 
@@ -47,7 +45,6 @@ abstract class ActionTreeTestBase extends TestCase
         parent::setUp();
 
         $this->mockCalculator = $this->createMock(Calculator::class);
-        $this->mockEquipmentFactory = $this->createMock(EquipmentFactoryInterface::class);
         $this->mockPropertyAccessor = $this->createMock(PropertyAccessorInterface::class);
         $this->mockPipeline = $this->createMock(ActionPathPipeline::class);
 
@@ -203,25 +200,23 @@ abstract class ActionTreeTestBase extends TestCase
 
     /**
      * Create an ActionTree instance with mock dependencies.
-     *
-     * @param bool $withPipeline Whether to inject the pipeline
+     * Pipeline is now required (Phase 6 - legacy code removed).
      */
-    protected function createActionTree(bool $withPipeline = false): ActionTree
+    protected function createActionTree(): ActionTree
     {
         return new ActionTree(
             $this->mockCalculator,
-            $this->mockEquipmentFactory,
             $this->mockPropertyAccessor,
-            $withPipeline ? $this->mockPipeline : null
+            $this->mockPipeline
         );
     }
 
     /**
      * Create a configured ActionTree with standard test values set.
      */
-    protected function createConfiguredActionTree(bool $withPipeline = false): ActionTree
+    protected function createConfiguredActionTree(): ActionTree
     {
-        $actionTree = $this->createActionTree($withPipeline);
+        $actionTree = $this->createActionTree();
 
         $actionTree->setOpenPoseDimensions($this->openPoseDimensions);
         $actionTree->setClosedPoseDimensions($this->closedPoseDimensions);

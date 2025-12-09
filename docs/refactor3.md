@@ -167,11 +167,15 @@ A `flattenTree()` megfordítja a path-ot, de a processzorok fordított sorrendbe
 
 **Status**: Mutable state eliminálva, setterek deprecated, tesztek továbbra is 100% pass (54 teszt, 1 skipped)
 
-### Phase 6: Legacy kód eltávolítása ⬜
+### Phase 6: Legacy kód eltávolítása ✅
 **Cél**: Kód duplikáció megszüntetése.
 
-- [ ] `extendLegacy()` törlése ha pipeline stabil
-- [ ] Pipeline-only működés
+- [x] `extendLegacy()` törlése az ActionTree-ből és ActionTreeProcessor-ból
+- [x] Pipeline kötelezővé tétele (nem nullable)
+- [x] EquipmentFactory eltávolítása az ActionTree/Processor-ból (Pipeline használja)
+- [x] Tesztek frissítése (skipped legacy teszt törlése)
+
+**Status**: Legacy kód törölve, pipeline-only működés, tesztek továbbra is 100% pass (54 teszt, 211 assertion)
 
 ---
 
@@ -253,7 +257,38 @@ A `Calculator` osztály jól strukturált, de:
 3. ✅ **Befejezve**: Phase 3 - Interface-ek feltöltése
 4. ✅ **Befejezve**: Phase 4 - Felelősségek szétválasztása (ActionTreeBuilder, ActionTreeFlattener, ActionTreeProcessor, TreeBuildContext)
 5. ✅ **Befejezve**: Phase 5 - Mutable state eliminálása (setterek deprecated, context-alapú működés)
-6. ⬜ **Következik**: Phase 6 - Legacy kód eltávolítása
+6. ✅ **Befejezve**: Phase 6 - Legacy kód eltávolítása (extendLegacy törölve, pipeline-only)
+
+---
+
+## 7. Refaktorálás Összefoglaló
+
+A teljes refaktorálás sikeresen befejeződött. Összesen 6 fázisban:
+
+**Kódbázis változások:**
+- ~250 sor legacy kód törölve
+- 4 új osztály létrehozva (ActionTreeBuilder, ActionTreeFlattener, ActionTreeProcessor, TreeBuildContext)
+- Interface-ek feltöltve (~100 sor)
+- Típusbiztonság javítva (strict typing, MachineType enum)
+- Felelősségek szétválasztva (Single Responsibility Principle)
+
+**Teszt statisztika:**
+- 54 teszt, 211 assertion
+- 100% pass rate
+- ~0.75s futási idő
+
+**Architektúra:**
+```
+ActionTree (facade)
+├── ActionTreeBuilder (fa építés)
+├── ActionTreeFlattener (fa lapítás)
+└── ActionTreeProcessor (orchestráció)
+    └── ActionPathPipeline (path kibővítés)
+        ├── CTPProcessor
+        ├── VersoProcessor
+        ├── CuttingProcessor
+        └── ... (további processzorok)
+```
 
 ---
 
