@@ -2,50 +2,27 @@
 
 namespace App\Controller;
 
-use App\Domain\Equipment\Interfaces\MachineInterface;
-use App\Domain\Geometry\Interfaces\RectangleInterface;
-use App\Domain\Sheet\Interfaces\InputSheetInterface;
-use App\Entity\ActionPath;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ProcessActionPathRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DisplayController extends AbstractController
 {
-    protected MachineInterface $machine;
-    protected RectangleInterface $pressSheet;
-    protected InputSheetInterface $zone;
-    protected array $actionPath;
-    protected array $pose;
-    protected array $abstractActionData;
-
     public function __construct(
-        protected KernelInterface $kernel,
-        protected EntityManagerInterface $em,
-    )
+        private ProcessActionPathRepository $actionPathRepository,
+    ) {}
+
+    #[Route(path: '/display/{jobId}/{partId}/{actionPathId}', methods: ['GET'])]
+    public function display(string $jobId, string $partId, string $actionPathId): JsonResponse
     {
+        $actionPath = $this->actionPathRepository->findByUuid($actionPathId);
+
+        if ($actionPath === null) {
+            throw new NotFoundHttpException("ActionPath not found: $actionPathId");
+        }
+
+        return new JsonResponse($actionPath->getJson());
     }
-
-    #[Route(path: '/display/{jobId}/{partId}/{impositionId}', requirements: [], methods: ['GET'])]
-    public function display(
-        $jobId,
-        $partId,
-        $impositionId,
-    ): JsonResponse
-    {
-        $data = $this->loadData($impositionId);
-
-        return new JsonResponse(
-            $data,
-            JsonResponse::HTTP_OK
-        );
-    }
-
-    public function loadData($impositionId): ?array
-    {
-        return $this->em->getRepository(ActionPath::class)->find($impositionId)->getJson();
-    }
-
 }

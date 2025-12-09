@@ -420,16 +420,23 @@ Adott plan újra-optimalizálása más paraméterekkel.
 
 ### 6.1 Magas Prioritás
 
-#### J1: ProcessUseCase szétbontása
+#### J1: ProcessUseCase szétbontása ✅ KÉSZ
 **Probléma**: ProcessUseCase túl sok felelősséget tartalmaz (validálás, transzformáció, számítás, perzisztencia).
 
-**Megoldás**:
+**Megoldás** (Implementálva - lásd `refactor5.md`):
 ```
-ProcessUseCase
-    ├── ProductionPlanningService (számítás)
-    ├── ActionPathRepository (perzisztencia)
-    └── ResponseTransformer (output formázás)
+ProcessUseCase (88 sor, orchestráció only)
+    ├── ProductionPlanningService (számítás + ranking)
+    │   └── ActionPathRanker (top N selection)
+    ├── ProcessPersistenceService (perzisztencia)
+    └── ActionPathTransformer (output formázás)
 ```
+
+**Eredmény**:
+- ProcessUseCase: 282 → 88 sor (-69%)
+- 4 új service, mindegyik unit tesztelhető
+- 44 új unit teszt
+- 98 teszt összesen, mind zöld
 
 #### J2: EquipmentFactory tisztítás
 **Probléma**: Switch-case minden machine típusra, kód duplikáció.
@@ -444,10 +451,14 @@ class MachineRegistry {
 }
 ```
 
-#### J3: ActionTree felelősségek szétválasztása
+#### J3: ActionTree felelősségek szétválasztása ✅ KÉSZ
 **Probléma**: ActionTree építés, lapítás, és kibővítés egy osztályban.
 
-**Megoldás**: Lásd refactor3.md - külön Builder, Flattener, Extender osztályok.
+**Megoldás** (Implementálva - lásd `refactor3.md`):
+- Pipeline pattern bevezetése
+- ActionPathPipeline 5 processor-ral
+- Legacy `extendLegacy()` eltávolítva
+- ActionTree most csak orchestrációt végez
 
 ### 6.2 Közepes Prioritás
 
@@ -502,16 +513,54 @@ Port/Adapter pattern a külső függőségekhez (YAML config, Database).
 ### Erősségek
 - Tiszta domain layer elkülönítés
 - Jól definiált value object-ek (Dimensions, Position, etc.)
-- Pipeline pattern sikeres bevezetése
+- Pipeline pattern sikeres bevezetése ✅
 - Interface-alapú tervezés
+- **ÚJ**: SRP-kompatibilis ProcessUseCase ✅
+- **ÚJ**: Unit tesztelhető service-ek ✅
 
-### Gyengeségek
-- God class-ok (ActionTree, ProcessUseCase)
+### Gyengeségek (Frissítve)
+- ~~God class-ok (ActionTree, ProcessUseCase)~~ ✅ MEGOLDVA
 - Hiányzó domain events
-- Túl sok felelősség az Application layer-ben
+- ~~Túl sok felelősség az Application layer-ben~~ ✅ MEGOLDVA
 - Nincs API versioning
+- EquipmentFactory még switch-case alapú
 
-### Prioritások
-1. **Sürgős**: ProcessUseCase és ActionTree refaktorálás
-2. **Fontos**: Domain events, CQRS előkészítés
+### Prioritások (Frissítve)
+1. ~~**Sürgős**: ProcessUseCase és ActionTree refaktorálás~~ ✅ KÉSZ
+2. **Fontos**: Domain events, CQRS előkészítés, EquipmentFactory tisztítás
 3. **Később**: API versioning, Hexagonal architecture
+
+---
+
+## 8. Elvégzett Refaktorálások
+
+### 8.1 ActionTree Pipeline (refactor3.md)
+- **Dátum**: 2024
+- **Státusz**: ✅ Kész
+- **Változások**:
+  - Pipeline pattern bevezetése
+  - 5 processor implementálása
+  - Legacy kód eltávolítása
+
+### 8.2 ProcessUseCase SRP (refactor5.md)
+- **Dátum**: 2024
+- **Státusz**: ✅ Kész
+- **Változások**:
+  - ProcessUseCase: 282 → 88 sor
+  - 4 új service létrehozva
+  - 44 új unit teszt
+  - 98 teszt összesen
+
+### 8.3 Teszt Lefedettség
+
+| Komponens | Tesztek | Státusz |
+|-----------|---------|---------|
+| ProcessController (E2E) | 9 | ✅ |
+| ActionPathOrder (Integration) | 8 | ✅ |
+| ActionPathRanker | 10 | ✅ |
+| ActionPathTransformer | 10 | ✅ |
+| ProductionPlanningService | 9 | ✅ |
+| ProcessPersistenceService | 9 | ✅ |
+| ProcessUseCase | 6 | ✅ |
+| Egyéb Unit tesztek | 37 | ✅ |
+| **Összesen** | **98** | ✅ |
