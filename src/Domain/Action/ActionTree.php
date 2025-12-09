@@ -5,11 +5,8 @@ namespace App\Domain\Action;
 use App\Domain\Action\Interfaces\AbstractActionInterface;
 use App\Domain\Action\Interfaces\ActionTreeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
-use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
-use App\Domain\Action\Pipeline\ExtensionParams;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
-use App\Domain\Equipment\MachineType;
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
 use App\Domain\Layout\Calculator;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
@@ -26,21 +23,22 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  *
  * Action paths are returned in "backtrace order" - the last production step first.
  *
- * This class now delegates to specialized classes:
+ * This class delegates to specialized classes:
  * - ActionTreeBuilder: Tree construction
  * - ActionTreeFlattener: Tree flattening
  * - ActionTreeProcessor: Workflow orchestration
+ *
+ * Phase 5: Mutable state has been minimized. The process() method now uses
+ * TreeBuildContext for all parameters. Setters are deprecated.
  */
 class ActionTree implements ActionTreeInterface
 {
     protected array $root = [];
 
-    protected DimensionsInterface $openPoseDimensions;
-    protected DimensionsInterface $closedPoseDimensions;
-    protected float $numberOfCopies;
-    protected float $numberOfColors;
-    protected float $paperWeight;
-    protected array $inking = [];
+    /**
+     * Current build context (set by process() or setters for backward compatibility).
+     */
+    private ?TreeBuildContext $context = null;
 
     private ActionTreeBuilder $builder;
     private ActionTreeFlattener $flattener;
@@ -74,69 +72,129 @@ class ActionTree implements ActionTreeInterface
         return $this;
     }
 
+    /**
+     * Get the open pose dimensions.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getOpenPoseDimensions(): DimensionsInterface
     {
-        return $this->openPoseDimensions;
+        return $this->context->getOpenPoseDimensions();
     }
 
+    /**
+     * Set the open pose dimensions.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setOpenPoseDimensions(DimensionsInterface $openPoseDimensions): static
     {
-        $this->openPoseDimensions = $openPoseDimensions;
+        $this->context = $this->createUpdatedContext(openPoseDimensions: $openPoseDimensions);
         return $this;
     }
 
+    /**
+     * Get the closed pose dimensions.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getClosedPoseDimensions(): DimensionsInterface
     {
-        return $this->closedPoseDimensions;
+        return $this->context->getClosedPoseDimensions();
     }
 
+    /**
+     * Set the closed pose dimensions.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setClosedPoseDimensions(DimensionsInterface $closedPoseDimensions): static
     {
-        $this->closedPoseDimensions = $closedPoseDimensions;
+        $this->context = $this->createUpdatedContext(closedPoseDimensions: $closedPoseDimensions);
         return $this;
     }
 
+    /**
+     * Get the number of copies.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getNumberOfCopies(): float
     {
-        return $this->numberOfCopies;
+        return $this->context->getNumberOfCopies();
     }
 
+    /**
+     * Set the number of copies.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setNumberOfCopies(float $numberOfCopies): static
     {
-        $this->numberOfCopies = $numberOfCopies;
+        $this->context = $this->createUpdatedContext(numberOfCopies: $numberOfCopies);
         return $this;
     }
 
+    /**
+     * Get the number of colors.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getNumberOfColors(): float
     {
-        return $this->numberOfColors;
+        return $this->context->getNumberOfColors();
     }
 
+    /**
+     * Set the number of colors.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setNumberOfColors(float $numberOfColors): static
     {
-        $this->numberOfColors = $numberOfColors;
+        $this->context = $this->createUpdatedContext(numberOfColors: $numberOfColors);
         return $this;
     }
 
+    /**
+     * Get the paper weight.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getPaperWeight(): float
     {
-        return $this->paperWeight;
+        return $this->context->getPaperWeight();
     }
 
+    /**
+     * Set the paper weight.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setPaperWeight(float $paperWeight): static
     {
-        $this->paperWeight = $paperWeight;
+        $this->context = $this->createUpdatedContext(paperWeight: $paperWeight);
         return $this;
     }
 
+    /**
+     * Get the inking specification.
+     *
+     * @deprecated Access via TreeBuildContext instead
+     */
     public function getInking(): array
     {
-        return $this->inking;
+        return $this->context?->getInking() ?? [];
     }
 
+    /**
+     * Set the inking specification.
+     *
+     * @deprecated Use process() method parameters instead
+     */
     public function setInking(array $inking): static
     {
-        $this->inking = $inking;
+        $this->context = $this->createUpdatedContext(inking: $inking);
         return $this;
     }
 
@@ -157,8 +215,7 @@ class ActionTree implements ActionTreeInterface
         array $prevNodes = [],
         array $inking = [],
     ): array {
-        $context = $this->createBuildContext();
-        $this->setRoot($this->builder->buildTree($abstractActions, $pressSheet, $zone, $inking, $context));
+        $this->setRoot($this->builder->buildTree($abstractActions, $pressSheet, $zone, $inking, $this->context));
         return $this->getRoot();
     }
 
@@ -174,8 +231,7 @@ class ActionTree implements ActionTreeInterface
         array $prevNodes = [],
         array $inking = [],
     ): array {
-        $context = $this->createBuildContext();
-        return $this->builder->buildTree($abstractActions, $pressSheet, $zone, $inking, $context);
+        return $this->builder->buildTree($abstractActions, $pressSheet, $zone, $inking, $this->context);
     }
 
     /**
@@ -199,7 +255,6 @@ class ActionTree implements ActionTreeInterface
      */
     protected function flatten(ActionTreeNodeInterface $node, array $path = []): array
     {
-        // Delegate to flattener's flatten method which returns forward-order paths
         return $this->flattener->flatten($node, $path);
     }
 
@@ -207,9 +262,8 @@ class ActionTree implements ActionTreeInterface
      * Process abstract actions and return extended action paths.
      *
      * This is the main entry point for production planning. It:
-     * 1. Sets up internal state from parameters
-     * 2. For each press sheet: builds tree, flattens, extends
-     * 3. Returns all extended action paths
+     * 1. For each press sheet: builds tree, flattens, extends
+     * 2. Returns all extended action paths
      *
      * @param AbstractActionInterface[] $abstractActions Actions to process
      * @param PressSheetInterface[] $pressSheets Available press sheets
@@ -233,15 +287,8 @@ class ActionTree implements ActionTreeInterface
         float $paperWeight,
         array $inking,
     ): array {
-        // Set state for backward compatibility
-        $this->setOpenPoseDimensions($openPoseDimensions);
-        $this->setClosedPoseDimensions($closedPoseDimensions);
-        $this->setNumberOfCopies($numberOfCopies);
-        $this->setNumberOfColors($numberOfColors);
-        $this->setPaperWeight($paperWeight);
-        $this->setInking($inking);
-
-        $context = new TreeBuildContext(
+        // Create immutable context from parameters
+        $this->context = new TreeBuildContext(
             $openPoseDimensions,
             $closedPoseDimensions,
             $numberOfCopies,
@@ -250,7 +297,7 @@ class ActionTree implements ActionTreeInterface
             $inking
         );
 
-        return $this->processor->process($abstractActions, $pressSheets, $zone, $context);
+        return $this->processor->process($abstractActions, $pressSheets, $zone, $this->context);
     }
 
     /**
@@ -263,8 +310,7 @@ class ActionTree implements ActionTreeInterface
      */
     public function extend(array $flatActionPath): array
     {
-        $context = $this->createBuildContext();
-        return $this->processor->extend($flatActionPath, $context);
+        return $this->processor->extend($flatActionPath, $this->context);
     }
 
     /**
@@ -274,22 +320,43 @@ class ActionTree implements ActionTreeInterface
      */
     public function extendLegacy(array $flatActionPath): array
     {
-        $context = $this->createBuildContext();
-        return $this->processor->extendLegacy($flatActionPath, $context);
+        return $this->processor->extendLegacy($flatActionPath, $this->context);
     }
 
     /**
-     * Create a TreeBuildContext from current state.
+     * Create an updated context with optional overrides.
+     *
+     * Used by deprecated setters for backward compatibility.
      */
-    private function createBuildContext(): TreeBuildContext
-    {
+    private function createUpdatedContext(
+        ?DimensionsInterface $openPoseDimensions = null,
+        ?DimensionsInterface $closedPoseDimensions = null,
+        ?float $numberOfCopies = null,
+        ?float $numberOfColors = null,
+        ?float $paperWeight = null,
+        ?array $inking = null,
+    ): TreeBuildContext {
+        // If no context exists, create a minimal one with the provided value
+        if ($this->context === null) {
+            // Create placeholder dimensions if needed
+            $defaultDimensions = new \App\Domain\Geometry\Dimensions(0, 0);
+            return new TreeBuildContext(
+                $openPoseDimensions ?? $defaultDimensions,
+                $closedPoseDimensions ?? $defaultDimensions,
+                $numberOfCopies ?? 0,
+                $numberOfColors ?? 0,
+                $paperWeight ?? 0,
+                $inking ?? []
+            );
+        }
+
         return new TreeBuildContext(
-            $this->openPoseDimensions,
-            $this->closedPoseDimensions,
-            $this->numberOfCopies,
-            $this->numberOfColors,
-            $this->paperWeight,
-            $this->inking
+            $openPoseDimensions ?? $this->context->getOpenPoseDimensions(),
+            $closedPoseDimensions ?? $this->context->getClosedPoseDimensions(),
+            $numberOfCopies ?? $this->context->getNumberOfCopies(),
+            $numberOfColors ?? $this->context->getNumberOfColors(),
+            $paperWeight ?? $this->context->getPaperWeight(),
+            $inking ?? $this->context->getInking()
         );
     }
 }

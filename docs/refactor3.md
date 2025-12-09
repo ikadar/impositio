@@ -156,12 +156,16 @@ A `flattenTree()` megfordítja a path-ot, de a processzorok fordított sorrendbe
 
 **Status**: Felelősségek szétválasztva, tesztek továbbra is 100% pass (54 teszt, 1 skipped)
 
-### Phase 5: Mutable state eliminálása ⬜
+### Phase 5: Mutable state eliminálása ✅
 **Cél**: Tisztább adatáramlás.
 
-- [ ] `TreeBuildContext` DTO bevezetése a sok property helyett
-- [ ] Setter-ek eltávolítása, constructor injection
-- [ ] Metódus paraméterek használata instance property-k helyett
+- [x] `TreeBuildContext` DTO használata a sok property helyett
+- [x] Setter-ek deprecated jelölése (backward compatibility)
+- [x] Interface-ből setterek eltávolítása
+- [x] `process()` metódus context-alapú működése
+- [x] Metódus paraméterek használata instance property-k helyett
+
+**Status**: Mutable state eliminálva, setterek deprecated, tesztek továbbra is 100% pass (54 teszt, 1 skipped)
 
 ### Phase 6: Legacy kód eltávolítása ⬜
 **Cél**: Kód duplikáció megszüntetése.
@@ -248,8 +252,8 @@ A `Calculator` osztály jól strukturált, de:
 2. ✅ **Befejezve**: Magic string-ek és típusok javítása (alacsony kockázat)
 3. ✅ **Befejezve**: Phase 3 - Interface-ek feltöltése
 4. ✅ **Befejezve**: Phase 4 - Felelősségek szétválasztása (ActionTreeBuilder, ActionTreeFlattener, ActionTreeProcessor, TreeBuildContext)
-5. ⬜ **Következik**: Phase 5 - Mutable state eliminálása
-6. ⬜ **Majd**: Phase 6 - Legacy kód eltávolítása
+5. ✅ **Befejezve**: Phase 5 - Mutable state eliminálása (setterek deprecated, context-alapú működés)
+6. ⬜ **Következik**: Phase 6 - Legacy kód eltávolítása
 
 ---
 

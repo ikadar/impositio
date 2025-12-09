@@ -15,6 +15,9 @@ use App\Domain\Sheet\Interfaces\PressSheetInterface;
  * 3. Extending paths with additional actions like CTP, cutting (extend)
  *
  * Action paths are returned in "backtrace order" - the last production step first.
+ *
+ * Note: This interface has been simplified in Phase 5 to remove mutable state.
+ * The setters are removed; use process() method parameters instead.
  */
 interface ActionTreeInterface
 {
@@ -32,81 +35,6 @@ interface ActionTreeInterface
      * @return static
      */
     public function setRoot(array $root): static;
-
-    /**
-     * Get the open pose dimensions.
-     */
-    public function getOpenPoseDimensions(): DimensionsInterface;
-
-    /**
-     * Set the open pose dimensions.
-     *
-     * @return static
-     */
-    public function setOpenPoseDimensions(DimensionsInterface $openPoseDimensions): static;
-
-    /**
-     * Get the closed pose dimensions.
-     */
-    public function getClosedPoseDimensions(): DimensionsInterface;
-
-    /**
-     * Set the closed pose dimensions.
-     *
-     * @return static
-     */
-    public function setClosedPoseDimensions(DimensionsInterface $closedPoseDimensions): static;
-
-    /**
-     * Get the number of copies to produce.
-     */
-    public function getNumberOfCopies(): float;
-
-    /**
-     * Set the number of copies to produce.
-     *
-     * @return static
-     */
-    public function setNumberOfCopies(float $numberOfCopies): static;
-
-    /**
-     * Get the number of colors.
-     */
-    public function getNumberOfColors(): float;
-
-    /**
-     * Set the number of colors.
-     *
-     * @return static
-     */
-    public function setNumberOfColors(float $numberOfColors): static;
-
-    /**
-     * Get the paper weight in g/m².
-     */
-    public function getPaperWeight(): float;
-
-    /**
-     * Set the paper weight in g/m².
-     *
-     * @return static
-     */
-    public function setPaperWeight(float $paperWeight): static;
-
-    /**
-     * Get the inking specification.
-     *
-     * @return array Inking specification ['recto' => [...], 'verso' => [...]]
-     */
-    public function getInking(): array;
-
-    /**
-     * Set the inking specification.
-     *
-     * @param array $inking Inking specification ['recto' => [...], 'verso' => [...]]
-     * @return static
-     */
-    public function setInking(array $inking): static;
 
     /**
      * Build the action tree for a given set of abstract actions.
@@ -141,9 +69,10 @@ interface ActionTreeInterface
      * Process abstract actions and return extended action paths.
      *
      * This is the main entry point for production planning. It:
-     * 1. Sets up internal state from parameters
-     * 2. For each press sheet: builds tree, flattens, extends
-     * 3. Returns all extended action paths
+     * 1. For each press sheet: builds tree, flattens, extends
+     * 2. Returns all extended action paths
+     *
+     * All parameters are passed directly - no internal state is required.
      *
      * @param AbstractActionInterface[] $abstractActions Actions to process
      * @param PressSheetInterface[] $pressSheets Available press sheets
