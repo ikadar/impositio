@@ -64,17 +64,17 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
         return $this;
     }
 
-    public function calculateCost()
+    public function calculateCost(): float|array
     {
         return $this->getMachine()->calculateCost($this);
     }
 
-    public function calculateSetupDuration()
+    public function calculateSetupDuration(): float
     {
         return $this->getMachine()->calculateSetupDuration($this);
     }
 
-    public function calculateRunDuration()
+    public function calculateRunDuration(): float
     {
         return $this->getMachine()->calculateRunDuration($this);
     }
@@ -84,7 +84,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
         return $this->todo;
     }
 
-    public function setTodo(array $todo): ActionPathNode
+    public function setTodo(array $todo): static
     {
         $this->todo = $todo;
         return $this;

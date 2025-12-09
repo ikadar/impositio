@@ -11,7 +11,7 @@ class ActionTreeNode extends ActionPathNode implements Interfaces\ActionTreeNode
         return $this->prevActions;
     }
 
-    public function setPrevActions(array $prevActions): ActionTreeNode
+    public function setPrevActions(array $prevActions): static
     {
         $this->prevActions = $prevActions;
         return $this;

@@ -49,7 +49,7 @@ class ActionTree implements ActionTreeInterface
         return $this->root;
     }
 
-    public function setRoot(array $root): ActionTree
+    public function setRoot(array $root): static
     {
         $this->root = $root;
         return $this;
@@ -60,7 +60,7 @@ class ActionTree implements ActionTreeInterface
         return $this->openPoseDimensions;
     }
 
-    public function setOpenPoseDimensions(DimensionsInterface $openPoseDimensions): ActionTree
+    public function setOpenPoseDimensions(DimensionsInterface $openPoseDimensions): static
     {
         $this->openPoseDimensions = $openPoseDimensions;
         return $this;
@@ -71,7 +71,7 @@ class ActionTree implements ActionTreeInterface
         return $this->closedPoseDimensions;
     }
 
-    public function setClosedPoseDimensions(DimensionsInterface $closedPoseDimensions): ActionTree
+    public function setClosedPoseDimensions(DimensionsInterface $closedPoseDimensions): static
     {
         $this->closedPoseDimensions = $closedPoseDimensions;
         return $this;
@@ -82,7 +82,7 @@ class ActionTree implements ActionTreeInterface
         return $this->numberOfCopies;
     }
 
-    public function setNumberOfCopies(float $numberOfCopies): ActionTree
+    public function setNumberOfCopies(float $numberOfCopies): static
     {
         $this->numberOfCopies = $numberOfCopies;
         return $this;
@@ -93,7 +93,7 @@ class ActionTree implements ActionTreeInterface
         return $this->numberOfColors;
     }
 
-    public function setNumberOfColors(float $numberOfColors): ActionTree
+    public function setNumberOfColors(float $numberOfColors): static
     {
         $this->numberOfColors = $numberOfColors;
         return $this;
@@ -104,7 +104,7 @@ class ActionTree implements ActionTreeInterface
         return $this->paperWeight;
     }
 
-    public function setPaperWeight(float $paperWeight): ActionTree
+    public function setPaperWeight(float $paperWeight): static
     {
         $this->paperWeight = $paperWeight;
         return $this;
@@ -115,7 +115,7 @@ class ActionTree implements ActionTreeInterface
         return $this->inking;
     }
 
-    public function setInking(array $inking): ActionTree
+    public function setInking(array $inking): static
     {
         $this->inking = $inking;
         return $this;
