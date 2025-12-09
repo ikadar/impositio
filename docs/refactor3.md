@@ -136,12 +136,14 @@ A `flattenTree()` megfordítja a path-ot, de a processzorok fordított sorrendbe
 
 **Status**: Kód tisztítás befejezve, tesztek továbbra is 100% pass
 
-### Phase 3: Interface-ek feltöltése ⬜
+### Phase 3: Interface-ek feltöltése ✅
 **Cél**: Típusbiztonság javítása.
 
-- [ ] `ActionTreeInterface` metódusok definiálása
-- [ ] `ActionPathNodeInterface` metódusok definiálása
-- [ ] `ActionTreeNodeInterface` metódusok definiálása
+- [x] `ActionTreeInterface` metódusok definiálása
+- [x] `ActionPathNodeInterface` metódusok definiálása
+- [x] `ActionTreeNodeInterface` metódusok definiálása
+
+**Status**: Interface-ek feltöltve, típusbiztonság javult, tesztek továbbra is 100% pass
 
 ### Phase 4: Felelősségek szétválasztása ⬜
 **Cél**: Single Responsibility Principle.
@@ -231,9 +233,9 @@ A `Calculator` osztály jól strukturált, de:
 |-----------|---------|----------|--------|
 | 🔴 Magas | Phase 1: Tesztek | Biztonságos refaktorálás alapja | ✅ |
 | 🔴 Magas | Phase 2: Kód tisztítás | Gyors, alacsony kockázatú javulás | ✅ |
-| 🟡 Közepes | Phase 3: Interface-ek | Típusbiztonság | ⬜ |
-| 🟡 Közepes | Phase 6: Legacy törlés | Duplikáció megszüntetése | ⬜ |
-| 🟢 Alacsony | Phase 4-5: Refaktor | Nagyobb változtatások, több kockázat | ⬜ |
+| � Magas | Phase 3: Interface-ek | Típusbiztonság | ✅ |
+| 🟡 Közepes | Phase 4-5: Refaktor | Felelősségek szétválasztása | ⬜ |
+| � Közepes | Phase 6: Legacy törlés | Duplikáció megszüntetése | ⬜ |
 
 ---
 
@@ -241,9 +243,9 @@ A `Calculator` osztály jól strukturált, de:
 
 1. ✅ **Befejezve**: Unit és integration tesztek írása a jelenlegi működésre
 2. ✅ **Befejezve**: Magic string-ek és típusok javítása (alacsony kockázat)
-3. ⬜ **Következik**: Phase 3 - Interface-ek feltöltése
-4. ⬜ **Majd**: Phase 4-5 - Strukturális refaktorálás (felelősségek szétválasztása)
-5. ⬜ **Végül**: Phase 6 - Legacy kód eltávolítása
+3. ✅ **Befejezve**: Phase 3 - Interface-ek feltöltése
+4. ⬜ **Következik**: Phase 4-5 - Strukturális refaktorálás (felelősségek szétválasztása)
+5. ⬜ **Majd**: Phase 6 - Legacy kód eltávolítása
 
 ---
 
