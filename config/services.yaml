@@ -35,6 +35,19 @@ services:
     App\Service\PressSheetProviderInterface:
         class: App\Service\PressSheetProvider
 
+    # Process Service Interface Bindings
+    App\Application\Process\Service\ActionPathRankerInterface:
+        class: App\Application\Process\Service\ActionPathRanker
+
+    App\Application\Process\Service\ActionPathTransformerInterface:
+        class: App\Application\Process\Service\ActionPathTransformer
+
+    App\Application\Process\Service\ProductionPlanningServiceInterface:
+        class: App\Application\Process\Service\ProductionPlanningService
+
+    App\Application\Process\Service\ProcessPersistenceServiceInterface:
+        class: App\Application\Process\Service\ProcessPersistenceService
+
     # ActionPath Pipeline processors (tagged for collection)
     App\Domain\Action\Pipeline\Processor\TodoPreparationProcessor:
         tags: ['app.action_path_processor']

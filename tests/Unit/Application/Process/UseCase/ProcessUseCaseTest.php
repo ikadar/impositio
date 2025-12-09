@@ -2,7 +2,6 @@
 
 namespace App\Tests\Unit\Application\Process\UseCase;
 
-use App\Application\Process\ActionTreeInput;
 use App\Application\Process\DTO\ActionPathResult;
 use App\Application\Process\ProcessRequestModel;
 use App\Application\Process\ProcessResponseModel;
@@ -37,9 +36,12 @@ class ProcessUseCaseTest extends ProcessTestBase
         $this->transformer = $this->createMock(ActionPathTransformerInterface::class);
         $this->pressSheetProvider = $this->createMock(PressSheetProviderInterface::class);
 
-        // Note: This test is written for the future refactored ProcessUseCase
-        // The current ProcessUseCase has different constructor signature
-        // These tests will guide the refactoring
+        $this->useCase = new ProcessUseCase(
+            $this->planningService,
+            $this->persistenceService,
+            $this->transformer,
+            $this->pressSheetProvider
+        );
     }
 
     /**
@@ -47,8 +49,6 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_calls_planning_service_for_each_part(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $part1 = $this->createPartPayload('PART001');
         $part2 = $this->createPartPayload('PART002');
         $request = new ProcessRequestModel([$part1, $part2]);
@@ -61,7 +61,10 @@ class ProcessUseCaseTest extends ProcessTestBase
             ->method('plan')
             ->willReturn([]);
 
-        $processRequest = new ProcessRequest();
+        $this->planningService->method('getInput')->willReturn(null);
+
+        $processRequest = $this->createMock(ProcessRequest::class);
+        $processRequest->method('getId')->willReturn(123);
         $this->persistenceService->method('persist')->willReturn($processRequest);
 
         $this->useCase->execute($request);
@@ -72,8 +75,6 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_transforms_results_for_response(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $part = $this->createPartPayload('PART001');
         $request = new ProcessRequestModel([$part]);
 
@@ -90,7 +91,8 @@ class ProcessUseCaseTest extends ProcessTestBase
             ->method('toResponseArray')
             ->willReturn(['id' => 'uuid', 'cost' => 100]);
 
-        $processRequest = new ProcessRequest();
+        $processRequest = $this->createMock(ProcessRequest::class);
+        $processRequest->method('getId')->willReturn(123);
         $this->persistenceService->method('persist')->willReturn($processRequest);
 
         $this->useCase->execute($request);
@@ -101,8 +103,6 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_persists_request_with_computed_paths(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $part = $this->createPartPayload('PART001');
         $request = new ProcessRequestModel([$part]);
 
@@ -116,7 +116,8 @@ class ProcessUseCaseTest extends ProcessTestBase
 
         $this->transformer->method('toResponseArray')->willReturn(['id' => 'uuid', 'cost' => 100]);
 
-        $processRequest = new ProcessRequest();
+        $processRequest = $this->createMock(ProcessRequest::class);
+        $processRequest->method('getId')->willReturn(123);
         $this->persistenceService
             ->expects($this->once())
             ->method('persist')
@@ -131,8 +132,6 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_returns_response_model_with_parts(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $part = $this->createPartPayload('PART001');
         $request = new ProcessRequestModel([$part]);
 
@@ -161,8 +160,6 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_handles_empty_parts(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $request = new ProcessRequestModel([]);
 
         $processRequest = $this->createMock(ProcessRequest::class);
@@ -180,20 +177,20 @@ class ProcessUseCaseTest extends ProcessTestBase
      */
     public function execute_extracts_paper_weight_from_print_action(): void
     {
-        $this->markTestSkipped('Test for future refactored ProcessUseCase - not yet implemented');
-
         $part = $this->createPartPayload('PART001');
         $request = new ProcessRequestModel([$part]);
 
         $this->pressSheetProvider
             ->expects($this->once())
             ->method('getPressSheets')
-            ->with(120) // Default paper weight
+            ->with(120.0) // Default paper weight from createPartPayload
             ->willReturn([]);
 
         $this->planningService->method('plan')->willReturn([]);
+        $this->planningService->method('getInput')->willReturn(null);
 
-        $processRequest = new ProcessRequest();
+        $processRequest = $this->createMock(ProcessRequest::class);
+        $processRequest->method('getId')->willReturn(123);
         $this->persistenceService->method('persist')->willReturn($processRequest);
 
         $this->useCase->execute($request);
