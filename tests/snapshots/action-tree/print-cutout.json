@@ -1,0 +1,12 @@
+[
+    {
+        "nodeCount": 4,
+        "machines": [
+            "cutout-machine",
+            "cutting-machine",
+            "Komori G40",
+            "ctp-machine"
+        ],
+        "hasGridFitting": true
+    }
+]

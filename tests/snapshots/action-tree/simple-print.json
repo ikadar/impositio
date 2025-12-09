@@ -1,0 +1,10 @@
+[
+    {
+        "nodeCount": 2,
+        "machines": [
+            "Komori G40",
+            "ctp-machine"
+        ],
+        "hasGridFitting": true
+    }
+]
