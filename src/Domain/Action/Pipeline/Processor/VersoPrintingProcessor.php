@@ -57,21 +57,22 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
             return null;
         }
 
-        // Create verso printing action with the same machine
-        $todo = [
-            'numberOfCopies' => $context->jobContext->numberOfCopies,
-            'numberOfColors' => $context->jobContext->numberOfColors,
-            'paperWeight' => $context->jobContext->paperWeight,
-            'cutSheetCount' => $context->cutSheetCount,
-            'dryTimeBetweenSequences' => 0,
-        ];
+        $gridFitting = clone $rectoNode->getGridFitting();
+
+        // Calculate enrichment using the new method
+        $enrichment = $rectoNode->getMachine()->calculateEnrichment(
+            $context->jobContext,
+            $gridFitting,
+            $rectoNode->getPressSheet(),
+            $context->cutSheetCount,
+        );
 
         return new ActionPathNode(
             $rectoNode->getMachine(),
             $rectoNode->getPressSheet(),
             $rectoNode->getZone(),
-            clone $rectoNode->getGridFitting(),
-            $todo
+            $gridFitting,
+            $enrichment
         );
     }
 

@@ -6,6 +6,7 @@ use App\Domain\Action\ActionPathNode;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathProcessorInterface;
+use App\Domain\Equipment\Enrichment\CuttingEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 
 /**
@@ -102,23 +103,27 @@ class CuttingInsertionProcessor implements ActionPathProcessorInterface
         ActionPathContext $context
     ): ActionPathNode {
         $cuttingMachine = $this->equipmentFactory->fromId('cutting-machine');
+        $gridFitting = clone $previousNode->getGridFitting();
 
-        $todo = [
-            'numberOfCuts' => $cuttingInfo['numberOfCuts'],
-            'numberOfCopies' => $context->jobContext->numberOfCopies,
-            'numberOfColors' => $context->jobContext->numberOfColors,
-            'paperWeight' => $context->jobContext->paperWeight,
-            'cutSheetCount' => $context->cutSheetCount,
-            'trimCuts' => $cuttingInfo['trimCuts'],
-            'cuts' => $cuttingInfo['cutCuts'],
-        ];
+        // Create CuttingEnrichment directly with cutting-specific data
+        // Cost will be calculated later based on the enrichment data
+        $enrichment = new CuttingEnrichment(
+            cost: 0.0, // Will be calculated by machine if needed
+            cutSheetCount: $context->cutSheetCount,
+            numberOfCuts: $cuttingInfo['numberOfCuts'],
+            trimCuts: $cuttingInfo['trimCuts'],
+            cuts: $cuttingInfo['cutCuts'],
+            numberOfCopies: $context->jobContext->numberOfCopies,
+            numberOfColors: $context->jobContext->numberOfColors,
+            paperWeight: $context->jobContext->paperWeight,
+        );
 
         return new ActionPathNode(
             $cuttingMachine,
             $previousNode->getPressSheet(),
             $previousNode->getZone(),
-            clone $previousNode->getGridFitting(),
-            $todo
+            $gridFitting,
+            $enrichment
         );
     }
 

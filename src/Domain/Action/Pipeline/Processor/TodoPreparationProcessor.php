@@ -6,11 +6,12 @@ use App\Domain\Action\ActionPathNode;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathProcessorInterface;
-use App\Domain\Equipment\TodoContext;
 
 /**
- * Processor that prepares todo arrays for each node.
- * Delegates to Machine::prepareTodo() for machine-specific logic.
+ * Processor that calculates enrichment for each node.
+ * Delegates to Machine::calculateEnrichment() for machine-specific logic.
+ *
+ * Previously named TodoPreparationProcessor, now uses the new enrichment system.
  */
 class TodoPreparationProcessor implements ActionPathProcessorInterface
 {
@@ -23,29 +24,21 @@ class TodoPreparationProcessor implements ActionPathProcessorInterface
             /** @var ActionTreeNodeInterface $originalNode */
             $node = clone $originalNode;
 
-            // Create TodoContext for the machine
-            $todoContext = new TodoContext(
-                numberOfCopies: $context->jobContext->numberOfCopies,
-                numberOfColors: $context->jobContext->numberOfColors,
-                paperWeight: $context->jobContext->paperWeight,
-                inking: $context->jobContext->inking,
-                openPoseDimensions: $context->jobContext->openPoseDimensions,
-                closedPoseDimensions: $context->jobContext->closedPoseDimensions,
-                cutSheetCount: $cutSheetCount,
-                gridFitting: $node->getGridFitting(),
-                pressSheet: $node->getPressSheet(),
+            // Calculate enrichment using the new method
+            $enrichment = $node->getMachine()->calculateEnrichment(
+                $context->jobContext,
+                $node->getGridFitting(),
+                $node->getPressSheet(),
+                $cutSheetCount,
             );
 
-            // Delegate to machine to prepare its todo
-            $todo = $node->getMachine()->prepareTodo($todoContext);
-
-            // Create ActionPathNode with the prepared todo
+            // Create ActionPathNode with the enrichment
             $actionPathNode = new ActionPathNode(
                 $node->getMachine(),
                 $node->getPressSheet(),
                 $node->getZone(),
                 $node->getGridFitting(),
-                $todo
+                $enrichment
             );
 
             $nodes[] = $actionPathNode;

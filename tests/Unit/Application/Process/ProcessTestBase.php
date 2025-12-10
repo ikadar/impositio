@@ -7,6 +7,7 @@ use App\Application\Process\PartPayload;
 use App\Domain\Action\ActionName;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\PayloadAction;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\MachineType;
 use App\Domain\Geometry\Dimensions;
@@ -43,6 +44,13 @@ abstract class ProcessTestBase extends TestCase
         $node->method('calculateSetupDuration')->willReturn(30.0);
         $node->method('calculateRunDuration')->willReturn(60.0);
 
+        // Mock enrichment for getEnrichment()->getCost()
+        $enrichment = $this->createMock(ActionEnrichmentInterface::class);
+        $enrichment->method('getCost')->willReturn($cost);
+        $enrichment->method('getCutSheetCount')->willReturn(100.0);
+        $enrichment->method('toArray')->willReturn(['cost' => $cost]);
+        $node->method('getEnrichment')->willReturn($enrichment);
+
         $machine = $this->createMachineMock('test-machine', MachineType::PrintingPress);
         $node->method('getMachine')->willReturn($machine);
 
@@ -75,6 +83,14 @@ abstract class ProcessTestBase extends TestCase
         $node->method('getTodo')->willReturn(['cost' => $costArray]);
         $node->method('calculateSetupDuration')->willReturn(30.0);
         $node->method('calculateRunDuration')->willReturn(60.0);
+
+        // Mock enrichment - extract 'cost' from array
+        $cost = $costArray['cost'] ?? 0;
+        $enrichment = $this->createMock(ActionEnrichmentInterface::class);
+        $enrichment->method('getCost')->willReturn((float) $cost);
+        $enrichment->method('getCutSheetCount')->willReturn(100.0);
+        $enrichment->method('toArray')->willReturn(['cost' => $costArray]);
+        $node->method('getEnrichment')->willReturn($enrichment);
 
         $machine = $this->createMachineMock('test-machine', MachineType::PrintingPress);
         $node->method('getMachine')->willReturn($machine);

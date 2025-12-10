@@ -155,6 +155,11 @@ class ActionPathRankerTest extends ProcessTestBase
         $node = $this->createMock(\App\Domain\Action\Interfaces\ActionPathNodeInterface::class);
         $node->method('getTodo')->willReturn([]);
 
+        // Mock enrichment with zero cost
+        $enrichment = $this->createMock(\App\Domain\Equipment\Enrichment\ActionEnrichmentInterface::class);
+        $enrichment->method('getCost')->willReturn(0.0);
+        $node->method('getEnrichment')->willReturn($enrichment);
+
         $cost = $this->ranker->calculateCost([$node]);
 
         $this->assertEquals(0, $cost);

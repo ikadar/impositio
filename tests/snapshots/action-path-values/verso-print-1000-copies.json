@@ -17,8 +17,12 @@
             "todo": {
                 "numberOfCopies": 1000,
                 "numberOfColors": 5,
-                "cutSheetCount": 1000,
-                "paperWeight": 0
+                "cutSheetCount": 125,
+                "paperWeight": 0,
+                "cost": {
+                    "cost": 60.68,
+                    "paperCost": 9.72
+                }
             }
         },
         {
@@ -51,7 +55,7 @@
             "todo": {
                 "numberOfCopies": 1000,
                 "numberOfColors": 5,
-                "cutSheetCount": 8000,
+                "cutSheetCount": 125,
                 "paperWeight": 0,
                 "cost": {
                     "cost": 60.68,
@@ -72,7 +76,7 @@
             "todo": {
                 "numberOfCopies": 1000,
                 "numberOfColors": 5,
-                "cutSheetCount": 8000,
+                "cutSheetCount": 1000,
                 "cost": {
                     "cost": 5.91,
                     "aluSheetsCost": 32.16

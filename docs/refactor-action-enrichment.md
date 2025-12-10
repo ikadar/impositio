@@ -9,8 +9,8 @@
 | **2** | ActionEnrichmentInterface | ✅ KÉSZ |
 | **3** | Machine.calculateEnrichment() | ✅ KÉSZ |
 | **4** | ActionPathNode módosítása | ✅ KÉSZ |
-| **5** | Pipeline processzorok | ⏳ Következő |
-| **6** | Cleanup | ⏳ Várakozik |
+| **5** | Pipeline processzorok | ✅ KÉSZ |
+| **6** | Cleanup | ⏳ Következő |
 
 ## Összefoglaló
 
@@ -820,9 +820,38 @@ readonly class LegacyArrayEnrichment implements ActionEnrichmentInterface
 
 ---
 
-## Fázis 5: Pipeline Processzorok Módosítása
+## Fázis 5: Pipeline Processzorok Módosítása ✅ KÉSZ
 
 **Cél**: A processzorok az új struktúrát használják.
+
+### Elkészült változtatások
+
+1. **TodoPreparationProcessor módosítva**:
+   - `prepareTodo()` helyett `calculateEnrichment()` hívás
+   - `TodoContext` eltávolítva, helyette közvetlenül `JobContext` használata
+
+2. **CtpInsertionProcessor módosítva**:
+   - `prepareTodo()` helyett `calculateEnrichment()` hívás
+   - CTP action enrichment számítása az új rendszerrel
+
+3. **VersoPrintingProcessor módosítva**:
+   - `calculateEnrichment()` használata verso action létrehozásánál
+
+4. **CuttingInsertionProcessor módosítva**:
+   - `CuttingEnrichment` közvetlen létrehozása a cutting-specifikus adatokkal
+   - A cutting logika (numberOfCuts, trimCuts, cuts) a processzorban marad
+
+5. **CutSheetCountProcessor egyszerűsítve**:
+   - Node-ok már tartalmazzák a helyes cutSheetCount értéket az enrichment-ből
+   - Most csak a context cutSheetCount tracking-et végzi
+
+6. **ActionPathRanker módosítva**:
+   - `getTodo()['cost']` helyett `getEnrichment()->getCost()` használata
+
+7. **ProcessTestBase teszt helper frissítve**:
+   - Mock-ok kiegészítve `getEnrichment()` mock-kal
+
+**Tesztek**: 150 teszt, 1127 assertion ✅
 
 ### 5.1 TodoPreparationProcessor → EnrichmentProcessor
 
@@ -920,7 +949,7 @@ public function calculateCost(array $actionPath): float
 | **2** | ActionEnrichmentInterface + implementációk | Alacsony | Unit tesztek | ✅ KÉSZ |
 | **3** | Machine.calculateEnrichment() | Közepes | Unit + Integration | ✅ KÉSZ |
 | **4** | ActionPathNode módosítása | Közepes | Integration | ✅ KÉSZ |
-| **5** | Pipeline processzorok módosítása | Magas | Full regression | ⏳ |
+| **5** | Pipeline processzorok módosítása | Magas | Full regression | ✅ KÉSZ |
 | **6** | Cleanup | Alacsony | Full regression | ⏳ |
 
 ---

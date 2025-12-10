@@ -2,6 +2,8 @@
 
 namespace App\Application\Process\Service;
 
+use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+
 /**
  * Ranks and selects best action paths based on cost.
  *
@@ -51,7 +53,7 @@ class ActionPathRanker implements ActionPathRankerInterface
     /**
      * Calculate total cost for an action path.
      *
-     * Handles both simple cost values and array cost format.
+     * Uses the new enrichment system via getEnrichment()->getCost().
      *
      * @param array $actionPath Array of ActionPathNodeInterface
      * @return float Total cost
@@ -61,15 +63,8 @@ class ActionPathRanker implements ActionPathRankerInterface
         $cost = 0.0;
 
         foreach ($actionPath as $node) {
-            $todo = $node->getTodo();
-            $nodeCost = $todo['cost'] ?? 0;
-
-            // Handle array cost format: ['cost' => 100, 'paper' => 20, ...]
-            if (is_array($nodeCost)) {
-                $nodeCost = $nodeCost['cost'] ?? 0;
-            }
-
-            $cost += (float) $nodeCost;
+            /** @var ActionPathNodeInterface $node */
+            $cost += $node->getEnrichment()->getCost();
         }
 
         return $cost;

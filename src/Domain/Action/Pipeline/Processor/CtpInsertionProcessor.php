@@ -7,7 +7,6 @@ use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathProcessorInterface;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
-use App\Domain\Equipment\TodoContext;
 
 /**
  * Processor that inserts CTP action before printing press actions.
@@ -51,21 +50,6 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
     ): ActionPathNode {
         $ctpMachine = $this->equipmentFactory->fromId('ctp-machine');
 
-        // Create TodoContext for CTP machine
-        $todoContext = new TodoContext(
-            numberOfCopies: $context->jobContext->numberOfCopies,
-            numberOfColors: $context->jobContext->numberOfColors,
-            paperWeight: $context->jobContext->paperWeight,
-            inking: $context->jobContext->inking,
-            openPoseDimensions: $context->jobContext->openPoseDimensions,
-            closedPoseDimensions: $context->jobContext->closedPoseDimensions,
-            cutSheetCount: $context->cutSheetCount,
-            gridFitting: $printNode->getGridFitting(),
-            pressSheet: $printNode->getPressSheet(),
-        );
-
-        $todo = $ctpMachine->prepareTodo($todoContext);
-
         // Add explanation for the CTP action
         $gridFitting = clone $printNode->getGridFitting();
         $explanation = [
@@ -77,12 +61,20 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
         ];
         $gridFitting->setExplanation($explanation);
 
+        // Calculate enrichment using the new method
+        $enrichment = $ctpMachine->calculateEnrichment(
+            $context->jobContext,
+            $gridFitting,
+            $printNode->getPressSheet(),
+            $context->cutSheetCount,
+        );
+
         return new ActionPathNode(
             $ctpMachine,
             $printNode->getPressSheet(),
             $printNode->getZone(),
             $gridFitting,
-            $todo
+            $enrichment
         );
     }
 

@@ -17,7 +17,7 @@
             "todo": {
                 "numberOfCopies": 1000,
                 "numberOfColors": 1,
-                "cutSheetCount": 1000,
+                "cutSheetCount": 500,
                 "paperWeight": 0,
                 "cost": {
                     "cost": 10.21,
