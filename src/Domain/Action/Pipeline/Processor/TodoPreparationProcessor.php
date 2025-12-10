@@ -32,6 +32,8 @@ class TodoPreparationProcessor implements ActionPathProcessorInterface
                 openPoseDimensions: $context->params->openPoseDimensions,
                 closedPoseDimensions: $context->params->closedPoseDimensions,
                 cutSheetCount: $cutSheetCount,
+                gridFitting: $node->getGridFitting(),
+                pressSheet: $node->getPressSheet(),
             );
 
             // Delegate to machine to prepare its todo

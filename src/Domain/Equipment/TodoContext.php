@@ -3,6 +3,8 @@
 namespace App\Domain\Equipment;
 
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
 /**
  * Context for Machine::prepareTodo() method.
@@ -18,5 +20,7 @@ readonly class TodoContext
         public DimensionsInterface $openPoseDimensions,
         public DimensionsInterface $closedPoseDimensions,
         public float $cutSheetCount,
+        public ?GridFittingInterface $gridFitting = null,
+        public ?PressSheetInterface $pressSheet = null,
     ) {}
 }

@@ -171,6 +171,42 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
     }
 
 
+    /**
+     * Prepare todo for offset printing press.
+     * Includes cost calculation based on grid fitting.
+     */
+    public function prepareTodo(TodoContext $context): array
+    {
+        $todo = parent::prepareTodo($context);
+
+        // Calculate cost if gridFitting is available
+        if ($context->gridFitting !== null && $context->pressSheet !== null) {
+            $productsPerSheet = count($context->gridFitting->getTiles());
+            $paperCostPerProduct = $context->pressSheet->getPrice() / $productsPerSheet;
+            $paperCost = round($context->numberOfCopies * $paperCostPerProduct, 2);
+
+            $numberOfPrintingSheets = ceil($context->numberOfCopies / $productsPerSheet);
+
+            // Setup duration
+            $setupDuration = $this->getBaseSetupDuration() + ($context->numberOfColors * $this->getSetupDurationPerColor());
+
+            // Run duration calculation
+            $numberOfStackReplenishments = (($numberOfPrintingSheets * ($context->paperWeight / 115) / 100)) / $this->getMaxInputStackHeight();
+            $runDuration = ($numberOfStackReplenishments * $this->getStackReplenishmentDuration()) + (($numberOfPrintingSheets / $this->getSheetsPerHour()) * 60);
+
+            $duration = $setupDuration + $runDuration;
+            $cost = round(($duration / 60) * $this->getCostPerHour(), 2);
+
+            $todo['cost'] = [
+                'cost' => $cost,
+                'paperCost' => $paperCost,
+            ];
+            $todo['cutSheetCount'] = $numberOfPrintingSheets;
+        }
+
+        return $todo;
+    }
+
     public function calculateCost(ActionPathNodeInterface $action): float | array
     {
         // paper cost calculation
