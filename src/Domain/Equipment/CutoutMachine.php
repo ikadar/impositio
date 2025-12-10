@@ -34,27 +34,6 @@ class CutoutMachine extends Machine
     }
 
     /**
-     * Prepare todo for cutout machine.
-     *
-     * @deprecated Use calculateEnrichment() instead
-     */
-    public function prepareTodo(TodoContext $context): array
-    {
-        return [
-            'numberOfCopies' => $context->numberOfCopies,
-            'cutSheetCount' => $context->cutSheetCount,
-            'openPoseDimensions' => [
-                'width' => $context->openPoseDimensions->getWidth(),
-                'height' => $context->openPoseDimensions->getHeight(),
-            ],
-            'closedPoseDimensions' => [
-                'width' => $context->closedPoseDimensions->getWidth(),
-                'height' => $context->closedPoseDimensions->getHeight(),
-            ],
-        ];
-    }
-
-    /**
      * Calculate enrichment for cutout machine.
      */
     public function calculateEnrichment(

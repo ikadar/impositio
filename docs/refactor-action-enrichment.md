@@ -10,7 +10,7 @@
 | **3** | Machine.calculateEnrichment() | ✅ KÉSZ |
 | **4** | ActionPathNode módosítása | ✅ KÉSZ |
 | **5** | Pipeline processzorok | ✅ KÉSZ |
-| **6** | Cleanup | ⏳ Következő |
+| **6** | Cleanup | ✅ KÉSZ |
 
 ## Összefoglaló
 
@@ -924,19 +924,50 @@ public function calculateCost(array $actionPath): float
 
 ---
 
-## Fázis 6: Cleanup és Deprecation Eltávolítása
+## Fázis 6: Cleanup és Deprecation Eltávolítása ✅ KÉSZ
 
 **Cél**: Régi kód eltávolítása, ha minden teszt zöld.
 
-### 6.1 Törlendő fájlok/osztályok
+### Elvégzett változtatások
 
-- `TodoContext.php` (ha már nem használt)
-- `prepareTodo()` metódusok (ha deprecation idő lejárt)
+1. **TodoContext osztály törölve**
+   - A `src/Domain/Equipment/TodoContext.php` fájl törölve
+   - Már nem szükséges, mivel a `calculateEnrichment()` közvetlenül `JobContext`-et használ
 
-### 6.2 Törlendő backward compatibility kód
+2. **prepareTodo() metódusok eltávolítva**
+   - `MachineInterface::prepareTodo()` eltávolítva
+   - `Machine::prepareTodo()` eltávolítva
+   - `OffsetPrintingPress::prepareTodo()` eltávolítva
+   - `CTPMachine::prepareTodo()` eltávolítva
+   - `Folder::prepareTodo()` eltávolítva
+   - `CutoutMachine::prepareTodo()` eltávolítva
+   - `StitchingMachine::prepareTodo()` eltávolítva
+   - `PrintingPress::prepareTodo()` eltávolítva
 
-- `getTodo()` metódus az ActionPathNode-ból
-- `"todo"` kulcs a toArray() output-ból
+3. **MachinePrepareTodoTest frissítve**
+   - A tesztek átalakítva `calculateEnrichment()` tesztelésére
+   - `TodoContext` helyett `JobContext` használata
+
+4. **Megtartott backward compatibility**
+   - `getTodo()` és `setTodo()` metódusok megtartva az `ActionPathNode`-ban
+   - Több machine osztály `calculateCost()`, `calculateRunDuration()` metódusa még használja a `getTodo()`-t
+   - A teljes migráció egy következő refactoring feladat lehet
+
+**Tesztek**: 150 teszt, 1125 assertion ✅
+
+### Megjegyzések a jövőbeli cleanup-hoz
+
+A következő metódusok még a `getTodo()` wrappert használják:
+- `CuttingMachine::calculateRunDuration()`
+- `OffsetPrintingPress::calculateCost()`, `calculateSetupDuration()`, `calculateRunDuration()`
+- `CTPMachine::calculateCost()`, `calculateRunDuration()`
+- `Folder::calculateCost()`, `calculateSetupDuration()`, `calculateRunDuration()`
+- `CutoutMachine::calculateCost()`
+- `StitchingMachine::calculateCost()`
+- `Splitter::calculateCost()`
+- `Assembler::calculateCost()`
+
+Ezek átalakítása egy következő refactoring feladat, ahol a `getTodo()` helyett közvetlenül a `getEnrichment()->toArray()` vagy a typed getter metódusok lesznek használva.
 
 ---
 
@@ -950,7 +981,7 @@ public function calculateCost(array $actionPath): float
 | **3** | Machine.calculateEnrichment() | Közepes | Unit + Integration | ✅ KÉSZ |
 | **4** | ActionPathNode módosítása | Közepes | Integration | ✅ KÉSZ |
 | **5** | Pipeline processzorok módosítása | Magas | Full regression | ✅ KÉSZ |
-| **6** | Cleanup | Alacsony | Full regression | ⏳ |
+| **6** | Cleanup | Alacsony | Full regression | ✅ KÉSZ |
 
 ---
 

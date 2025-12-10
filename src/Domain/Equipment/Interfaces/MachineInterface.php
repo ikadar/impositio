@@ -4,7 +4,6 @@ namespace App\Domain\Equipment\Interfaces;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
-use App\Domain\Equipment\TodoContext;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
 use App\Domain\Job\JobContext;
@@ -25,18 +24,10 @@ interface MachineInterface
     public function getType(): \App\Domain\Equipment\MachineType;
 
     /**
-     * Prepare the todo array for this machine based on the given context.
-     * Each machine type knows what parameters it needs for cost/duration calculation.
-     *
-     * @deprecated Use calculateEnrichment() instead
-     */
-    public function prepareTodo(TodoContext $context): array;
-
-    /**
      * Calculate and return the enrichment data for this action.
      *
-     * This is the new method that replaces prepareTodo(). It returns a typed
-     * enrichment object instead of an array.
+     * Returns a typed enrichment object containing cost, cutSheetCount,
+     * and machine-specific metrics.
      *
      * @param JobContext $jobContext Job-level parameters (copies, colors, weight, etc.)
      * @param GridFittingInterface $gridFitting Grid fitting information

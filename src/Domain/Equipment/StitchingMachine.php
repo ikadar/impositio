@@ -141,19 +141,6 @@ class StitchingMachine extends Machine implements FolderInterface
     }
 
     /**
-     * Prepare todo for stitching machine.
-     *
-     * @deprecated Use calculateEnrichment() instead
-     */
-    public function prepareTodo(TodoContext $context): array
-    {
-        return [
-            'numberOfCopies' => $context->numberOfCopies,
-            'cutSheetCount' => $context->cutSheetCount,
-        ];
-    }
-
-    /**
      * Calculate enrichment for stitching machine.
      */
     public function calculateEnrichment(

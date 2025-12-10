@@ -5,38 +5,37 @@ namespace App\Tests\Unit\Domain\Equipment;
 use App\Domain\Equipment\CTPMachine;
 use App\Domain\Equipment\MachineType;
 use App\Domain\Equipment\OffsetPrintingPress;
-use App\Domain\Equipment\TodoContext;
 use App\Domain\Geometry\Dimensions;
-use App\Domain\Layout\GridFitting;
+use App\Domain\Job\JobContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\PressSheet;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for Machine::prepareTodo() methods.
+ * Unit tests for Machine::calculateEnrichment() methods.
  *
  * These tests document and protect the exact cost calculation logic
- * for each machine type. They are critical for the todo -> ActionEnrichment
- * refactoring.
+ * for each machine type.
  */
 class MachinePrepareTodoTest extends TestCase
 {
     // ==================== OFFSET PRINTING PRESS ====================
 
     /**
-     * Test: OffsetPrintingPress prepareTodo returns correct structure.
+     * Test: OffsetPrintingPress calculateEnrichment returns correct structure.
      */
     public function test_offset_press_prepareTodo_returns_correct_structure(): void
     {
         $press = $this->createOffsetPrintingPress();
-        $context = $this->createTodoContext(
+        $jobContext = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 4,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
         );
+        $gridFitting = $this->createGridFitting(cols: 5, rows: 2);
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
-        $todo = $press->prepareTodo($context);
+        $enrichment = $press->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 0);
+        $todo = $enrichment->toArray();
 
         // Structure assertions
         $this->assertArrayHasKey('numberOfCopies', $todo);
@@ -44,10 +43,7 @@ class MachinePrepareTodoTest extends TestCase
         $this->assertArrayHasKey('paperWeight', $todo);
         $this->assertArrayHasKey('cutSheetCount', $todo);
         $this->assertArrayHasKey('cost', $todo);
-
-        // Cost structure
         $this->assertIsArray($todo['cost']);
-        $this->assertArrayHasKey('cost', $todo['cost']);
         $this->assertArrayHasKey('paperCost', $todo['cost']);
     }
 
@@ -57,18 +53,14 @@ class MachinePrepareTodoTest extends TestCase
     public function test_offset_press_calculates_cut_sheet_count(): void
     {
         $press = $this->createOffsetPrintingPress();
+        $jobContext = $this->createJobContext(numberOfCopies: 1000, numberOfColors: 4);
+        $gridFitting = $this->createGridFitting(cols: 5, rows: 2);
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
         // 1000 copies, 10 poses per sheet (5x2) = 100 sheets
-        $context = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 4,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
+        $enrichment = $press->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 0);
 
-        $todo = $press->prepareTodo($context);
-
-        $this->assertEquals(100, $todo['cutSheetCount']);
+        $this->assertEquals(100, $enrichment->getCutSheetCount());
     }
 
     /**
@@ -77,18 +69,14 @@ class MachinePrepareTodoTest extends TestCase
     public function test_offset_press_cut_sheet_count_uses_ceiling(): void
     {
         $press = $this->createOffsetPrintingPress();
+        $jobContext = $this->createJobContext(numberOfCopies: 1001, numberOfColors: 4);
+        $gridFitting = $this->createGridFitting(cols: 5, rows: 2);
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
         // 1001 copies, 10 poses per sheet = 101 sheets (ceiling)
-        $context = $this->createTodoContext(
-            numberOfCopies: 1001,
-            numberOfColors: 4,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
+        $enrichment = $press->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 0);
 
-        $todo = $press->prepareTodo($context);
-
-        $this->assertEquals(101, $todo['cutSheetCount']);
+        $this->assertEquals(101, $enrichment->getCutSheetCount());
     }
 
     /**
@@ -97,18 +85,15 @@ class MachinePrepareTodoTest extends TestCase
     public function test_offset_press_calculates_paper_cost(): void
     {
         $press = $this->createOffsetPrintingPress();
+        $jobContext = $this->createJobContext(numberOfCopies: 1000, numberOfColors: 4);
+        $gridFitting = $this->createGridFitting(cols: 5, rows: 2);
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
         // 1000 copies, 10 poses per sheet, 0.10 EUR per sheet
         // Paper cost per product = 0.10 / 10 = 0.01
         // Total paper cost = 1000 * 0.01 = 10.00
-        $context = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 4,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
-
-        $todo = $press->prepareTodo($context);
+        $enrichment = $press->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 0);
+        $todo = $enrichment->toArray();
 
         $this->assertEqualsWithDelta(10.0, $todo['cost']['paperCost'], 0.01);
     }
@@ -119,27 +104,18 @@ class MachinePrepareTodoTest extends TestCase
     public function test_offset_press_cost_increases_with_colors(): void
     {
         $press = $this->createOffsetPrintingPress();
+        $gridFitting = $this->createGridFitting(cols: 5, rows: 2);
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
-        $context1Color = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 1,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
+        $jobContext1Color = $this->createJobContext(numberOfCopies: 1000, numberOfColors: 1);
+        $jobContext4Colors = $this->createJobContext(numberOfCopies: 1000, numberOfColors: 4);
 
-        $context4Colors = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 4,
-            gridFitting: $this->createGridFitting(cols: 5, rows: 2),
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
-
-        $todo1Color = $press->prepareTodo($context1Color);
-        $todo4Colors = $press->prepareTodo($context4Colors);
+        $enrichment1Color = $press->calculateEnrichment($jobContext1Color, $gridFitting, $pressSheet, 0);
+        $enrichment4Colors = $press->calculateEnrichment($jobContext4Colors, $gridFitting, $pressSheet, 0);
 
         $this->assertGreaterThan(
-            $todo1Color['cost']['cost'],
-            $todo4Colors['cost']['cost'],
+            $enrichment1Color->getCost(),
+            $enrichment4Colors->getCost(),
             '4 colors should cost more than 1 color'
         );
     }
@@ -147,19 +123,21 @@ class MachinePrepareTodoTest extends TestCase
     // ==================== CTP MACHINE ====================
 
     /**
-     * Test: CTPMachine prepareTodo returns correct structure.
+     * Test: CTPMachine calculateEnrichment returns correct structure.
      */
     public function test_ctp_machine_prepareTodo_returns_correct_structure(): void
     {
         $ctp = $this->createCTPMachine();
-        $context = $this->createTodoContext(
+        $jobContext = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 4,
             inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
         );
+        $gridFitting = $this->createGridFitting();
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
-        $todo = $ctp->prepareTodo($context);
+        $enrichment = $ctp->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 1000);
+        $todo = $enrichment->toArray();
 
         // Structure assertions
         $this->assertArrayHasKey('numberOfCopies', $todo);
@@ -167,10 +145,7 @@ class MachinePrepareTodoTest extends TestCase
         $this->assertArrayHasKey('cutSheetCount', $todo);
         $this->assertArrayHasKey('inking', $todo);
         $this->assertArrayHasKey('cost', $todo);
-
-        // Cost structure
         $this->assertIsArray($todo['cost']);
-        $this->assertArrayHasKey('cost', $todo['cost']);
         $this->assertArrayHasKey('aluSheetsCost', $todo['cost']);
     }
 
@@ -182,18 +157,19 @@ class MachinePrepareTodoTest extends TestCase
     public function test_ctp_machine_calculates_alu_sheets_cost(): void
     {
         $ctp = $this->createCTPMachine();
+        $jobContext = $this->createJobContext(
+            numberOfCopies: 1000,
+            numberOfColors: 4,
+            inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
+        );
+        $gridFitting = $this->createGridFitting();
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
         // 1020x720mm = 0.7344 sqm
         // 4 colors (CMYK)
         // aluSheetsCost = 11.42 * 0.7344 * 4 = 33.55
-        $context = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 4,
-            inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
-
-        $todo = $ctp->prepareTodo($context);
+        $enrichment = $ctp->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 1000);
+        $todo = $enrichment->toArray();
 
         $expectedAluCost = round(11.42 * 0.7344 * 4, 2);
         $this->assertEqualsWithDelta(
@@ -210,23 +186,25 @@ class MachinePrepareTodoTest extends TestCase
     public function test_ctp_machine_alu_cost_increases_with_colors(): void
     {
         $ctp = $this->createCTPMachine();
+        $gridFitting = $this->createGridFitting();
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
-        $context1Color = $this->createTodoContext(
+        $jobContext1Color = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 1,
             inking: ['recto' => ['K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
         );
-
-        $context4Colors = $this->createTodoContext(
+        $jobContext4Colors = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 4,
             inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
         );
 
-        $todo1Color = $ctp->prepareTodo($context1Color);
-        $todo4Colors = $ctp->prepareTodo($context4Colors);
+        $enrichment1Color = $ctp->calculateEnrichment($jobContext1Color, $gridFitting, $pressSheet, 1000);
+        $enrichment4Colors = $ctp->calculateEnrichment($jobContext4Colors, $gridFitting, $pressSheet, 1000);
+
+        $todo1Color = $enrichment1Color->toArray();
+        $todo4Colors = $enrichment4Colors->toArray();
 
         $this->assertGreaterThan(
             $todo1Color['cost']['aluSheetsCost'],
@@ -241,23 +219,21 @@ class MachinePrepareTodoTest extends TestCase
     public function test_ctp_machine_alu_cost_increases_with_sheet_size(): void
     {
         $ctp = $this->createCTPMachine();
-
-        $contextSmallSheet = $this->createTodoContext(
+        $gridFitting = $this->createGridFitting();
+        $jobContext = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 4,
             inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(520, 360, 0.05),
         );
 
-        $contextLargeSheet = $this->createTodoContext(
-            numberOfCopies: 1000,
-            numberOfColors: 4,
-            inking: ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
-        );
+        $smallSheet = $this->createPressSheet(520, 360, 0.05);
+        $largeSheet = $this->createPressSheet(1020, 720, 0.10);
 
-        $todoSmall = $ctp->prepareTodo($contextSmallSheet);
-        $todoLarge = $ctp->prepareTodo($contextLargeSheet);
+        $enrichmentSmall = $ctp->calculateEnrichment($jobContext, $gridFitting, $smallSheet, 1000);
+        $enrichmentLarge = $ctp->calculateEnrichment($jobContext, $gridFitting, $largeSheet, 1000);
+
+        $todoSmall = $enrichmentSmall->toArray();
+        $todoLarge = $enrichmentLarge->toArray();
 
         $this->assertGreaterThan(
             $todoSmall['cost']['aluSheetsCost'],
@@ -267,21 +243,23 @@ class MachinePrepareTodoTest extends TestCase
     }
 
     /**
-     * Test: CTPMachine includes inking in todo.
+     * Test: CTPMachine includes inking in enrichment.
      */
     public function test_ctp_machine_includes_inking_in_todo(): void
     {
         $ctp = $this->createCTPMachine();
+        $gridFitting = $this->createGridFitting();
+        $pressSheet = $this->createPressSheet(1020, 720, 0.10);
 
         $inking = ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => ['K']];
-        $context = $this->createTodoContext(
+        $jobContext = $this->createJobContext(
             numberOfCopies: 1000,
             numberOfColors: 5,
             inking: $inking,
-            pressSheet: $this->createPressSheet(1020, 720, 0.10),
         );
 
-        $todo = $ctp->prepareTodo($context);
+        $enrichment = $ctp->calculateEnrichment($jobContext, $gridFitting, $pressSheet, 1000);
+        $todo = $enrichment->toArray();
 
         $this->assertEquals($inking, $todo['inking']);
     }
@@ -326,26 +304,21 @@ class MachinePrepareTodoTest extends TestCase
     }
 
     /**
-     * Create a TodoContext for testing.
+     * Create a JobContext for testing.
      */
-    private function createTodoContext(
+    private function createJobContext(
         float $numberOfCopies = 1000,
         float $numberOfColors = 4,
         float $paperWeight = 115,
         array $inking = ['recto' => ['C', 'M', 'Y', 'K'], 'verso' => []],
-        ?GridFittingInterface $gridFitting = null,
-        ?PressSheet $pressSheet = null,
-    ): TodoContext {
-        return new TodoContext(
+    ): JobContext {
+        return new JobContext(
             numberOfCopies: $numberOfCopies,
             numberOfColors: $numberOfColors,
             paperWeight: $paperWeight,
             inking: $inking,
             openPoseDimensions: new Dimensions(300, 200),
             closedPoseDimensions: new Dimensions(300, 200),
-            cutSheetCount: 0,
-            gridFitting: $gridFitting,
-            pressSheet: $pressSheet,
         );
     }
 

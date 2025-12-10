@@ -202,20 +202,6 @@ class Machine implements MachineInterface
     }
 
     /**
-     * Default implementation - returns basic todo with numberOfCopies and cutSheetCount.
-     * Override in subclasses for machine-specific todo requirements.
-     *
-     * @deprecated Use calculateEnrichment() instead
-     */
-    public function prepareTodo(TodoContext $context): array
-    {
-        return [
-            'numberOfCopies' => $context->numberOfCopies,
-            'cutSheetCount' => $context->cutSheetCount,
-        ];
-    }
-
-    /**
      * Default implementation - returns generic enrichment with basic data.
      * Override in subclasses for machine-specific enrichment.
      */
@@ -251,8 +237,9 @@ class Machine implements MachineInterface
         $config = $this->equipmentService->loadById($this->getId());
         $piecesPerHour = $config['pieces-per-hour'] ?? 1000;
 
-        $todo = $action->getTodo();
-        $numberOfCopies = $todo['numberOfCopies'] ?? 0;
+        // Get numberOfCopies from enrichment
+        $enrichmentData = $action->getEnrichment()->toArray();
+        $numberOfCopies = $enrichmentData['numberOfCopies'] ?? 0;
 
         // Calculate run duration based on pieces per hour (in minutes)
         return ($numberOfCopies / $piecesPerHour) * 60;

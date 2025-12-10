@@ -159,46 +159,6 @@ class CTPMachine extends Machine implements CTPMachineInterface
     }
 
     /**
-     * Prepare todo for CTP machine.
-     * Includes cost calculation.
-     *
-     * @deprecated Use calculateEnrichment() instead
-     */
-    public function prepareTodo(TodoContext $context): array
-    {
-        $todo = [
-            'numberOfCopies' => $context->numberOfCopies,
-            'numberOfColors' => $context->numberOfColors,
-            'cutSheetCount' => $context->cutSheetCount,
-            'inking' => $context->inking,
-        ];
-
-        // Calculate cost if pressSheet is available
-        if ($context->pressSheet !== null) {
-            $pressSheetSqm = ($context->pressSheet->getWidth() * $context->pressSheet->getHeight()) / 1000000;
-
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($context->inking));
-            $inkCount = iterator_count($iterator);
-
-            $plakettPrice = round(11.42 * $pressSheetSqm * $inkCount, 2);
-
-            // Run duration calculation
-            $sqm = $pressSheetSqm;
-            $runDuration = ((($sqm * 1.05) / $this->getSqmPerHour()) * 60 * $context->numberOfColors);
-            $runDuration = round($runDuration, 2);
-
-            $cost = round(($runDuration / 60) * $this->getCostPerHour(), 2);
-
-            $todo['cost'] = [
-                'cost' => $cost,
-                'aluSheetsCost' => $plakettPrice,
-            ];
-        }
-
-        return $todo;
-    }
-
-    /**
      * Calculate enrichment for CTP machine.
      */
     public function calculateEnrichment(
