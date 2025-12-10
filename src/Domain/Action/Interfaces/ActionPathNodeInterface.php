@@ -2,6 +2,7 @@
 
 namespace App\Domain\Action\Interfaces;
 
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
@@ -11,7 +12,7 @@ use App\Domain\Sheet\Interfaces\PressSheetInterface;
  * Interface for action path nodes.
  *
  * An ActionPathNode represents a single step in a production path,
- * containing the machine, press sheet, zone, grid fitting, and todo information.
+ * containing the machine, press sheet, zone, grid fitting, and enrichment information.
  */
 interface ActionPathNodeInterface
 {
@@ -36,12 +37,24 @@ interface ActionPathNodeInterface
     public function getGridFitting(): GridFittingInterface;
 
     /**
+     * Get the enrichment data for this action.
+     *
+     * Enrichment contains calculated values like cost, cutSheetCount,
+     * and machine-specific metrics.
+     */
+    public function getEnrichment(): ActionEnrichmentInterface;
+
+    /**
      * Get the todo/work specification for this action.
+     *
+     * @deprecated Use getEnrichment() instead. Will be removed in a future version.
      */
     public function getTodo(): array;
 
     /**
      * Set the todo/work specification.
+     *
+     * @deprecated Use constructor with ActionEnrichmentInterface instead.
      */
     public function setTodo(array $todo): static;
 

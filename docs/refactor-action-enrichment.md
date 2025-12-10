@@ -8,8 +8,8 @@
 | **1** | JobContext bevezetése | ✅ KÉSZ |
 | **2** | ActionEnrichmentInterface | ✅ KÉSZ |
 | **3** | Machine.calculateEnrichment() | ✅ KÉSZ |
-| **4** | ActionPathNode módosítása | ⏳ Következő |
-| **5** | Pipeline processzorok | ⏳ Várakozik |
+| **4** | ActionPathNode módosítása | ✅ KÉSZ |
+| **5** | Pipeline processzorok | ⏳ Következő |
 | **6** | Cleanup | ⏳ Várakozik |
 
 ## Összefoglaló
@@ -701,9 +701,22 @@ class OffsetPrintingPress extends PrintingPress
 
 ---
 
-## Fázis 4: ActionPathNode Módosítása
+## Fázis 4: ActionPathNode Módosítása ✅ KÉSZ
 
 **Cél**: Todo helyett enrichment tárolása.
+
+### Elkészült változtatások
+
+1. **ActionPathNodeInterface bővítve**: `getEnrichment()` metódus hozzáadva
+2. **ActionPathNode módosítva**:
+   - `$enrichment` property hozzáadva (`ActionEnrichmentInterface`)
+   - Konstruktor elfogad `array|ActionEnrichmentInterface`-t (backward compatibility)
+   - `getEnrichment()` metódus implementálva
+   - `getTodo()` és `setTodo()` `@deprecated` jelöléssel ellátva
+   - `toArray()` visszaadja mind az `enrichment` és `todo` kulcsokat
+3. **LegacyArrayEnrichment létrehozva**: Wrapper a régi array formátumhoz
+
+**Tesztek**: 150 teszt, 1121 assertion ✅
 
 ### 4.1 ActionPathNode módosítása
 
@@ -712,13 +725,24 @@ class OffsetPrintingPress extends PrintingPress
 
 class ActionPathNode implements ActionPathNodeInterface
 {
+    protected ActionEnrichmentInterface $enrichment;
+
+    /**
+     * @param array|ActionEnrichmentInterface $todoOrEnrichment Backward compatible
+     */
     public function __construct(
         protected MachineInterface $machine,
         protected PressSheetInterface $pressSheet,
         protected InputSheetInterface $zone,
         protected GridFittingInterface $gridFitting,
-        protected ActionEnrichmentInterface $enrichment,  // todo helyett
-    ) {}
+        array|ActionEnrichmentInterface $todoOrEnrichment
+    ) {
+        if ($todoOrEnrichment instanceof ActionEnrichmentInterface) {
+            $this->enrichment = $todoOrEnrichment;
+        } else {
+            $this->enrichment = new LegacyArrayEnrichment($todoOrEnrichment);
+        }
+    }
 
     public function getEnrichment(): ActionEnrichmentInterface
     {
@@ -730,17 +754,12 @@ class ActionPathNode implements ActionPathNodeInterface
      */
     public function getTodo(): array
     {
-        // Backward compatibility
         return $this->enrichment->toArray();
-    }
-
-    public function calculateCost(): float
-    {
-        return $this->enrichment->getCost();
     }
 
     public function toArray($machine, $pressSheet, $pose): array
     {
+        $enrichmentArray = $this->enrichment->toArray();
         return [
             "machine" => $this->getMachine()->getId(),
             "zone" => [...],
@@ -749,11 +768,52 @@ class ActionPathNode implements ActionPathNodeInterface
             "trimLines" => [...],
             "setupDuration" => $this->calculateSetupDuration(),
             "runDuration" => $this->calculateRunDuration(),
-            "cost" => $this->enrichment->getCost(),
-            "enrichment" => $this->enrichment->toArray(),  // todo helyett
-            // Backward compatibility:
-            "todo" => $this->enrichment->toArray(),
+            "cost" => $this->calculateCost(),
+            "enrichment" => $enrichmentArray,
+            "todo" => $enrichmentArray, // Backward compatibility
         ];
+    }
+}
+```
+
+### 4.2 LegacyArrayEnrichment létrehozva
+
+```php
+// src/Domain/Equipment/Enrichment/LegacyArrayEnrichment.php
+
+/**
+ * Wrapper for legacy todo arrays to implement ActionEnrichmentInterface.
+ * @deprecated Exists only for backward compatibility.
+ */
+readonly class LegacyArrayEnrichment implements ActionEnrichmentInterface
+{
+    public function __construct(private array $todoArray) {}
+
+    public function getCost(): float
+    {
+        // Handle nested ['cost' => ['cost' => X]] structure
+        if (isset($this->todoArray['cost']) && is_array($this->todoArray['cost'])) {
+            return (float) ($this->todoArray['cost']['cost'] ?? 0);
+        }
+        return (float) ($this->todoArray['cost'] ?? 0);
+    }
+
+    public function getCutSheetCount(): float
+    {
+        return (float) ($this->todoArray['cutSheetCount'] ?? 0);
+    }
+
+    public function getCostBreakdown(): array
+    {
+        if (isset($this->todoArray['cost']) && is_array($this->todoArray['cost'])) {
+            return $this->todoArray['cost'];
+        }
+        return ['cost' => $this->getCost()];
+    }
+
+    public function toArray(): array
+    {
+        return $this->todoArray;
     }
 }
 ```
@@ -859,7 +919,7 @@ public function calculateCost(array $actionPath): float
 | **1** | JobContext bevezetése | Alacsony | Unit tesztek | ✅ KÉSZ |
 | **2** | ActionEnrichmentInterface + implementációk | Alacsony | Unit tesztek | ✅ KÉSZ |
 | **3** | Machine.calculateEnrichment() | Közepes | Unit + Integration | ✅ KÉSZ |
-| **4** | ActionPathNode módosítása | Közepes | Integration | ⏳ |
+| **4** | ActionPathNode módosítása | Közepes | Integration | ✅ KÉSZ |
 | **5** | Pipeline processzorok módosítása | Magas | Full regression | ⏳ |
 | **6** | Cleanup | Alacsony | Full regression | ⏳ |
 

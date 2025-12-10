@@ -3,6 +3,8 @@
 namespace App\Domain\Action;
 
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\LegacyArrayEnrichment;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
@@ -10,14 +12,25 @@ use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
 class ActionPathNode implements Interfaces\ActionPathNodeInterface
 {
+    protected ActionEnrichmentInterface $enrichment;
+
+    /**
+     * @param array|ActionEnrichmentInterface $todoOrEnrichment For backward compatibility, accepts both array (legacy) and ActionEnrichmentInterface (new)
+     */
     public function __construct(
         protected MachineInterface $machine,
         protected PressSheetInterface $pressSheet,
         protected InputSheetInterface $zone,
         protected GridFittingInterface $gridFitting,
-        protected array $todo
+        array|ActionEnrichmentInterface $todoOrEnrichment
     )
     {
+        if ($todoOrEnrichment instanceof ActionEnrichmentInterface) {
+            $this->enrichment = $todoOrEnrichment;
+        } else {
+            // Legacy array format - wrap in LegacyArrayEnrichment for backward compatibility
+            $this->enrichment = new LegacyArrayEnrichment($todoOrEnrichment);
+        }
     }
 
     public function getGridFitting(): GridFittingInterface
@@ -79,19 +92,35 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
         return $this->getMachine()->calculateRunDuration($this);
     }
 
-    public function getTodo(): array
+    /**
+     * Get the enrichment data for this action.
+     */
+    public function getEnrichment(): ActionEnrichmentInterface
     {
-        return $this->todo;
+        return $this->enrichment;
     }
 
+    /**
+     * @deprecated Use getEnrichment() instead. Will be removed in a future version.
+     */
+    public function getTodo(): array
+    {
+        return $this->enrichment->toArray();
+    }
+
+    /**
+     * @deprecated Use constructor with ActionEnrichmentInterface instead.
+     */
     public function setTodo(array $todo): static
     {
-        $this->todo = $todo;
+        $this->enrichment = new LegacyArrayEnrichment($todo);
         return $this;
     }
 
     public function toArray($machine, $pressSheet, $pose): array
     {
+        $enrichmentArray = $this->enrichment->toArray();
+
         return [
             "machine" => $this->getMachine()->getId(),
             "zone" => [
@@ -112,7 +141,9 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
             "setupDuration" => $this->calculateSetupDuration(),
             "runDuration" => $this->calculateRunDuration(),
             "cost" => $this->calculateCost(),
-            "todo" => $this->getTodo()
+            "enrichment" => $enrichmentArray,
+            // Backward compatibility: keep 'todo' key with same data
+            "todo" => $enrichmentArray,
         ];
     }
 }
