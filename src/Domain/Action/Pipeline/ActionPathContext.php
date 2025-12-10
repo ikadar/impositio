@@ -4,6 +4,7 @@ namespace App\Domain\Action\Pipeline;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Job\JobContext;
 
 /**
  * Context object passed through the pipeline.
@@ -14,15 +15,26 @@ class ActionPathContext
     /**
      * @param ActionPathNodeInterface[] $nodes The current list of action path nodes
      * @param float $cutSheetCount Current sheet count in the process
-     * @param ExtensionParams $params Extension parameters (immutable)
+     * @param JobContext $jobContext Job-level parameters (immutable)
      * @param ActionTreeNodeInterface[] $originalPath Original flat path for reference
      */
     public function __construct(
         public array $nodes,
         public float $cutSheetCount,
-        public readonly ExtensionParams $params,
+        public readonly JobContext $jobContext,
         public readonly array $originalPath,
     ) {}
+
+    /**
+     * @deprecated Use $jobContext instead
+     */
+    public function __get(string $name): mixed
+    {
+        if ($name === 'params') {
+            return $this->jobContext;
+        }
+        throw new \InvalidArgumentException("Property {$name} does not exist");
+    }
 
     /**
      * Create a new context with updated nodes.
@@ -32,7 +44,7 @@ class ActionPathContext
         return new self(
             $nodes,
             $this->cutSheetCount,
-            $this->params,
+            $this->jobContext,
             $this->originalPath
         );
     }
@@ -45,7 +57,7 @@ class ActionPathContext
         return new self(
             $this->nodes,
             $cutSheetCount,
-            $this->params,
+            $this->jobContext,
             $this->originalPath
         );
     }

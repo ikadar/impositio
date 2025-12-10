@@ -1,0 +1,58 @@
+{
+    "2x2U": {
+        "cols": 2,
+        "rows": 2,
+        "rotated": false,
+        "pathCost": 104.59,
+        "pathDuration": 27.34
+    },
+    "2x3U": {
+        "cols": 2,
+        "rows": 3,
+        "rotated": false,
+        "pathCost": 96.54,
+        "pathDuration": 26.71
+    },
+    "3x1R": {
+        "cols": 3,
+        "rows": 1,
+        "rotated": true,
+        "pathCost": 96.25999999999999,
+        "pathDuration": 26.38
+    },
+    "3x2U": {
+        "cols": 3,
+        "rows": 2,
+        "rotated": false,
+        "pathCost": 109.74000000000001,
+        "pathDuration": 28.37
+    },
+    "3x3U": {
+        "cols": 3,
+        "rows": 3,
+        "rotated": false,
+        "pathCost": 103.08,
+        "pathDuration": 27.96
+    },
+    "4x2R": {
+        "cols": 4,
+        "rows": 2,
+        "rotated": true,
+        "pathCost": 92.53,
+        "pathDuration": 26.400000000000002
+    },
+    "5x1R": {
+        "cols": 5,
+        "rows": 1,
+        "rotated": true,
+        "pathCost": 113.74,
+        "pathDuration": 28.62
+    },
+    "5x2R": {
+        "cols": 5,
+        "rows": 2,
+        "rotated": true,
+        "pathCost": 101.73,
+        "pathDuration": 27.87
+    }
+}

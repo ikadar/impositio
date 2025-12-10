@@ -1,0 +1,53 @@
+{
+    "pathCost": 22.68,
+    "pathDuration": 17.95,
+    "pressSheet": "520x360mm",
+    "nodeCount": 2,
+    "nodes": [
+        {
+            "machine": "Heidelberg GTO",
+            "cost": 10.21,
+            "setupDuration": 10,
+            "runDuration": 7.5,
+            "gridFitting": {
+                "cols": 2,
+                "rows": 1,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 1,
+                "cutSheetCount": 1000,
+                "paperWeight": 0,
+                "cost": {
+                    "cost": 10.21,
+                    "paperCost": 9.94
+                }
+            }
+        },
+        {
+            "machine": "ctp-machine",
+            "cost": 0.39,
+            "setupDuration": 0,
+            "runDuration": 0.45,
+            "gridFitting": {
+                "cols": 2,
+                "rows": 1,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 1,
+                "cutSheetCount": 1000,
+                "cost": {
+                    "cost": 0.39,
+                    "aluSheetsCost": 2.14
+                },
+                "inking": {
+                    "rectoCount": 1,
+                    "versoCount": 0
+                }
+            }
+        }
+    ]
+}

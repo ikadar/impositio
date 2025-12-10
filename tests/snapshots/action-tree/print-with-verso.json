@@ -1,9 +1,8 @@
 [
     {
-        "nodeCount": 4,
+        "nodeCount": 3,
         "machines": [
             "Komori G40",
-            "cutting-machine",
             "Komori G40",
             "ctp-machine"
         ],

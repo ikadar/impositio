@@ -25,12 +25,12 @@ class TodoPreparationProcessor implements ActionPathProcessorInterface
 
             // Create TodoContext for the machine
             $todoContext = new TodoContext(
-                numberOfCopies: $context->params->numberOfCopies,
-                numberOfColors: $context->params->numberOfColors,
-                paperWeight: $context->params->paperWeight,
-                inking: $context->params->inking,
-                openPoseDimensions: $context->params->openPoseDimensions,
-                closedPoseDimensions: $context->params->closedPoseDimensions,
+                numberOfCopies: $context->jobContext->numberOfCopies,
+                numberOfColors: $context->jobContext->numberOfColors,
+                paperWeight: $context->jobContext->paperWeight,
+                inking: $context->jobContext->inking,
+                openPoseDimensions: $context->jobContext->openPoseDimensions,
+                closedPoseDimensions: $context->jobContext->closedPoseDimensions,
                 cutSheetCount: $cutSheetCount,
                 gridFitting: $node->getGridFitting(),
                 pressSheet: $node->getPressSheet(),
@@ -54,7 +54,7 @@ class TodoPreparationProcessor implements ActionPathProcessorInterface
         return new ActionPathContext(
             $nodes,
             $cutSheetCount,
-            $context->params,
+            $context->jobContext,
             $context->originalPath
         );
     }

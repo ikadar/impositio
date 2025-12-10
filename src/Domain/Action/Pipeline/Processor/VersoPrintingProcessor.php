@@ -41,7 +41,7 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
         return new ActionPathContext(
             $newNodes,
             $context->cutSheetCount,
-            $context->params,
+            $context->jobContext,
             $context->originalPath
         );
     }
@@ -51,7 +51,7 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
         ActionPathContext $context
     ): ?ActionPathNode {
         // Check if there's verso inking
-        $versoInking = $this->propertyAccessor->getValue($context->params->inking, '[verso]');
+        $versoInking = $this->propertyAccessor->getValue($context->jobContext->inking, '[verso]');
 
         if (!is_array($versoInking) || $versoInking === []) {
             return null;
@@ -59,9 +59,9 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
 
         // Create verso printing action with the same machine
         $todo = [
-            'numberOfCopies' => $context->params->numberOfCopies,
-            'numberOfColors' => $context->params->numberOfColors,
-            'paperWeight' => $context->params->paperWeight,
+            'numberOfCopies' => $context->jobContext->numberOfCopies,
+            'numberOfColors' => $context->jobContext->numberOfColors,
+            'paperWeight' => $context->jobContext->paperWeight,
             'cutSheetCount' => $context->cutSheetCount,
             'dryTimeBetweenSequences' => 0,
         ];

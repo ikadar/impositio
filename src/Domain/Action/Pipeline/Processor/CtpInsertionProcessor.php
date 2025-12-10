@@ -40,7 +40,7 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
         return new ActionPathContext(
             $newNodes,
             $context->cutSheetCount,
-            $context->params,
+            $context->jobContext,
             $context->originalPath
         );
     }
@@ -53,13 +53,15 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
 
         // Create TodoContext for CTP machine
         $todoContext = new TodoContext(
-            numberOfCopies: $context->params->numberOfCopies,
-            numberOfColors: $context->params->numberOfColors,
-            paperWeight: $context->params->paperWeight,
-            inking: $context->params->inking,
-            openPoseDimensions: $context->params->openPoseDimensions,
-            closedPoseDimensions: $context->params->closedPoseDimensions,
+            numberOfCopies: $context->jobContext->numberOfCopies,
+            numberOfColors: $context->jobContext->numberOfColors,
+            paperWeight: $context->jobContext->paperWeight,
+            inking: $context->jobContext->inking,
+            openPoseDimensions: $context->jobContext->openPoseDimensions,
+            closedPoseDimensions: $context->jobContext->closedPoseDimensions,
             cutSheetCount: $context->cutSheetCount,
+            gridFitting: $printNode->getGridFitting(),
+            pressSheet: $printNode->getPressSheet(),
         );
 
         $todo = $ctpMachine->prepareTodo($todoContext);

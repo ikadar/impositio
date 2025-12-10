@@ -54,7 +54,7 @@ class CuttingInsertionProcessor implements ActionPathProcessorInterface
         return new ActionPathContext(
             $newNodes,
             $context->cutSheetCount,
-            $context->params,
+            $context->jobContext,
             $context->originalPath
         );
     }
@@ -105,9 +105,9 @@ class CuttingInsertionProcessor implements ActionPathProcessorInterface
 
         $todo = [
             'numberOfCuts' => $cuttingInfo['numberOfCuts'],
-            'numberOfCopies' => $context->params->numberOfCopies,
-            'numberOfColors' => $context->params->numberOfColors,
-            'paperWeight' => $context->params->paperWeight,
+            'numberOfCopies' => $context->jobContext->numberOfCopies,
+            'numberOfColors' => $context->jobContext->numberOfColors,
+            'paperWeight' => $context->jobContext->paperWeight,
             'cutSheetCount' => $context->cutSheetCount,
             'trimCuts' => $cuttingInfo['trimCuts'],
             'cuts' => $cuttingInfo['cutCuts'],

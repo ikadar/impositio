@@ -7,7 +7,7 @@ use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
-use App\Domain\Action\Pipeline\ExtensionParams;
+use App\Domain\Job\JobContext;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
@@ -80,7 +80,7 @@ class ActionTreeProcessor
      */
     public function extend(array $flatActionPath, TreeBuildContext $context): array
     {
-        $params = new ExtensionParams(
+        $jobContext = new JobContext(
             numberOfCopies: $context->getNumberOfCopies(),
             numberOfColors: $context->getNumberOfColors(),
             paperWeight: $context->getPaperWeight(),
@@ -92,7 +92,7 @@ class ActionTreeProcessor
         $pipelineContext = new ActionPathContext(
             nodes: [],
             cutSheetCount: $context->getNumberOfCopies(),
-            params: $params,
+            jobContext: $jobContext,
             originalPath: $flatActionPath,
         );
 

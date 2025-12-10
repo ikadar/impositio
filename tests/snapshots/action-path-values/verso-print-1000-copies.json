@@ -1,0 +1,87 @@
+{
+    "pathCost": 180.22,
+    "pathDuration": 58.36,
+    "pressSheet": "880x640mm",
+    "nodeCount": 4,
+    "nodes": [
+        {
+            "machine": "Komori G40",
+            "cost": 60.68,
+            "setupDuration": 23.33,
+            "runDuration": 0.94,
+            "gridFitting": {
+                "cols": 4,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 5,
+                "cutSheetCount": 1000,
+                "paperWeight": 0
+            }
+        },
+        {
+            "machine": "cutting-machine",
+            "cost": 1.35,
+            "setupDuration": 3,
+            "runDuration": 0,
+            "gridFitting": {
+                "cols": 4,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 5,
+                "cutSheetCount": 1000,
+                "paperWeight": 0
+            }
+        },
+        {
+            "machine": "Komori G40",
+            "cost": 60.68,
+            "setupDuration": 23.33,
+            "runDuration": 0.94,
+            "gridFitting": {
+                "cols": 4,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 5,
+                "cutSheetCount": 8000,
+                "paperWeight": 0,
+                "cost": {
+                    "cost": 60.68,
+                    "paperCost": 9.72
+                }
+            }
+        },
+        {
+            "machine": "ctp-machine",
+            "cost": 5.91,
+            "setupDuration": 0,
+            "runDuration": 6.82,
+            "gridFitting": {
+                "cols": 4,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 1000,
+                "numberOfColors": 5,
+                "cutSheetCount": 8000,
+                "cost": {
+                    "cost": 5.91,
+                    "aluSheetsCost": 32.16
+                },
+                "inking": {
+                    "rectoCount": 4,
+                    "versoCount": 1
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "pathCost": 209.81999999999996,
+    "pathDuration": 34.62,
+    "pressSheet": "1020x720mm",
+    "nodeCount": 2,
+    "nodes": [
+        {
+            "machine": "Komori G40",
+            "cost": 68.75,
+            "setupDuration": 20,
+            "runDuration": 7.5,
+            "gridFitting": {
+                "cols": 5,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 10000,
+                "numberOfColors": 4,
+                "cutSheetCount": 10000,
+                "paperWeight": 0,
+                "cost": {
+                    "cost": 68.75,
+                    "paperCost": 101.35
+                }
+            }
+        },
+        {
+            "machine": "ctp-machine",
+            "cost": 6.17,
+            "setupDuration": 0,
+            "runDuration": 7.12,
+            "gridFitting": {
+                "cols": 5,
+                "rows": 2,
+                "rotated": true
+            },
+            "todo": {
+                "numberOfCopies": 10000,
+                "numberOfColors": 4,
+                "cutSheetCount": 10000,
+                "cost": {
+                    "cost": 6.17,
+                    "aluSheetsCost": 33.55
+                },
+                "inking": {
+                    "rectoCount": 4,
+                    "versoCount": 0
+                }
+            }
+        }
+    ]
+}

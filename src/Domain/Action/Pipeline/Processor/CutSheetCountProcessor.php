@@ -53,7 +53,7 @@ class CutSheetCountProcessor implements ActionPathProcessorInterface
         return new ActionPathContext(
             $newNodes,
             $cutSheetCount,
-            $context->params,
+            $context->jobContext,
             $context->originalPath
         );
     }
