@@ -4,10 +4,15 @@ namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\CTPEnrichment;
 use App\Domain\Equipment\Interfaces\CTPMachineInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class CTPMachine extends Machine implements CTPMachineInterface
@@ -156,6 +161,8 @@ class CTPMachine extends Machine implements CTPMachineInterface
     /**
      * Prepare todo for CTP machine.
      * Includes cost calculation.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -189,5 +196,38 @@ class CTPMachine extends Machine implements CTPMachineInterface
         }
 
         return $todo;
+    }
+
+    /**
+     * Calculate enrichment for CTP machine.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        $pressSheetSqm = ($pressSheet->getWidth() * $pressSheet->getHeight()) / 1000000;
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($jobContext->inking));
+        $inkCount = iterator_count($iterator);
+
+        $plakettPrice = round(11.42 * $pressSheetSqm * $inkCount, 2);
+
+        // Run duration calculation
+        $sqm = $pressSheetSqm;
+        $runDuration = ((($sqm * 1.05) / $this->getSqmPerHour()) * 60 * $jobContext->numberOfColors);
+        $runDuration = round($runDuration, 2);
+
+        $cost = round(($runDuration / 60) * $this->getCostPerHour(), 2);
+
+        return new CTPEnrichment(
+            cost: $cost,
+            cutSheetCount: $cutSheetCount,
+            aluSheetsCost: $plakettPrice,
+            numberOfCopies: $jobContext->numberOfCopies,
+            numberOfColors: $jobContext->numberOfColors,
+            inking: $jobContext->inking,
+        );
     }
 }

@@ -4,9 +4,14 @@ namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\OffsetPressEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\OffsetPrintingPressInterface;
 use App\Domain\Geometry\Dimensions;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressInterface
@@ -174,6 +179,8 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
     /**
      * Prepare todo for offset printing press.
      * Includes cost calculation based on grid fitting.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -205,6 +212,41 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
         }
 
         return $todo;
+    }
+
+    /**
+     * Calculate enrichment for offset printing press.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        $productsPerSheet = count($gridFitting->getTiles());
+        $paperCostPerProduct = $pressSheet->getPrice() / $productsPerSheet;
+        $paperCost = round($jobContext->numberOfCopies * $paperCostPerProduct, 2);
+
+        $numberOfPrintingSheets = ceil($jobContext->numberOfCopies / $productsPerSheet);
+
+        // Setup duration
+        $setupDuration = $this->getBaseSetupDuration() + ($jobContext->numberOfColors * $this->getSetupDurationPerColor());
+
+        // Run duration calculation
+        $numberOfStackReplenishments = (($numberOfPrintingSheets * ($jobContext->paperWeight / 115) / 100)) / $this->getMaxInputStackHeight();
+        $runDuration = ($numberOfStackReplenishments * $this->getStackReplenishmentDuration()) + (($numberOfPrintingSheets / $this->getSheetsPerHour()) * 60);
+
+        $duration = $setupDuration + $runDuration;
+        $cost = round(($duration / 60) * $this->getCostPerHour(), 2);
+
+        return new OffsetPressEnrichment(
+            cost: $cost,
+            cutSheetCount: $numberOfPrintingSheets,
+            paperCost: $paperCost,
+            numberOfCopies: $jobContext->numberOfCopies,
+            numberOfColors: $jobContext->numberOfColors,
+            paperWeight: $jobContext->paperWeight,
+        );
     }
 
     public function calculateCost(ActionPathNodeInterface $action): float | array

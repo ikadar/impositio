@@ -3,6 +3,11 @@
 namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\CutoutEnrichment;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
 /**
  * Cutout machine for die-cutting operations.
@@ -30,6 +35,8 @@ class CutoutMachine extends Machine
 
     /**
      * Prepare todo for cutout machine.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -45,5 +52,29 @@ class CutoutMachine extends Machine
                 'height' => $context->closedPoseDimensions->getHeight(),
             ],
         ];
+    }
+
+    /**
+     * Calculate enrichment for cutout machine.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        return new CutoutEnrichment(
+            cost: 0.0, // Cost is calculated later by calculateCost()
+            cutSheetCount: $cutSheetCount,
+            numberOfCopies: $jobContext->numberOfCopies,
+            openPoseDimensions: [
+                'width' => $jobContext->openPoseDimensions->getWidth(),
+                'height' => $jobContext->openPoseDimensions->getHeight(),
+            ],
+            closedPoseDimensions: [
+                'width' => $jobContext->closedPoseDimensions->getWidth(),
+                'height' => $jobContext->closedPoseDimensions->getHeight(),
+            ],
+        );
     }
 }

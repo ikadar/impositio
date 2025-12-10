@@ -3,9 +3,14 @@
 namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\FolderEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\FolderInterface;
 use App\Domain\Geometry\Dimensions;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class Folder extends Machine implements FolderInterface
@@ -217,6 +222,8 @@ class Folder extends Machine implements FolderInterface
     /**
      * Prepare todo for folder.
      * Required by calculateCost/calculateSetupDuration/calculateRunDuration.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -235,5 +242,32 @@ class Folder extends Machine implements FolderInterface
             'cutSheetCount' => $context->cutSheetCount,
             'numberOfCopies' => $context->numberOfCopies,
         ];
+    }
+
+    /**
+     * Calculate enrichment for folder.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        $inputSheetLength = $jobContext->openPoseDimensions->getHeight() / 1000;
+
+        return new FolderEnrichment(
+            cost: 0.0, // Cost is calculated later by calculateCost()
+            cutSheetCount: $cutSheetCount,
+            numberOfCopies: $jobContext->numberOfCopies,
+            inputSheetLength: $inputSheetLength,
+            openPoseDimensions: [
+                'width' => $jobContext->openPoseDimensions->getWidth(),
+                'height' => $jobContext->openPoseDimensions->getHeight(),
+            ],
+            closedPoseDimensions: [
+                'width' => $jobContext->closedPoseDimensions->getWidth(),
+                'height' => $jobContext->closedPoseDimensions->getHeight(),
+            ],
+        );
     }
 }

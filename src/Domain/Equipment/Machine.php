@@ -4,10 +4,15 @@ namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\GenericEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class Machine implements MachineInterface
@@ -199,6 +204,8 @@ class Machine implements MachineInterface
     /**
      * Default implementation - returns basic todo with numberOfCopies and cutSheetCount.
      * Override in subclasses for machine-specific todo requirements.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -206,6 +213,23 @@ class Machine implements MachineInterface
             'numberOfCopies' => $context->numberOfCopies,
             'cutSheetCount' => $context->cutSheetCount,
         ];
+    }
+
+    /**
+     * Default implementation - returns generic enrichment with basic data.
+     * Override in subclasses for machine-specific enrichment.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        return new GenericEnrichment(
+            cost: 0.0,
+            cutSheetCount: $cutSheetCount,
+            numberOfCopies: $jobContext->numberOfCopies,
+        );
     }
 
     /**

@@ -93,6 +93,8 @@ class PrintingPress extends Machine implements PrintingPressInterface
     /**
      * Prepare todo for printing press.
      * Required by calculateCost/calculateSetupDuration/calculateRunDuration.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {

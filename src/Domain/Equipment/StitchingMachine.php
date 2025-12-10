@@ -4,9 +4,14 @@ namespace App\Domain\Equipment;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
+use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
+use App\Domain\Equipment\Enrichment\GenericEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\FolderInterface;
 use App\Domain\Geometry\Dimensions;
+use App\Domain\Job\JobContext;
+use App\Domain\Layout\Interfaces\GridFittingInterface;
+use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
 
 class StitchingMachine extends Machine implements FolderInterface
@@ -137,6 +142,8 @@ class StitchingMachine extends Machine implements FolderInterface
 
     /**
      * Prepare todo for stitching machine.
+     *
+     * @deprecated Use calculateEnrichment() instead
      */
     public function prepareTodo(TodoContext $context): array
     {
@@ -144,5 +151,21 @@ class StitchingMachine extends Machine implements FolderInterface
             'numberOfCopies' => $context->numberOfCopies,
             'cutSheetCount' => $context->cutSheetCount,
         ];
+    }
+
+    /**
+     * Calculate enrichment for stitching machine.
+     */
+    public function calculateEnrichment(
+        JobContext $jobContext,
+        GridFittingInterface $gridFitting,
+        PressSheetInterface $pressSheet,
+        float $cutSheetCount,
+    ): ActionEnrichmentInterface {
+        return new GenericEnrichment(
+            cost: 0.0, // Cost is calculated later by calculateCost()
+            cutSheetCount: $cutSheetCount,
+            numberOfCopies: $jobContext->numberOfCopies,
+        );
     }
 }

@@ -6,9 +6,9 @@
 |-------|---------|---------|
 | **0** | Regressziós tesztek | ✅ KÉSZ |
 | **1** | JobContext bevezetése | ✅ KÉSZ |
-| **2** | ActionEnrichmentInterface | ⏳ Következő |
-| **3** | Machine.calculateEnrichment() | ⏳ Várakozik |
-| **4** | ActionPathNode módosítása | ⏳ Várakozik |
+| **2** | ActionEnrichmentInterface | ✅ KÉSZ |
+| **3** | Machine.calculateEnrichment() | ✅ KÉSZ |
+| **4** | ActionPathNode módosítása | ⏳ Következő |
 | **5** | Pipeline processzorok | ⏳ Várakozik |
 | **6** | Cleanup | ⏳ Várakozik |
 
@@ -390,9 +390,25 @@ class ActionPathContext
 
 ---
 
-## Fázis 2: ActionEnrichmentInterface Bevezetése
+## Fázis 2: ActionEnrichmentInterface Bevezetése ✅ KÉSZ
 
 **Cél**: Közös interface a machine-specifikus enrichment-ekhez.
+
+### Elkészült osztályok
+
+- `src/Domain/Equipment/Enrichment/ActionEnrichmentInterface.php` - Közös interface
+- `src/Domain/Equipment/Enrichment/OffsetPressEnrichment.php` - Offset nyomda enrichment
+- `src/Domain/Equipment/Enrichment/CTPEnrichment.php` - CTP enrichment
+- `src/Domain/Equipment/Enrichment/CuttingEnrichment.php` - Vágógép enrichment
+- `src/Domain/Equipment/Enrichment/FolderEnrichment.php` - Hajtogató enrichment
+- `src/Domain/Equipment/Enrichment/CutoutEnrichment.php` - Stanc enrichment
+- `src/Domain/Equipment/Enrichment/GenericEnrichment.php` - Általános enrichment
+
+### Unit tesztek
+
+- `tests/Unit/Domain/Equipment/Enrichment/ActionEnrichmentTest.php` - 18 teszt
+
+**Összesen**: 150 teszt, 1121 assertion ✅
 
 ### 2.1 Interface definiálása
 
@@ -592,9 +608,25 @@ readonly class FolderEnrichment implements ActionEnrichmentInterface
 
 ---
 
-## Fázis 3: Machine Interface Bővítése
+## Fázis 3: Machine Interface Bővítése ✅ KÉSZ
 
 **Cél**: A machine-ek enrichment-et adjanak vissza todo helyett.
+
+### Elkészült változtatások
+
+1. **MachineInterface bővítve**: `calculateEnrichment()` metódus hozzáadva
+2. **Implementált machine-ek**:
+   - `Machine` (base) - GenericEnrichment visszaadása
+   - `OffsetPrintingPress` - OffsetPressEnrichment
+   - `CTPMachine` - CTPEnrichment
+   - `Folder` - FolderEnrichment
+   - `CutoutMachine` - CutoutEnrichment
+   - `StitchingMachine` - GenericEnrichment
+   - `PrintingPress` - Örökli a base implementációt
+
+3. **prepareTodo() metódusok** `@deprecated` jelöléssel ellátva
+
+**Tesztek**: 150 teszt, 1121 assertion ✅
 
 ### 3.1 MachineInterface bővítése
 
@@ -825,8 +857,8 @@ public function calculateCost(array $actionPath): float
 |-------|---------|----------|---------|---------|
 | **0** | Regressziós tesztek létrehozása | Nincs | Új tesztek | ✅ KÉSZ |
 | **1** | JobContext bevezetése | Alacsony | Unit tesztek | ✅ KÉSZ |
-| **2** | ActionEnrichmentInterface + implementációk | Alacsony | Unit tesztek | ⏳ |
-| **3** | Machine.calculateEnrichment() | Közepes | Unit + Integration | ⏳ |
+| **2** | ActionEnrichmentInterface + implementációk | Alacsony | Unit tesztek | ✅ KÉSZ |
+| **3** | Machine.calculateEnrichment() | Közepes | Unit + Integration | ✅ KÉSZ |
 | **4** | ActionPathNode módosítása | Közepes | Integration | ⏳ |
 | **5** | Pipeline processzorok módosítása | Magas | Full regression | ⏳ |
 | **6** | Cleanup | Alacsony | Full regression | ⏳ |
