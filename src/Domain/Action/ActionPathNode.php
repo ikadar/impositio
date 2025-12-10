@@ -13,16 +13,19 @@ use App\Domain\Sheet\Interfaces\PressSheetInterface;
 class ActionPathNode implements Interfaces\ActionPathNodeInterface
 {
     protected ActionEnrichmentInterface $enrichment;
+    protected ?PrintActionParams $printParams = null;
 
     /**
      * @param array|ActionEnrichmentInterface $todoOrEnrichment For backward compatibility, accepts both array (legacy) and ActionEnrichmentInterface (new)
+     * @param PrintActionParams|null $printParams Print-specific parameters (inking). Only set for print actions.
      */
     public function __construct(
         protected MachineInterface $machine,
         protected PressSheetInterface $pressSheet,
         protected InputSheetInterface $zone,
         protected GridFittingInterface $gridFitting,
-        array|ActionEnrichmentInterface $todoOrEnrichment
+        array|ActionEnrichmentInterface $todoOrEnrichment,
+        ?PrintActionParams $printParams = null,
     )
     {
         if ($todoOrEnrichment instanceof ActionEnrichmentInterface) {
@@ -31,6 +34,7 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
             // Legacy array format - wrap in LegacyArrayEnrichment for backward compatibility
             $this->enrichment = new LegacyArrayEnrichment($todoOrEnrichment);
         }
+        $this->printParams = $printParams;
     }
 
     public function getGridFitting(): GridFittingInterface
@@ -114,6 +118,25 @@ class ActionPathNode implements Interfaces\ActionPathNodeInterface
     public function setTodo(array $todo): static
     {
         $this->enrichment = new LegacyArrayEnrichment($todo);
+        return $this;
+    }
+
+    /**
+     * Get print-specific parameters if this is a print action.
+     * Returns null for non-print actions (cut, fold, etc.)
+     */
+    public function getPrintParams(): ?PrintActionParams
+    {
+        return $this->printParams;
+    }
+
+    /**
+     * Set print-specific parameters.
+     * Used when creating verso print actions from recto actions.
+     */
+    public function setPrintParams(?PrintActionParams $printParams): static
+    {
+        $this->printParams = $printParams;
         return $this;
     }
 

@@ -7,9 +7,12 @@ use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Equipment\MachineType;
 use App\Domain\Layout\Calculator;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+
+// Note: Uses ProcessAbstractAction for print actions which includes PrintActionParams
 
 /**
  * Builds action trees from abstract actions.
@@ -33,7 +36,7 @@ class ActionTreeBuilder
      * @param PressSheetInterface $pressSheet The press sheet to use
      * @param InputSheetInterface $zone The zone/input sheet
      * @param array $inking Inking specification ['recto' => [...], 'verso' => [...]]
-     * @param TreeBuildContext $context Build context with dimensions and other state
+     * @param PartProductionContext $context Part production context with dimensions and other state
      * @return ActionTreeNodeInterface[] Root nodes of the built tree
      */
     public function buildTree(
@@ -41,7 +44,7 @@ class ActionTreeBuilder
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
         array $inking,
-        TreeBuildContext $context,
+        PartProductionContext $context,
     ): array {
         return $this->build($abstractActions, $pressSheet, $zone, $inking, $context);
     }
@@ -56,7 +59,7 @@ class ActionTreeBuilder
      * @param PressSheetInterface $pressSheet The press sheet
      * @param InputSheetInterface $zone Current zone (may change through recursion)
      * @param array $inking Inking specification
-     * @param TreeBuildContext $context Build context
+     * @param PartProductionContext $context Part production context
      * @return ActionTreeNodeInterface[] Tree nodes for this level
      */
     private function build(
@@ -64,7 +67,7 @@ class ActionTreeBuilder
         PressSheetInterface $pressSheet,
         InputSheetInterface $zone,
         array $inking,
-        TreeBuildContext $context,
+        PartProductionContext $context,
     ): array {
         /** @var AbstractActionInterface|null $abstractAction */
         $abstractAction = array_shift($abstractActions);
@@ -106,12 +109,19 @@ class ActionTreeBuilder
             foreach ($action->getGridFittings() as $gridFitting) {
                 $gridFitting->getCutSheet()->setContentType("Sheet");
 
+                // Get PrintActionParams from ProcessAbstractAction if this is a print action
+                $printParams = null;
+                if ($abstractAction instanceof ProcessAbstractAction && $abstractAction->isPrintAction()) {
+                    $printParams = $abstractAction->getPrintParams();
+                }
+
                 $node = new ActionTreeNode(
                     $action->getMachine(),
                     $action->getPressSheet(),
                     $action->getZone(),
                     $gridFitting,
-                    []
+                    [],
+                    $printParams
                 );
 
                 $node->setPrevActions($this->build(
@@ -134,10 +144,10 @@ class ActionTreeBuilder
      *
      * @param MachineInterface[] $machines Available machines
      * @param array $inking Inking specification
-     * @param TreeBuildContext $context Build context with full inking
+     * @param PartProductionContext $context Part production context with full inking
      * @return MachineInterface[] Machines with sufficient color capacity
      */
-    private function filterMachinesByColorCapability(array $machines, array $inking, TreeBuildContext $context): array
+    private function filterMachinesByColorCapability(array $machines, array $inking, PartProductionContext $context): array
     {
         $versoInking = $this->propertyAccessor->getValue($context->getInking(), "[verso]") ?: [];
         $maxColorsPerSide = max(count($inking["recto"] ?? []), count($versoInking));

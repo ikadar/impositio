@@ -9,7 +9,7 @@ use App\Domain\Equipment\Enrichment\GenericEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\FolderInterface;
 use App\Domain\Geometry\Dimensions;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -144,7 +144,7 @@ class StitchingMachine extends Machine implements FolderInterface
      * Calculate enrichment for stitching machine.
      */
     public function calculateEnrichment(
-        JobContext $jobContext,
+        PartProductionContext $jobContext,
         GridFittingInterface $gridFitting,
         PressSheetInterface $pressSheet,
         float $cutSheetCount,

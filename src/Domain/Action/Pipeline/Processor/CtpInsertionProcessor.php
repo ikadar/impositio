@@ -69,12 +69,17 @@ class CtpInsertionProcessor implements ActionPathProcessorInterface
             $context->cutSheetCount,
         );
 
+        // CTP action inherits the printParams from the print node it serves.
+        // This allows CTP to know the number of plates needed (= colors in inking).
+        $printParams = $printNode->getPrintParams();
+
         return new ActionPathNode(
             $ctpMachine,
             $printNode->getPressSheet(),
             $printNode->getZone(),
             $gridFitting,
-            $enrichment
+            $enrichment,
+            $printParams
         );
     }
 

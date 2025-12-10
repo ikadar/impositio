@@ -8,6 +8,7 @@ use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
 use App\Domain\Geometry\Interfaces\DimensionsInterface;
 use App\Domain\Layout\Calculator;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -36,7 +37,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Current build context (set by process() or setters for backward compatibility).
      */
-    private ?TreeBuildContext $context = null;
+    private ?PartProductionContext $context = null;
 
     private ActionTreeBuilder $builder;
     private ActionTreeFlattener $flattener;
@@ -70,7 +71,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the open pose dimensions.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getOpenPoseDimensions(): DimensionsInterface
     {
@@ -91,7 +92,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the closed pose dimensions.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getClosedPoseDimensions(): DimensionsInterface
     {
@@ -112,7 +113,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the number of copies.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getNumberOfCopies(): float
     {
@@ -133,7 +134,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the number of colors.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getNumberOfColors(): float
     {
@@ -154,7 +155,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the paper weight.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getPaperWeight(): float
     {
@@ -175,7 +176,7 @@ class ActionTree implements ActionTreeInterface
     /**
      * Get the inking specification.
      *
-     * @deprecated Access via TreeBuildContext instead
+     * @deprecated Access via PartProductionContext instead
      */
     public function getInking(): array
     {
@@ -283,13 +284,13 @@ class ActionTree implements ActionTreeInterface
         array $inking,
     ): array {
         // Create immutable context from parameters
-        $this->context = new TreeBuildContext(
-            $openPoseDimensions,
-            $closedPoseDimensions,
-            $numberOfCopies,
-            $numberOfColors,
-            $paperWeight,
-            $inking
+        $this->context = new PartProductionContext(
+            numberOfCopies: $numberOfCopies,
+            numberOfColors: $numberOfColors,
+            paperWeight: $paperWeight,
+            inking: $inking,
+            openPoseDimensions: $openPoseDimensions,
+            closedPoseDimensions: $closedPoseDimensions,
         );
 
         return $this->processor->process($abstractActions, $pressSheets, $zone, $this->context);
@@ -320,28 +321,28 @@ class ActionTree implements ActionTreeInterface
         ?float $numberOfColors = null,
         ?float $paperWeight = null,
         ?array $inking = null,
-    ): TreeBuildContext {
+    ): PartProductionContext {
         // If no context exists, create a minimal one with the provided value
         if ($this->context === null) {
             // Create placeholder dimensions if needed
             $defaultDimensions = new \App\Domain\Geometry\Dimensions(0, 0);
-            return new TreeBuildContext(
-                $openPoseDimensions ?? $defaultDimensions,
-                $closedPoseDimensions ?? $defaultDimensions,
-                $numberOfCopies ?? 0,
-                $numberOfColors ?? 0,
-                $paperWeight ?? 0,
-                $inking ?? []
+            return new PartProductionContext(
+                numberOfCopies: $numberOfCopies ?? 0,
+                numberOfColors: $numberOfColors ?? 0,
+                paperWeight: $paperWeight ?? 0,
+                inking: $inking ?? [],
+                openPoseDimensions: $openPoseDimensions ?? $defaultDimensions,
+                closedPoseDimensions: $closedPoseDimensions ?? $defaultDimensions,
             );
         }
 
-        return new TreeBuildContext(
-            $openPoseDimensions ?? $this->context->getOpenPoseDimensions(),
-            $closedPoseDimensions ?? $this->context->getClosedPoseDimensions(),
-            $numberOfCopies ?? $this->context->getNumberOfCopies(),
-            $numberOfColors ?? $this->context->getNumberOfColors(),
-            $paperWeight ?? $this->context->getPaperWeight(),
-            $inking ?? $this->context->getInking()
+        return new PartProductionContext(
+            numberOfCopies: $numberOfCopies ?? $this->context->getNumberOfCopies(),
+            numberOfColors: $numberOfColors ?? $this->context->getNumberOfColors(),
+            paperWeight: $paperWeight ?? $this->context->getPaperWeight(),
+            inking: $inking ?? $this->context->getInking(),
+            openPoseDimensions: $openPoseDimensions ?? $this->context->getOpenPoseDimensions(),
+            closedPoseDimensions: $closedPoseDimensions ?? $this->context->getClosedPoseDimensions(),
         );
     }
 }

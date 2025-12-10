@@ -2,6 +2,7 @@
 
 namespace App\Domain\Action\Interfaces;
 
+use App\Domain\Action\PrintActionParams;
 use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
@@ -88,4 +89,10 @@ interface ActionPathNodeInterface
      * @return array Array representation of the node
      */
     public function toArray(mixed $machine, mixed $pressSheet, mixed $pose): array;
+
+    /**
+     * Get print-specific parameters if this is a print action.
+     * Returns null for non-print actions (cut, fold, etc.)
+     */
+    public function getPrintParams(): ?PrintActionParams;
 }

@@ -10,7 +10,7 @@ use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\MachineInterface;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -206,7 +206,7 @@ class Machine implements MachineInterface
      * Override in subclasses for machine-specific enrichment.
      */
     public function calculateEnrichment(
-        JobContext $jobContext,
+        PartProductionContext $jobContext,
         GridFittingInterface $gridFitting,
         PressSheetInterface $pressSheet,
         float $cutSheetCount,

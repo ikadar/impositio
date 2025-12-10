@@ -9,7 +9,7 @@ use App\Domain\Equipment\Enrichment\OffsetPressEnrichment;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Equipment\Interfaces\OffsetPrintingPressInterface;
 use App\Domain\Geometry\Dimensions;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -180,7 +180,7 @@ class OffsetPrintingPress extends PrintingPress implements OffsetPrintingPressIn
      * Calculate enrichment for offset printing press.
      */
     public function calculateEnrichment(
-        JobContext $jobContext,
+        PartProductionContext $jobContext,
         GridFittingInterface $gridFitting,
         PressSheetInterface $pressSheet,
         float $cutSheetCount,

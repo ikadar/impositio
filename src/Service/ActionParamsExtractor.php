@@ -6,6 +6,7 @@ use App\Application\Process\ActionTreeInput;
 use App\Application\Process\PartPayload;
 use App\Domain\Action\ActionName;
 use App\Domain\Action\PayloadAction;
+use App\Domain\Action\PrintActionParams;
 use App\Domain\Action\ProcessAbstractAction;
 use App\Domain\Equipment\Interfaces\EquipmentFactoryInterface;
 use App\Domain\Geometry\Dimensions;
@@ -195,6 +196,8 @@ class ActionParamsExtractor implements ActionParamsExtractorInterface
     /**
      * Convert PayloadActions to ProcessAbstractActions.
      *
+     * For print actions, creates PrintActionParams with inking info.
+     *
      * @param PayloadAction[] $actions
      * @return ProcessAbstractAction[]
      */
@@ -203,9 +206,18 @@ class ActionParamsExtractor implements ActionParamsExtractorInterface
         $abstractActions = [];
 
         foreach ($actions as $action) {
+            $printParams = null;
+
+            // Create PrintActionParams for print actions
+            if ($action->name === ActionName::Print) {
+                $inking = $this->extractInking($action->params);
+                $printParams = new PrintActionParams($inking);
+            }
+
             $abstractActions[] = new ProcessAbstractAction(
                 $action->name,
-                $this->equipmentFactory
+                $this->equipmentFactory,
+                $printParams
             );
         }
 

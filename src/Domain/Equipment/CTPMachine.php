@@ -10,7 +10,7 @@ use App\Domain\Equipment\Interfaces\CTPMachineInterface;
 use App\Domain\Equipment\Interfaces\EquipmentServiceInterface;
 use App\Domain\Geometry\Dimensions;
 use App\Domain\Geometry\Interfaces\RectangleInterface;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 use App\Domain\Sheet\PrintFactory;
@@ -162,7 +162,7 @@ class CTPMachine extends Machine implements CTPMachineInterface
      * Calculate enrichment for CTP machine.
      */
     public function calculateEnrichment(
-        JobContext $jobContext,
+        PartProductionContext $jobContext,
         GridFittingInterface $gridFitting,
         PressSheetInterface $pressSheet,
         float $cutSheetCount,

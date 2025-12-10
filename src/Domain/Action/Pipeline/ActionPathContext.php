@@ -4,7 +4,7 @@ namespace App\Domain\Action\Pipeline;
 
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 
 /**
  * Context object passed through the pipeline.
@@ -15,13 +15,13 @@ class ActionPathContext
     /**
      * @param ActionPathNodeInterface[] $nodes The current list of action path nodes
      * @param float $cutSheetCount Current sheet count in the process
-     * @param JobContext $jobContext Job-level parameters (immutable)
+     * @param PartProductionContext $jobContext Part production parameters (immutable). Named 'jobContext' for backward compatibility.
      * @param ActionTreeNodeInterface[] $originalPath Original flat path for reference
      */
     public function __construct(
         public array $nodes,
         public float $cutSheetCount,
-        public readonly JobContext $jobContext,
+        public readonly PartProductionContext $jobContext,
         public readonly array $originalPath,
     ) {}
 

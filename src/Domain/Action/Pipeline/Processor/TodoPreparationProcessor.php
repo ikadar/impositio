@@ -32,13 +32,14 @@ class TodoPreparationProcessor implements ActionPathProcessorInterface
                 $cutSheetCount,
             );
 
-            // Create ActionPathNode with the enrichment
+            // Create ActionPathNode with the enrichment and preserve printParams
             $actionPathNode = new ActionPathNode(
                 $node->getMachine(),
                 $node->getPressSheet(),
                 $node->getZone(),
                 $node->getGridFitting(),
-                $enrichment
+                $enrichment,
+                $node->getPrintParams()  // Preserve print-specific parameters
             );
 
             $nodes[] = $actionPathNode;

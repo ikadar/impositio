@@ -6,11 +6,14 @@ use App\Domain\Action\ActionPathNode;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathProcessorInterface;
+use App\Domain\Action\PrintActionParams;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
  * Processor that inserts verso (back side) printing action after recto printing.
  * Verso printing uses the same machine but with different inking.
+ *
+ * Now uses PrintActionParams from the node instead of JobContext for inking info.
  */
 class VersoPrintingProcessor implements ActionPathProcessorInterface
 {
@@ -50,11 +53,31 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
         ActionPathNodeInterface $rectoNode,
         ActionPathContext $context
     ): ?ActionPathNode {
-        // Check if there's verso inking
-        $versoInking = $this->propertyAccessor->getValue($context->jobContext->inking, '[verso]');
+        // Check if there's verso inking - prefer action-level printParams, fallback to context
+        $printParams = $rectoNode->getPrintParams();
 
-        if (!is_array($versoInking) || $versoInking === []) {
-            return null;
+        if ($printParams !== null) {
+            // New way: use PrintActionParams from the node
+            if (!$printParams->hasVerso()) {
+                return null;
+            }
+            // Create verso-specific PrintActionParams with just verso inking
+            $versoPrintParams = new PrintActionParams([
+                'recto' => $printParams->getVersoInks(),
+                'verso' => [],
+            ]);
+        } else {
+            // Legacy fallback: use JobContext inking
+            $versoInking = $this->propertyAccessor->getValue($context->jobContext->inking, '[verso]');
+
+            if (!is_array($versoInking) || $versoInking === []) {
+                return null;
+            }
+            // Create verso-specific PrintActionParams
+            $versoPrintParams = new PrintActionParams([
+                'recto' => $versoInking,
+                'verso' => [],
+            ]);
         }
 
         $gridFitting = clone $rectoNode->getGridFitting();
@@ -72,7 +95,8 @@ class VersoPrintingProcessor implements ActionPathProcessorInterface
             $rectoNode->getPressSheet(),
             $rectoNode->getZone(),
             $gridFitting,
-            $enrichment
+            $enrichment,
+            $versoPrintParams  // Pass verso print params
         );
     }
 

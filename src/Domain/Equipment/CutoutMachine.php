@@ -5,7 +5,7 @@ namespace App\Domain\Equipment;
 use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Equipment\Enrichment\ActionEnrichmentInterface;
 use App\Domain\Equipment\Enrichment\CutoutEnrichment;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Layout\Interfaces\GridFittingInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
@@ -37,7 +37,7 @@ class CutoutMachine extends Machine
      * Calculate enrichment for cutout machine.
      */
     public function calculateEnrichment(
-        JobContext $jobContext,
+        PartProductionContext $jobContext,
         GridFittingInterface $gridFitting,
         PressSheetInterface $pressSheet,
         float $cutSheetCount,

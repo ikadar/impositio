@@ -7,7 +7,7 @@ use App\Domain\Action\Interfaces\ActionPathNodeInterface;
 use App\Domain\Action\Interfaces\ActionTreeNodeInterface;
 use App\Domain\Action\Pipeline\ActionPathContext;
 use App\Domain\Action\Pipeline\ActionPathPipeline;
-use App\Domain\Job\JobContext;
+use App\Domain\Part\PartProductionContext;
 use App\Domain\Sheet\Interfaces\InputSheetInterface;
 use App\Domain\Sheet\Interfaces\PressSheetInterface;
 
@@ -39,14 +39,14 @@ class ActionTreeProcessor
      * @param AbstractActionInterface[] $abstractActions Actions to process
      * @param PressSheetInterface[] $pressSheets Available press sheets
      * @param InputSheetInterface $zone The zone/input sheet
-     * @param TreeBuildContext $context Build context with all parameters
+     * @param PartProductionContext $context Part production context with all parameters
      * @return ActionPathNodeInterface[][] Extended action paths
      */
     public function process(
         array $abstractActions,
         array $pressSheets,
         InputSheetInterface $zone,
-        TreeBuildContext $context,
+        PartProductionContext $context,
     ): array {
         $extendedFlatActionPaths = [];
 
@@ -75,24 +75,17 @@ class ActionTreeProcessor
      * Uses the pipeline architecture for path extension.
      *
      * @param ActionTreeNodeInterface[] $flatActionPath The flattened action path
-     * @param TreeBuildContext $context Build context
+     * @param PartProductionContext $context Part production context
      * @return ActionPathNodeInterface[] Extended action path with inserted actions
      */
-    public function extend(array $flatActionPath, TreeBuildContext $context): array
+    public function extend(array $flatActionPath, PartProductionContext $context): array
     {
-        $jobContext = new JobContext(
-            numberOfCopies: $context->getNumberOfCopies(),
-            numberOfColors: $context->getNumberOfColors(),
-            paperWeight: $context->getPaperWeight(),
-            inking: $context->getInking(),
-            openPoseDimensions: $context->getOpenPoseDimensions(),
-            closedPoseDimensions: $context->getClosedPoseDimensions(),
-        );
-
+        // Context is now used directly - no need to create JobContext
+        // (JobContext extends PartProductionContext for backward compatibility)
         $pipelineContext = new ActionPathContext(
             nodes: [],
             cutSheetCount: $context->getNumberOfCopies(),
-            jobContext: $jobContext,
+            jobContext: $context,
             originalPath: $flatActionPath,
         );
 
