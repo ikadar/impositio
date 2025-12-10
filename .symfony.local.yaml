@@ -1,0 +1,4 @@
+http:
+  listen_ip: localhost
+  port: 8000
+  no_tls: true
